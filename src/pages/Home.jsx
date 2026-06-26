@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import { Plus, Siren, TrendingUp } from "lucide-react";
 
+const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
+
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -46,6 +48,12 @@ export default function Home() {
   return (
     <PullToRefresh onRefresh={refresh}>
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
+        {/* Brand bar */}
+        <div className="flex items-center gap-2 mb-6 md:hidden">
+          <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-8 h-8 rounded-full object-cover" />
+          <span className="font-extrabold text-foreground">Neighbourhood Labour Connect</span>
+        </div>
+
         {/* Hero */}
         <header className="mb-8">
           <p className="text-muted-foreground text-sm">{greet},</p>
