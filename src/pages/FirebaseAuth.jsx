@@ -355,9 +355,6 @@ export default function FirebaseAuth() {
         </div>
       </main>
 
-      {/* Single reCAPTCHA container — reused across all steps */}
-      <div id="recaptcha-container" />
-
       <footer className="px-6 py-4 text-center">
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} Neighbourhood Labour Connect
