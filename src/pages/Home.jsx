@@ -9,24 +9,16 @@ import TrustBadges from "@/components/TrustBadges";
 import HowItWorks from "@/components/HowItWorks";
 import LandingPage from "@/components/LandingPage";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/AuthContext";
 import { Plus, Siren, TrendingUp } from "lucide-react";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { user } = useAuth();
   const [top, setTop] = useState([]);
   const [openJobs, setOpenJobs] = useState(0);
 
   useEffect(() => {
-    base44.auth
-      .me()
-      .then((u) => {
-        setUser(u);
-        setAuthChecked(true);
-      })
-      .catch(() => setAuthChecked(true));
-
     base44.entities.ServiceProvider.filter({ available: true }, "-rating", 6).then(setTop);
     base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 100).then((r) =>
       setOpenJobs(r.length)
@@ -43,7 +35,7 @@ export default function Home() {
   };
 
   // Show landing page for visitors who aren't logged in
-  if (authChecked && !user) {
+  if (!user) {
     return <LandingPage />;
   }
 

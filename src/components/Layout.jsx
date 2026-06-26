@@ -36,10 +36,10 @@ function AnimatedOutlet() {
 }
 
 export default function Layout() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const nav = user?.role === "admin" ? [...BASE_NAV, ADMIN_NAV] : BASE_NAV;
 
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-background">
         <main className="min-w-0">
