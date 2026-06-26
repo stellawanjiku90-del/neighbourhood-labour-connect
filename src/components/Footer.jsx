@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="w-8 h-8 rounded-lg bg-[#2D7A3E] flex items-center justify-center">
             <HandHelping className="w-4 h-4 text-white" />
           </div>
-          <span className="font-extrabold text-foreground">Labour Connect</span>
+          <span className="font-extrabold text-foreground">Neighbourhood Labour Connect</span>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
           <Link to="/terms" className="hover:text-foreground">Terms & Conditions</Link>

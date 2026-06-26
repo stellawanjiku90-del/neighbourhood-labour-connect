@@ -17,7 +17,7 @@ export default function LandingPage() {
           Trusted local help, on demand
         </h1>
         <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-          Labour Connect brings neighbours and local service providers together.
+          Neighbourhood Labour Connect brings neighbours and local service providers together.
           Post a job, get offers from verified pros near you, and get it done — all in one place.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -37,11 +37,11 @@ export default function LandingPage() {
       {/* What it's about */}
       <section className="mb-12 md:mb-16">
         <div className="bg-white rounded-3xl p-6 md:p-10 border border-slate-100">
-          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-4">What is Labour Connect?</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-4">What is Neighbourhood Labour Connect?</h2>
           <p className="text-muted-foreground leading-relaxed">
             It's a simple way to find trusted people for household, skilled, and emergency tasks —
             right in your neighbourhood. Whether you need a plumber, a cleaner, an electrician, or
-            someone to help with a move, Labour Connect matches you with local pros who are ready to help.
+            someone to help with a move, Neighbourhood Labour Connect matches you with local pros who are ready to help.
             No more asking around or settling for the first name you find. Read real reviews,
             compare offers, and choose the person who's right for you.
           </p>

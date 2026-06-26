@@ -15,13 +15,13 @@ export default function Terms() {
         <section>
           <h2 className="text-lg font-bold mb-2">1. Acceptance of Terms</h2>
           <p className="text-muted-foreground">
-            By accessing or using Neighbourhood Labour Connect ("Labour Connect", "we", "us"), you agree to be bound by these Terms & Conditions. If you do not agree, please do not use the platform.
+            By accessing or using Neighbourhood Labour Connect ("we", "us", "our"), you agree to be bound by these Terms & Conditions. If you do not agree, please do not use the platform.
           </p>
         </section>
         <section>
           <h2 className="text-lg font-bold mb-2">2. Our Service</h2>
           <p className="text-muted-foreground">
-            Labour Connect is a marketplace that connects customers with local service providers for household, skilled, and emergency tasks. We facilitate connections but are not a party to any agreement between customers and providers.
+            Neighbourhood Labour Connect is a marketplace that connects customers with local service providers for household, skilled, and emergency tasks. We facilitate connections but are not a party to any agreement between customers and providers.
           </p>
         </section>
         <section>
@@ -45,7 +45,7 @@ export default function Terms() {
         <section>
           <h2 className="text-lg font-bold mb-2">6. Limitation of Liability</h2>
           <p className="text-muted-foreground">
-            Labour Connect is provided "as is" without warranties of any kind. To the fullest extent permitted by law, we are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.
+            Neighbourhood Labour Connect is provided "as is" without warranties of any kind. To the fullest extent permitted by law, we are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.
           </p>
         </section>
         <section>

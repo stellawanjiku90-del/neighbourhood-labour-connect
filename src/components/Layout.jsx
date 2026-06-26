@@ -42,7 +42,7 @@ export default function Layout() {
             <HandHelping className="w-5 h-5 text-white" />
           </div>
           <span className="font-extrabold text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-            Labour Connect
+            Neighbourhood Labour Connect
           </span>
         </div>
         <nav className="flex-1 px-3 space-y-1">
