@@ -17,7 +17,7 @@ export default function Providers() {
   const [sort, setSort] = useState("distance");
 
   useEffect(() => {
-    base44.entities.ServiceProvider.filter({ available: true }, "-rating", 200).then(setProviders);
+    base44.entities.ServiceProvider.filter({ available: true }, "-rating", 50).then(setProviders);
   }, []);
 
   const list = useMemo(() => {
