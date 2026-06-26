@@ -1,10 +1,11 @@
 import React from "react";
 import { Outlet, NavLink, useLocation, useOutlet } from "react-router-dom";
-import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, HandHelping } from "lucide-react";
+import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, HandHelping, Shield } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 
-const NAV = [
+const BASE_NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/providers", label: "Find Help", icon: Search },
   { to: "/post", label: "Post Job", icon: PlusCircle },
@@ -12,6 +13,8 @@ const NAV = [
   { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
+
+const ADMIN_NAV = { to: "/admin", label: "Admin", icon: Shield };
 
 function AnimatedOutlet() {
   const location = useLocation();
@@ -33,6 +36,20 @@ function AnimatedOutlet() {
 }
 
 export default function Layout() {
+  const { user, isAuthenticated } = useAuth();
+  const nav = user?.role === "admin" ? [...BASE_NAV, ADMIN_NAV] : BASE_NAV;
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="min-w-0">
+          <AnimatedOutlet />
+          <Footer />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Desktop lean-and-expand rail */}
@@ -46,7 +63,7 @@ export default function Layout() {
           </span>
         </div>
         <nav className="flex-1 px-3 space-y-1">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -76,7 +93,7 @@ export default function Layout() {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-100 flex z-40 px-1 pb-[env(safe-area-inset-bottom)]">
-        {NAV.map(({ to, label, icon: Icon }) => (
+        {nav.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

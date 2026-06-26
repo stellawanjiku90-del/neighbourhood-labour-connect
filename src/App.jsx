@@ -27,6 +27,7 @@ import PageTransition from '@/components/PageTransition';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
 import Refund from '@/pages/Refund';
+import AdminPanel from '@/pages/AdminPanel';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
           <Route path="/jobs" element={<MyJobs />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Route>
       </Route>
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
