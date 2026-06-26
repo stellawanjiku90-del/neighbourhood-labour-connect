@@ -28,6 +28,9 @@ import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
 import Refund from '@/pages/Refund';
 import AdminPanel from '@/pages/AdminPanel';
+import FirebaseAuth from '@/pages/FirebaseAuth';
+import FirebaseApp from '@/pages/FirebaseApp';
+import FirebaseRouteGuard from '@/components/FirebaseRouteGuard';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -76,6 +79,15 @@ const AuthenticatedApp = () => {
         <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
         <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />
       </Route>
+      <Route path="/firebase-auth" element={<FirebaseAuth />} />
+      <Route
+        path="/firebase-app"
+        element={
+          <FirebaseRouteGuard>
+            <FirebaseApp />
+          </FirebaseRouteGuard>
+        }
+      />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/refund" element={<Refund />} />
