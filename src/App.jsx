@@ -6,6 +6,20 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import { Navigate } from 'react-router-dom';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
+import Home from '@/pages/Home';
+import Providers from '@/pages/Providers';
+import ProviderDetail from '@/pages/ProviderDetail';
+import PostJob from '@/pages/PostJob';
+import MyJobs from '@/pages/MyJobs';
+import Settings from '@/pages/Settings';
+import BecomeProvider from '@/pages/BecomeProvider';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -34,7 +48,21 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/providers" element={<Providers />} />
+          <Route path="/post" element={<PostJob />} />
+          <Route path="/jobs" element={<MyJobs />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+        <Route path="/provider/:id" element={<ProviderDetail />} />
+        <Route path="/become-provider" element={<BecomeProvider />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

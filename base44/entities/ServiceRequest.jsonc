@@ -1,0 +1,56 @@
+{
+  "name": "ServiceRequest",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "location_name": {
+      "type": "string"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "emergency": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "accepted",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "open"
+    },
+    "assigned_provider_id": {
+      "type": "string"
+    },
+    "assigned_provider_name": {
+      "type": "string"
+    },
+    "budget": {
+      "type": "number"
+    },
+    "rated": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "category",
+    "title"
+  ]
+}
