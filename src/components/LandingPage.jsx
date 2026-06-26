@@ -38,12 +38,12 @@ export default function LandingPage() {
             compare ratings, and hire with confidence.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/register" className="w-full sm:w-auto">
+            <Link to="/firebase-auth" className="w-full sm:w-auto">
               <Button className="rounded-2xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-12 px-8 w-full">
                 Get Started <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
-            <Link to="/login" className="w-full sm:w-auto">
+            <Link to="/firebase-auth" className="w-full sm:w-auto">
               <Button variant="outline" className="rounded-2xl h-12 px-8 w-full">
                 Sign In
               </Button>
@@ -79,7 +79,7 @@ export default function LandingPage() {
           <p className="text-[#2D7A3E]/80 mb-6 max-w-md mx-auto">
             Join your neighbours on Neighbourhood Labour Connect and find trusted local help today.
           </p>
-          <Link to="/register">
+          <Link to="/firebase-auth">
             <Button className="rounded-2xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-12 px-8">
               Create an Account <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
