@@ -8,6 +8,7 @@ import LocationPicker from "@/components/LocationPicker";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { MapPin, SlidersHorizontal } from "lucide-react";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Providers() {
   const params = new URLSearchParams(useLocation().search);
@@ -19,6 +20,11 @@ export default function Providers() {
   useEffect(() => {
     base44.entities.ServiceProvider.filter({ available: true }, "-rating", 50).then(setProviders);
   }, []);
+
+  const refresh = async () => {
+    const data = await base44.entities.ServiceProvider.filter({ available: true }, "-rating", 50);
+    setProviders(data);
+  };
 
   const list = useMemo(() => {
     let items = providers
@@ -36,6 +42,7 @@ export default function Providers() {
   }, [providers, category, loc, sort]);
 
   return (
+    <PullToRefresh onRefresh={refresh}>
     <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-extrabold text-foreground">Find Help</h1>
@@ -105,5 +112,6 @@ export default function Providers() {
         </p>
       )}
     </div>
+    </PullToRefresh>
   );
 }

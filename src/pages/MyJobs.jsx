@@ -5,6 +5,7 @@ import RateDialog from "@/components/RateDialog";
 import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Siren, MapPin, Star, CheckCircle2 } from "lucide-react";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const STATUS_STYLE = {
   open: "bg-[#CFE0F0] text-[#5A6072]",
@@ -23,12 +24,18 @@ export default function MyJobs() {
 
   useEffect(() => { load(); }, []);
 
+  const refresh = async () => {
+    const data = await base44.entities.ServiceRequest.list("-created_date", 100);
+    setJobs(data);
+  };
+
   const complete = async (job) => {
     await base44.entities.ServiceRequest.update(job.id, { status: "completed" });
     load();
   };
 
   return (
+    <PullToRefresh onRefresh={refresh}>
     <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-10">
       <h1 className="text-2xl font-extrabold text-foreground mb-6">My Jobs</h1>
 
@@ -93,5 +100,6 @@ export default function MyJobs() {
         />
       )}
     </div>
+    </PullToRefresh>
   );
 }

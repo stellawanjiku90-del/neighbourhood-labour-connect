@@ -5,6 +5,7 @@ import { CATEGORIES } from "@/lib/categories";
 import CategoryIcon from "@/components/CategoryIcon";
 import ProviderCard from "@/components/ProviderCard";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
+import PullToRefresh from "@/components/PullToRefresh";
 import { Button } from "@/components/ui/button";
 import { Plus, Siren, TrendingUp } from "lucide-react";
 
@@ -22,11 +23,21 @@ export default function Home() {
     );
   }, []);
 
+  const refresh = async () => {
+    const [topData, jobsData] = await Promise.all([
+      base44.entities.ServiceProvider.filter({ available: true }, "-rating", 6),
+      base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 100),
+    ]);
+    setTop(topData);
+    setOpenJobs(jobsData.length);
+  };
+
   const firstName = user?.full_name?.split(" ")[0] || "there";
   const hour = new Date().getHours();
   const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
+    <PullToRefresh onRefresh={refresh}>
     <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
       <header className="flex items-start justify-between gap-4 mb-8">
         <div>
@@ -101,5 +112,6 @@ export default function Home() {
         )}
       </div>
     </div>
+    </PullToRefresh>
   );
 }

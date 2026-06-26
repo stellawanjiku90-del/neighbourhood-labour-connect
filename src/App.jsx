@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -22,6 +23,7 @@ import Settings from '@/pages/Settings';
 import BecomeProvider from '@/pages/BecomeProvider';
 import Messages from '@/pages/Messages';
 import Chat from '@/pages/Chat';
+import PageTransition from '@/components/PageTransition';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -63,9 +65,9 @@ const AuthenticatedApp = () => {
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
-        <Route path="/provider/:id" element={<ProviderDetail />} />
-        <Route path="/become-provider" element={<BecomeProvider />} />
-        <Route path="/chat/:id" element={<Chat />} />
+        <Route path="/provider/:id" element={<PageTransition><ProviderDetail /></PageTransition>} />
+        <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
+        <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -73,7 +75,18 @@ const AuthenticatedApp = () => {
 };
 
 
+function useAutoTheme() {
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => document.documentElement.classList.toggle('dark', mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+}
+
 function App() {
+  useAutoTheme();
 
   return (
     <AuthProvider>

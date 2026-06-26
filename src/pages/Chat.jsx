@@ -37,19 +37,33 @@ export default function Chat() {
     const body = text.trim();
     if (!body || !me) return;
     setText("");
-    setSending(true);
-    await base44.entities.Message.create({
+    const tempId = "temp-" + Date.now();
+    setMessages((prev) => [...prev, {
+      id: tempId,
       conversation_id: id,
       sender_id: me.id,
       sender_name: me.full_name,
       text: body,
-    });
-    await base44.entities.Conversation.update(id, {
-      last_message: body,
-      last_sender_id: me.id,
-    });
-    setSending(false);
-    loadMessages();
+    }]);
+    setSending(true);
+    try {
+      const created = await base44.entities.Message.create({
+        conversation_id: id,
+        sender_id: me.id,
+        sender_name: me.full_name,
+        text: body,
+      });
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? created : m)));
+      await base44.entities.Conversation.update(id, {
+        last_message: body,
+        last_sender_id: me.id,
+      });
+    } catch (err) {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setText(body);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (

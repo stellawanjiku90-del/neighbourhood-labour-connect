@@ -4,9 +4,26 @@ import { Button } from "@/components/ui/button";
 import { LogOut, User, Shield, HandHelping } from "lucide-react";
 import { Link } from "react-router-dom";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
+import {
+  AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogCancel, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
 export default function Settings() {
   const [user, setUser] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const deleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await base44.functions.invoke("deleteAccount", {});
+      await base44.auth.logout();
+    } catch (e) {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -46,6 +63,32 @@ export default function Settings() {
       >
         <LogOut className="w-5 h-5" /> Log out
       </Button>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" className="w-full mt-2 rounded-2xl h-12 gap-2 text-destructive border-destructive/30">
+            <Trash2 className="w-5 h-5" /> Delete Account
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes your profile, jobs, conversations, and reviews. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteAccount}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
