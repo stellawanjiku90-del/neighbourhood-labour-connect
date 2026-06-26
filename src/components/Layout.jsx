@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet, NavLink, useLocation, useOutlet } from "react-router-dom";
 import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, HandHelping } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import Footer from "@/components/Footer";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -70,6 +71,7 @@ export default function Layout() {
 
       <main className="flex-1 min-w-0 pb-20 md:pb-0">
         <AnimatedOutlet />
+        <Footer />
       </main>
 
       {/* Mobile bottom nav */}

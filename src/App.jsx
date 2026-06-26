@@ -24,6 +24,9 @@ import BecomeProvider from '@/pages/BecomeProvider';
 import Messages from '@/pages/Messages';
 import Chat from '@/pages/Chat';
 import PageTransition from '@/components/PageTransition';
+import Terms from '@/pages/Terms';
+import Privacy from '@/pages/Privacy';
+import Refund from '@/pages/Refund';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -69,6 +72,9 @@ const AuthenticatedApp = () => {
         <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
         <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />
       </Route>
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/refund" element={<Refund />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
