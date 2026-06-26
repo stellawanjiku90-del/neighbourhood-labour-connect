@@ -7,6 +7,7 @@ import {
   ArrowLeft, BadgeCheck, Phone, MessageCircle, MapPin, Award, Briefcase, Heart,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { openConversation } from "@/lib/chat";
 
 export default function ProviderDetail() {
   const { id } = useParams();
@@ -28,6 +29,10 @@ export default function ProviderDetail() {
   }
 
   const hire = () => toast({ title: `Request sent to ${p.name}`, description: "They'll respond shortly." });
+  const message = async () => {
+    const convo = await openConversation(p);
+    navigate(`/chat/${convo.id}`);
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10 pb-32">
@@ -87,7 +92,7 @@ export default function ProviderDetail() {
               <a href={`tel:${p.phone}`}><Phone className="w-5 h-5 mr-1" /> Call</a>
             </Button>
           )}
-          <Button variant="outline" className="rounded-2xl h-14 flex-1 bg-white" onClick={() => toast({ title: "Chat coming soon" })}>
+          <Button variant="outline" className="rounded-2xl h-14 flex-1 bg-white" onClick={message}>
             <MessageCircle className="w-5 h-5 mr-1" /> Message
           </Button>
           <Button onClick={hire} className="rounded-2xl h-14 flex-[1.5] bg-[#1A1F2E] hover:bg-[#2A2F45] text-base">

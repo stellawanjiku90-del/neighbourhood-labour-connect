@@ -1,12 +1,13 @@
 import React from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Home, Search, PlusCircle, Briefcase, Settings, HandHelping } from "lucide-react";
+import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, HandHelping } from "lucide-react";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/providers", label: "Find Help", icon: Search },
   { to: "/post", label: "Post Job", icon: PlusCircle },
   { to: "/jobs", label: "My Jobs", icon: Briefcase },
+  { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 

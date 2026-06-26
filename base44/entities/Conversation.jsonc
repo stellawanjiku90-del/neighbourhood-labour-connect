@@ -1,0 +1,31 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "provider_id": {
+      "type": "string"
+    },
+    "provider_name": {
+      "type": "string"
+    },
+    "provider_photo": {
+      "type": "string"
+    },
+    "customer_id": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "last_message": {
+      "type": "string"
+    },
+    "last_sender_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "provider_id",
+    "customer_id"
+  ]
+}

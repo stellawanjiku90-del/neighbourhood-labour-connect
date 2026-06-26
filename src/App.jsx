@@ -20,6 +20,8 @@ import PostJob from '@/pages/PostJob';
 import MyJobs from '@/pages/MyJobs';
 import Settings from '@/pages/Settings';
 import BecomeProvider from '@/pages/BecomeProvider';
+import Messages from '@/pages/Messages';
+import Chat from '@/pages/Chat';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -58,10 +60,12 @@ const AuthenticatedApp = () => {
           <Route path="/providers" element={<Providers />} />
           <Route path="/post" element={<PostJob />} />
           <Route path="/jobs" element={<MyJobs />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
         <Route path="/provider/:id" element={<ProviderDetail />} />
         <Route path="/become-provider" element={<BecomeProvider />} />
+        <Route path="/chat/:id" element={<Chat />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
