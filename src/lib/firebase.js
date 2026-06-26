@@ -18,6 +18,7 @@ let firebaseApp = null;
 let authInstance = null;
 let messagingInstance = null;
 let initPromise = null;
+let firebaseConfig = null;
 
 function waitForFirebaseSdk() {
   return new Promise((resolve, reject) => {
@@ -49,6 +50,7 @@ async function initFirebase() {
         "Firebase configuration is missing. Set FIREBASE_API_KEY and FIREBASE_APP_ID in your app secrets."
       );
     }
+    firebaseConfig = config;
     await waitForFirebaseSdk();
     firebaseApp = window.firebase.initializeApp(config);
     return firebaseApp;
@@ -94,9 +96,23 @@ export async function subscribeAuthState(callback) {
 // ApplicationVerifier interface (type + verify) so signInWithPhoneNumber
 // can use the Enterprise token directly — no DOM container needed.
 
-const RECAPTCHA_ENTERPRISE_SITE_KEY = "6Lcs4jYtAAAAAKrNpDJ2fZHMGc1iL6kG70bripfJ";
 let enterpriseVerifier = null;
 let enterpriseReadyPromise = null;
+
+function loadRecaptchaEnterpriseScript(siteKey) {
+  return new Promise((resolve, reject) => {
+    if (window.grecaptcha?.enterprise) return resolve();
+    const existing = document.querySelector('script[src*="recaptcha/enterprise.js"]');
+    if (existing) existing.remove();
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/enterprise.js?render=${siteKey}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load reCAPTCHA Enterprise script."));
+    document.head.appendChild(script);
+  });
+}
 
 /** Waits for grecaptcha.enterprise to be available on window. */
 function waitForGrecaptcha() {
@@ -128,6 +144,12 @@ export async function getRecaptchaVerifier() {
     return enterpriseVerifier;
   }
   enterpriseReadyPromise = (async () => {
+    await initFirebase();
+    const siteKey = firebaseConfig?.recaptchaEnterpriseSiteKey;
+    if (!siteKey) {
+      throw new Error("reCAPTCHA Enterprise site key is not configured. Set RECAPTCHA_ENTERPRISE_SITE_KEY in app secrets.");
+    }
+    await loadRecaptchaEnterpriseScript(siteKey);
     await waitForGrecaptcha();
     const verifier = {
       type: "recaptcha",
@@ -137,7 +159,7 @@ export async function getRecaptchaVerifier() {
           window.grecaptcha.enterprise.ready(async () => {
             try {
               const token = await window.grecaptcha.enterprise.execute(
-                RECAPTCHA_ENTERPRISE_SITE_KEY,
+                firebaseConfig.recaptchaEnterpriseSiteKey,
                 { action: "LOGIN" }
               );
               console.log("[Firebase] reCAPTCHA Enterprise token:", token ? "✓" : "✗");
