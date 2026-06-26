@@ -1,9 +1,11 @@
 import React from "react";
 import { Outlet, NavLink, useLocation, useOutlet } from "react-router-dom";
-import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, HandHelping, Shield } from "lucide-react";
+import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, Shield } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
+
+const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
 const BASE_NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -55,9 +57,7 @@ export default function Layout() {
       {/* Desktop lean-and-expand rail */}
       <aside className="hidden md:flex group flex-col w-20 hover:w-60 transition-all duration-300 bg-white border-r border-slate-100 sticky top-0 h-screen overflow-hidden z-30">
         <div className="flex items-center gap-3 px-6 h-20 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-[#2D7A3E] flex items-center justify-center shrink-0">
-            <HandHelping className="w-5 h-5 text-white" />
-          </div>
+          <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-9 h-9 rounded-full object-cover shrink-0" />
           <span className="font-extrabold text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
             Neighbourhood Labour Connect
           </span>
