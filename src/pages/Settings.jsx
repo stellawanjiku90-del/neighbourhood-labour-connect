@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Shield, HandHelping } from "lucide-react";
 import { Link } from "react-router-dom";
+import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -24,6 +25,8 @@ export default function Settings() {
           <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
         </div>
       </div>
+
+      <PushNotificationEnabler />
 
       <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden">
         <Link to="/become-provider" className="flex items-center gap-3 px-5 py-4 hover:bg-muted">

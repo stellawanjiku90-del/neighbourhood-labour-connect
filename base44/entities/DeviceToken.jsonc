@@ -1,0 +1,22 @@
+{
+  "name": "DeviceToken",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The user this device token belongs to"
+    },
+    "token": {
+      "type": "string",
+      "description": "FCM registration token"
+    },
+    "platform": {
+      "type": "string",
+      "default": "web"
+    }
+  },
+  "required": [
+    "user_id",
+    "token"
+  ]
+}

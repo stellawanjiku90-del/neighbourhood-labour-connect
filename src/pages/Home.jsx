@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { CATEGORIES } from "@/lib/categories";
 import CategoryIcon from "@/components/CategoryIcon";
 import ProviderCard from "@/components/ProviderCard";
+import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 import { Button } from "@/components/ui/button";
 import { Plus, Siren, TrendingUp } from "lucide-react";
 
@@ -42,6 +43,8 @@ export default function Home() {
           <Plus className="w-5 h-5 mr-1" /> <span className="hidden sm:inline">Post Request</span>
         </Button>
       </header>
+
+      <PushNotificationEnabler />
 
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
