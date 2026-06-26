@@ -1,20 +1,41 @@
 import { base44 } from "@/api/base44Client";
 
-// ─── Firebase v9+ Modular SDK (loaded from CDN) ────────────────────
-// We use dynamic imports from the gstatic CDN with @vite-ignore to
-// bypass Vite's dependency optimizer (which fails for firebase/auth
-// in this environment). This gives us the v9+ modular API without
-// any npm bundling issues.
+// ─── Firebase SDK (loaded via CDN compat scripts in index.html) ────
+// The compat SDK exposes a global `window.firebase` object. We use it
+// directly to avoid Vite dependency-optimization issues with the
+// modular firebase/auth package.
+//
+// reCAPTCHA Best Practices (v9+ singleton pattern):
+//   1. The RecaptchaVerifier is stored at module level (singleton).
+//   2. getRecaptchaVerifier() reuses the existing verifier — it never
+//      creates a duplicate for the same container.
+//   3. clearRecaptchaVerifier() destroys the verifier on unmount or
+//      when a fresh one is needed (e.g. after a reCAPTCHA error).
+//   4. A single container element (#recaptcha-container) is used
+//      throughout the auth flow.
 
-const FIREBASE_APP_URL = "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-const FIREBASE_AUTH_URL = "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-const FIREBASE_MESSAGING_URL = "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
-
-let app = null;
-let auth = null;
-let messaging = null;
+let firebaseApp = null;
+let authInstance = null;
+let messagingInstance = null;
 let recaptchaVerifier = null;
 let initPromise = null;
+
+function waitForFirebaseSdk() {
+  return new Promise((resolve, reject) => {
+    if (window.firebase) return resolve();
+    let tries = 0;
+    const interval = setInterval(() => {
+      tries++;
+      if (window.firebase) {
+        clearInterval(interval);
+        resolve();
+      } else if (tries > 50) {
+        clearInterval(interval);
+        reject(new Error("Firebase SDK failed to load. Check your internet connection."));
+      }
+    }, 100);
+  });
+}
 
 /**
  * Initialises the Firebase app once (singleton). Config is fetched
@@ -29,29 +50,27 @@ async function initFirebase() {
         "Firebase configuration is missing. Set FIREBASE_API_KEY and FIREBASE_APP_ID in your app secrets."
       );
     }
-    const { initializeApp } = await import(/* @vite-ignore */ FIREBASE_APP_URL);
-    app = initializeApp(config);
-    return app;
+    await waitForFirebaseSdk();
+    firebaseApp = window.firebase.initializeApp(config);
+    return firebaseApp;
   })();
   return initPromise;
 }
 
 /** Returns the singleton Firebase Auth instance. */
 export async function getAuthInstance() {
-  if (auth) return auth;
+  if (authInstance) return authInstance;
   await initFirebase();
-  const { getAuth } = await import(/* @vite-ignore */ FIREBASE_AUTH_URL);
-  auth = getAuth(app);
-  return auth;
+  authInstance = firebaseApp.auth();
+  return authInstance;
 }
 
 /** Returns the singleton Firebase Messaging instance. */
 export async function getMessagingInstance() {
-  if (messaging) return messaging;
+  if (messagingInstance) return messagingInstance;
   await initFirebase();
-  const { getMessaging } = await import(/* @vite-ignore */ FIREBASE_MESSAGING_URL);
-  messaging = getMessaging(app);
-  return messaging;
+  messagingInstance = firebaseApp.messaging();
+  return messagingInstance;
 }
 
 /** Returns the Firebase config (fetched from backend). */
@@ -66,23 +85,19 @@ export async function getFirebaseConfig() {
  */
 export async function subscribeAuthState(callback) {
   const auth = await getAuthInstance();
-  const { onAuthStateChanged } = await import(/* @vite-ignore */ FIREBASE_AUTH_URL);
-  return onAuthStateChanged(auth, callback);
+  return auth.onAuthStateChanged(callback);
 }
 
 // ─── reCAPTCHA Management (Singleton) ─────────────────────────────
-// The reCAPTCHA verifier is stored at module level so it is created
-// only once and reused across re-renders and repeated sendCode()
-// calls. This prevents the "reCAPTCHA has already been rendered in
-// this element" error.
 
 /**
  * Returns the existing RecaptchaVerifier, or creates one if none exists.
  * The verifier is reused for all subsequent sendPhoneCode() calls.
+ * This prevents the "reCAPTCHA has already been rendered in this element"
+ * error.
  */
 export async function getRecaptchaVerifier(containerId = "recaptcha-container") {
-  const auth = await getAuthInstance();
-  const { RecaptchaVerifier } = await import(/* @vite-ignore */ FIREBASE_AUTH_URL);
+  await getAuthInstance();
 
   // Reuse the existing verifier — never create a duplicate
   if (recaptchaVerifier) {
@@ -93,7 +108,7 @@ export async function getRecaptchaVerifier(containerId = "recaptcha-container") 
   const el = document.getElementById(containerId);
   if (el) el.innerHTML = "";
 
-  recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+  recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier(containerId, {
     size: "invisible",
     callback: () => {},
   });
@@ -123,22 +138,19 @@ export function clearRecaptchaVerifier() {
  */
 export async function sendPhoneCode(phone, containerId = "recaptcha-container") {
   const auth = await getAuthInstance();
-  const { signInWithPhoneNumber } = await import(/* @vite-ignore */ FIREBASE_AUTH_URL);
   const verifier = await getRecaptchaVerifier(containerId);
-  return signInWithPhoneNumber(auth, phone, verifier);
+  return auth.signInWithPhoneNumber(phone, verifier);
 }
 
 /** Signs out the current Firebase user and clears the reCAPTCHA verifier. */
 export async function signOutFirebase() {
   const auth = await getAuthInstance();
-  const { signOut } = await import(/* @vite-ignore */ FIREBASE_AUTH_URL);
-  await signOut(auth);
+  await auth.signOut();
   clearRecaptchaVerifier();
 }
 
 /** Returns an FCM registration token for push notifications. */
 export async function getMessagingToken(vapidKey, serviceWorkerRegistration) {
   const messaging = await getMessagingInstance();
-  const { getToken } = await import(/* @vite-ignore */ FIREBASE_MESSAGING_URL);
-  return getToken(messaging, { vapidKey, serviceWorkerRegistration });
+  return messaging.getToken({ vapidKey, serviceWorkerRegistration });
 }

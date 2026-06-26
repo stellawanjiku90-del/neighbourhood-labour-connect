@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Upload, Loader2, AlertCircle, IdCard, CheckCircle2, X } from "lucide-react";
+import { User, Upload, Loader2, AlertCircle, CreditCard, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -191,7 +191,7 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
             </div>
           ) : (
             <label className="flex flex-col items-center cursor-pointer py-4">
-              <IdCard className="w-10 h-10 text-muted-foreground mb-2" />
+              <CreditCard className="w-10 h-10 text-muted-foreground mb-2" />
               <span className="text-sm text-muted-foreground">Tap to upload your ID photo</span>
               <input
                 type="file"
@@ -230,7 +230,7 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
           </>
         ) : (
           <>
-            <CheckCircle2 className="w-4 h-4 mr-2" /> Verify & Save
+            <Check className="w-4 h-4 mr-2" /> Verify & Save
           </>
         )}
       </Button>

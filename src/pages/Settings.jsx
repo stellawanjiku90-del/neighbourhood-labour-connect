@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Shield, HandHelping } from "lucide-react";
 import { Link } from "react-router-dom";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
+import { useAuth } from "@/lib/AuthContext";
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
   AlertDialogTitle, AlertDialogDescription, AlertDialogFooter,
@@ -12,22 +13,18 @@ import {
 import { Trash2 } from "lucide-react";
 
 export default function Settings() {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const [deleting, setDeleting] = useState(false);
 
   const deleteAccount = async () => {
     setDeleting(true);
     try {
       await base44.functions.invoke("deleteAccount", {});
-      await base44.auth.logout();
+      await logout();
     } catch (e) {
       setDeleting(false);
     }
   };
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   return (
     <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
