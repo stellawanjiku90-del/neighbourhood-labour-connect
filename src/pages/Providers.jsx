@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { CATEGORIES, distanceKm } from "@/lib/categories";
-import CategoryIcon from "@/components/CategoryIcon";
+import CategorySearch from "@/components/CategorySearch";
 import ProviderCard from "@/components/ProviderCard";
 import LocationPicker from "@/components/LocationPicker";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -63,22 +63,12 @@ export default function Providers() {
         </Sheet>
       </div>
 
-      {/* Category chips */}
-      <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 mb-2 scrollbar-hide">
-        {["All", ...CATEGORIES.map((c) => c.name)].map((c) => (
-          <button
-            key={c}
-            onClick={() => setCategory(c)}
-            className={`shrink-0 flex items-center gap-1.5 px-3.5 h-10 rounded-full text-sm font-medium transition-colors ${
-              category === c
-                ? "bg-[#1A1F2E] text-white"
-                : "bg-white border border-slate-100 text-muted-foreground"
-            }`}
-          >
-            {c !== "All" && <CategoryIcon name={CATEGORIES.find((x) => x.name === c)?.icon} className="w-4 h-4" />}
-            {c}
-          </button>
-        ))}
+      <div className="mb-4">
+        <CategorySearch
+          value={category === "All" ? "" : category}
+          onChange={(v) => setCategory(v || "All")}
+          placeholder="Search category or leave blank for all…"
+        />
       </div>
 
       <div className="flex items-center justify-between mb-3 text-sm">

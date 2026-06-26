@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { CATEGORIES } from "@/lib/categories";
-import CategoryIcon from "@/components/CategoryIcon";
+import CategorySearch from "@/components/CategorySearch";
 import LocationPicker from "@/components/LocationPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,21 +49,8 @@ export default function PostJob() {
       <h1 className="text-2xl font-extrabold text-foreground mb-6">Post a Request</h1>
 
       <label className="text-sm font-semibold text-foreground">Service category</label>
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2 mb-6 max-h-64 overflow-y-auto pr-1">
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.name}
-            onClick={() => setCategory(c.name)}
-            className={`flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border text-center transition-all ${
-              category === c.name
-                ? "border-[#2D7A3E] bg-secondary"
-                : "border-slate-100 bg-white"
-            }`}
-          >
-            <CategoryIcon name={c.icon} className="w-5 h-5 text-secondary-foreground" />
-            <span className="text-[10px] leading-tight line-clamp-2 text-muted-foreground">{c.name}</span>
-          </button>
-        ))}
+      <div className="mt-2 mb-6">
+        <CategorySearch value={category} onChange={setCategory} placeholder="Search and select a category…" />
       </div>
 
       <div className="space-y-4">

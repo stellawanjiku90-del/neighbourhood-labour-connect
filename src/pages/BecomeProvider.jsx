@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { CATEGORIES } from "@/lib/categories";
-import CategoryIcon from "@/components/CategoryIcon";
+import CategorySearch from "@/components/CategorySearch";
 import LocationPicker from "@/components/LocationPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,19 +73,13 @@ export default function BecomeProvider() {
 
         <div>
           <label className="text-sm font-semibold">Professions</label>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2 max-h-56 overflow-y-auto pr-1">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.name}
-                onClick={() => toggle(c.name)}
-                className={`flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border text-center transition-all ${
-                  professions.includes(c.name) ? "border-[#2D7A3E] bg-secondary" : "border-slate-100 bg-white"
-                }`}
-              >
-                <CategoryIcon name={c.icon} className="w-5 h-5 text-secondary-foreground" />
-                <span className="text-[10px] leading-tight line-clamp-2 text-muted-foreground">{c.name}</span>
-              </button>
-            ))}
+          <div className="mt-2">
+            <CategorySearch
+              multiple
+              selected={professions}
+              onToggle={toggle}
+              placeholder="Search and add professions…"
+            />
           </div>
         </div>
 

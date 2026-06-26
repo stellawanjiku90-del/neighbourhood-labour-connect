@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { CATEGORIES } from "@/lib/categories";
-import CategoryIcon from "@/components/CategoryIcon";
+import CategorySearch from "@/components/CategorySearch";
 import ProviderCard from "@/components/ProviderCard";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -76,26 +75,14 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Categories */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-bold text-foreground">Categories</h2>
-        <Link to="/providers" className="text-sm text-[#2D7A3E] font-medium">View all</Link>
-      </div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mb-10">
-        {CATEGORIES.slice(0, 12).map((c) => (
-          <Link
-            key={c.name}
-            to={`/providers?category=${encodeURIComponent(c.name)}`}
-            className="bg-white rounded-2xl p-3 border border-slate-100 flex flex-col items-center gap-2 text-center hover:-translate-y-0.5 hover:shadow-md transition-all"
-          >
-            <span className="w-11 h-11 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground">
-              <CategoryIcon name={c.icon} />
-            </span>
-            <span className="text-[11px] leading-tight text-muted-foreground line-clamp-2">
-              {c.name}
-            </span>
-          </Link>
-        ))}
+      {/* Search categories */}
+      <div className="mb-10">
+        <h2 className="text-lg font-bold text-foreground mb-3">Find a service</h2>
+        <CategorySearch
+          value=""
+          onChange={(v) => v && navigate(`/providers?category=${encodeURIComponent(v)}`)}
+          placeholder="Search for a service category…"
+        />
       </div>
 
       {/* Top rated */}

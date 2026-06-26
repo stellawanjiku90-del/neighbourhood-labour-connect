@@ -1,5 +1,5 @@
 export const CATEGORIES = [
-  { name: "Cleaners / Mama Fua", icon: "Sparkles" },
+  { name: "Cleaners", icon: "Sparkles" },
   { name: "Housekeepers", icon: "Home" },
   { name: "Nannies", icon: "Baby" },
   { name: "Drivers", icon: "Car" },
