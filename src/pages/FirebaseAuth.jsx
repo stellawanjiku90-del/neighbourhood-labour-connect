@@ -97,6 +97,7 @@ export default function FirebaseAuth() {
   };
 
   const handleAuthError = (err) => {
+    console.error("[FirebaseAuth] Auth error:", err?.code, err?.message, err);
     const map = {
       "auth/invalid-phone-number":
         "Please enter a valid phone number with country code (e.g. +254712345678).",
@@ -109,6 +110,8 @@ export default function FirebaseAuth() {
         "reCAPTCHA verification failed. Please refresh and try again.",
       "auth/operation-not-allowed":
         "Phone sign-in is not enabled. Enable it in the Firebase Console.",
+      "auth/configuration-not-found":
+        "Firebase Phone Auth is not configured. Enable Phone Authentication and add your domain to the authorized domains list in the Firebase Console.",
     };
     setError(
       map[err.code] || err.message || "Something went wrong. Please try again."
@@ -131,9 +134,10 @@ export default function FirebaseAuth() {
       setResendTimer(60);
     } catch (err) {
       handleAuthError(err);
-      if (err.code === "auth/captcha-check-failed") {
-        clearRecaptchaVerifier();
-      }
+      // Do NOT clear the verifier on captcha-check-failed — that error is a
+      // server-side hostname validation issue, not a client-side reCAPTCHA
+      // failure. The verifier is still rendered and can be reused. Clearing
+      // it here causes "already rendered" on the next attempt.
     } finally {
       setLoading(false);
     }
@@ -177,9 +181,7 @@ export default function FirebaseAuth() {
       setResendTimer(60);
     } catch (err) {
       handleAuthError(err);
-      if (err.code === "auth/captcha-check-failed") {
-        clearRecaptchaVerifier();
-      }
+      // Verifier is reused — see comment in sendCode()
     } finally {
       setLoading(false);
     }
@@ -243,9 +245,7 @@ export default function FirebaseAuth() {
       setResendTimer(60);
     } catch (err) {
       handleAuthError(err);
-      if (err.code === "auth/captcha-check-failed") {
-        clearRecaptchaVerifier();
-      }
+      // Verifier is reused — see comment in sendCode()
     } finally {
       setLoading(false);
     }

@@ -18,6 +18,7 @@ let firebaseApp = null;
 let authInstance = null;
 let messagingInstance = null;
 let recaptchaVerifier = null;
+let recaptchaReadyPromise = null;
 let initPromise = null;
 
 function waitForFirebaseSdk() {
@@ -88,31 +89,75 @@ export async function subscribeAuthState(callback) {
   return auth.onAuthStateChanged(callback);
 }
 
-// ─── reCAPTCHA Management (Singleton) ─────────────────────────────
+// ─── reCAPTCHA Management (Singleton with render lock) ───────────
+// Key fixes:
+//   1. recaptchaReadyPromise acts as a lock — concurrent calls to
+//      getRecaptchaVerifier() await the same creation+render promise,
+//      preventing duplicate verifiers ("already rendered" error).
+//   2. The verifier is explicitly .render()ed and awaited before use.
+//      Without rendering, signInWithPhoneNumber fails with
+//      auth/configuration-not-found and no reCAPTCHA tokens are generated.
+//   3. clearRecaptchaVerifier() destroys the verifier AND resets the lock.
 
 /**
- * Returns the existing RecaptchaVerifier, or creates one if none exists.
- * The verifier is reused for all subsequent sendPhoneCode() calls.
- * This prevents the "reCAPTCHA has already been rendered in this element"
- * error.
+ * Returns the singleton RecaptchaVerifier, creating + rendering it if
+ * needed. Concurrent calls share the same creation promise (lock),
+ * so the widget is never rendered twice in the same container.
  */
 export async function getRecaptchaVerifier(containerId = "recaptcha-container") {
   await getAuthInstance();
 
-  // Reuse the existing verifier — never create a duplicate
+  // If creation+render is in flight, await it (prevents race condition)
+  if (recaptchaReadyPromise) {
+    await recaptchaReadyPromise;
+  }
+
+  // Reuse the existing, already-rendered verifier
   if (recaptchaVerifier) {
     return recaptchaVerifier;
   }
 
-  // Clear the container DOM element before creating a new verifier
-  const el = document.getElementById(containerId);
-  if (el) el.innerHTML = "";
+  // Create + render in a single locked promise
+  recaptchaReadyPromise = (async () => {
+    // Clear any leftover DOM in the container before creating
+    const el = document.getElementById(containerId);
+    if (el) el.innerHTML = "";
 
-  recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier(containerId, {
-    size: "invisible",
-    callback: () => {},
-  });
-  return recaptchaVerifier;
+    const verifier = new window.firebase.auth.RecaptchaVerifier(containerId, {
+      size: "invisible",
+      callback: (token) => {
+        console.log("[Firebase] reCAPTCHA token generated:", token ? "✓" : "✗");
+      },
+      "expired-callback": () => {
+        console.warn("[Firebase] reCAPTCHA expired — clearing verifier");
+        clearRecaptchaVerifier();
+      },
+      "error-callback": (err) => {
+        console.error("[Firebase] reCAPTCHA error callback:", err);
+        clearRecaptchaVerifier();
+      },
+    });
+
+    // Explicitly render the widget and await readiness.
+    // This is critical — without it, signInWithPhoneNumber fails with
+    // auth/configuration-not-found and no tokens are generated.
+    await verifier.render();
+    console.log("[Firebase] reCAPTCHA verifier rendered successfully");
+    return verifier;
+  })();
+
+  try {
+    recaptchaVerifier = await recaptchaReadyPromise;
+    return recaptchaVerifier;
+  } catch (err) {
+    console.error("[Firebase] reCAPTCHA setup failed:", err);
+    recaptchaVerifier = null;
+    throw new Error(
+      "Could not initialize reCAPTCHA. Please refresh the page and try again."
+    );
+  } finally {
+    recaptchaReadyPromise = null;
+  }
 }
 
 /**
@@ -125,20 +170,23 @@ export function clearRecaptchaVerifier() {
     try {
       recaptchaVerifier.clear();
     } catch (e) {
-      // verifier may already be cleared
+      console.warn("[Firebase] Error clearing reCAPTCHA verifier:", e);
     }
     recaptchaVerifier = null;
   }
+  recaptchaReadyPromise = null;
 }
 
 /**
  * Sends an SMS verification code to the given phone number.
  * Reuses the singleton RecaptchaVerifier — does NOT create a new one
- * on repeated calls.
+ * on repeated calls. The verifier is already rendered, so
+ * signInWithPhoneNumber can trigger reCAPTCHA execution immediately.
  */
 export async function sendPhoneCode(phone, containerId = "recaptcha-container") {
   const auth = await getAuthInstance();
   const verifier = await getRecaptchaVerifier(containerId);
+  console.log("[Firebase] Sending SMS to", phone);
   return auth.signInWithPhoneNumber(phone, verifier);
 }
 
