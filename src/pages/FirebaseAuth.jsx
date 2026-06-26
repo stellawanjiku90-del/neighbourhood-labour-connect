@@ -1,51 +1,85 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
 import {
-  getFirebaseAuth,
-  createRecaptchaVerifier,
+  subscribeAuthState,
   sendPhoneCode,
+  clearRecaptchaVerifier,
+  getAuthInstance,
 } from "@/lib/firebase";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Phone, Shield, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import { hashPin } from "@/lib/pin";
+import PhoneStep from "@/components/firebase/PhoneStep";
+import OtpStep from "@/components/firebase/OtpStep";
+import PinStep from "@/components/firebase/PinStep";
+import ProfileSetupStep from "@/components/firebase/ProfileSetupStep";
 
 const LOGO_URL =
   "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
 export default function FirebaseAuth() {
   const navigate = useNavigate();
-  const [step, setStep] = useState("phone"); // "phone" | "code"
+  const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [resendTimer, setResendTimer] = useState(0);
+  const [isResettingPin, setIsResettingPin] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const initialCheckDone = useRef(false);
 
-  const recaptchaRef = useRef(null); // guards against re-instantiation
-  const confirmationRef = useRef(null);
-
-  // Create the invisible reCAPTCHA once on mount
+  // Check Firebase auth state on mount (runs once)
   useEffect(() => {
     let active = true;
-    getFirebaseAuth()
-      .then(() => {
-        if (!active || recaptchaRef.current) return;
-        return createRecaptchaVerifier("recaptcha-container", {
-          size: "invisible",
-        }).then((verifier) => {
-          if (!active) return;
-          recaptchaRef.current = verifier;
-          verifier.render();
-        });
+    let unsub = () => {};
+
+    subscribeAuthState(async (firebaseUser) => {
+      if (!active || initialCheckDone.current) return;
+      initialCheckDone.current = true;
+
+      if (firebaseUser) {
+        const userPhone = firebaseUser.phoneNumber;
+        setPhone(userPhone);
+        try {
+          const { data } = await base44.functions.invoke("getUserProfile", {
+            phone: userPhone,
+          });
+          const profile = data?.profile;
+          setUserProfile(profile);
+
+          if (profile?.profile_completed && profile?.pin_hash) {
+            if (sessionStorage.getItem("pin_verified") === "true") {
+              navigate("/");
+              return;
+            }
+            setStep("pin-login");
+          } else if (profile?.pin_hash) {
+            setStep("profile");
+          } else {
+            setStep("pin-setup");
+          }
+        } catch (e) {
+          setStep("pin-setup");
+        }
+      } else {
+        setStep("phone");
+      }
+      setCheckingAuth(false);
+    })
+      .then((u) => {
+        unsub = u || (() => {});
       })
-      .catch((err) => setError("Unable to initialize Firebase: " + err.message));
+      .catch(() => {
+        if (!active) return;
+        setStep("phone");
+        setCheckingAuth(false);
+      });
 
     return () => {
       active = false;
-      if (recaptchaRef.current) {
-        recaptchaRef.current.clear();
-        recaptchaRef.current = null;
-      }
+      unsub();
+      clearRecaptchaVerifier();
     };
   }, []);
 
@@ -71,28 +105,14 @@ export default function FirebaseAuth() {
       "auth/invalid-verification-code": "Incorrect code. Please check and try again.",
       "auth/too-many-requests": "Too many attempts. Please try again later.",
       "auth/quota-exceeded": "SMS quota exceeded. Use a test number or try again later.",
-      "auth/captcha-check-failed": "reCAPTCHA verification failed. Please refresh and try again.",
+      "auth/captcha-check-failed":
+        "reCAPTCHA verification failed. Please refresh and try again.",
       "auth/operation-not-allowed":
         "Phone sign-in is not enabled. Enable it in the Firebase Console.",
     };
-    setError(map[err.code] || err.message || "Something went wrong. Please try again.");
-  };
-
-  const resetRecaptcha = () => {
-    if (recaptchaRef.current) {
-      recaptchaRef.current.clear();
-      recaptchaRef.current = null;
-    }
-  };
-
-  const ensureRecaptcha = async () => {
-    if (recaptchaRef.current) return recaptchaRef.current;
-    const verifier = await createRecaptchaVerifier("recaptcha-container", {
-      size: "invisible",
-    });
-    recaptchaRef.current = verifier;
-    await verifier.render();
-    return verifier;
+    setError(
+      map[err.code] || err.message || "Something went wrong. Please try again."
+    );
   };
 
   const sendCode = async () => {
@@ -104,32 +124,43 @@ export default function FirebaseAuth() {
     }
     setLoading(true);
     try {
-      await getFirebaseAuth();
-      const verifier = await ensureRecaptcha();
-      const confirmation = await sendPhoneCode(normalized, verifier);
-      confirmationRef.current = confirmation;
+      const confirmation = await sendPhoneCode(normalized);
+      setConfirmationResult(confirmation);
       setPhone(normalized);
-      setStep("code");
+      setStep("otp");
       setResendTimer(60);
     } catch (err) {
       handleAuthError(err);
-      resetRecaptcha();
+      if (err.code === "auth/captcha-check-failed") {
+        clearRecaptchaVerifier();
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const verifyCode = async () => {
+  const verifyCode = async (code) => {
     setError(null);
-    if (code.length !== 6) {
-      setError("Please enter the 6-digit code.");
-      return;
-    }
     setLoading(true);
     try {
-      await confirmationRef.current.confirm(code);
-      // onAuthStateChanged fires → route guard redirects to /firebase-app
-      navigate("/firebase-app");
+      const result = await confirmationResult.confirm(code);
+      const firebaseUser = result.user;
+      const userPhone = firebaseUser.phoneNumber;
+      setPhone(userPhone);
+
+      const { data } = await base44.functions.invoke("getUserProfile", {
+        phone: userPhone,
+      });
+      const profile = data?.profile;
+      setUserProfile(profile);
+
+      if (isResettingPin) {
+        setStep("pin-setup");
+      } else if (profile?.pin_hash) {
+        setStep("pin-login");
+      } else {
+        setStep("pin-setup");
+      }
     } catch (err) {
       handleAuthError(err);
     } finally {
@@ -141,145 +172,190 @@ export default function FirebaseAuth() {
     setError(null);
     setLoading(true);
     try {
-      await getFirebaseAuth();
-      resetRecaptcha();
-      const verifier = await ensureRecaptcha();
-      const confirmation = await sendPhoneCode(phone, verifier);
-      confirmationRef.current = confirmation;
+      const confirmation = await sendPhoneCode(phone);
+      setConfirmationResult(confirmation);
       setResendTimer(60);
     } catch (err) {
       handleAuthError(err);
-      resetRecaptcha();
+      if (err.code === "auth/captcha-check-failed") {
+        clearRecaptchaVerifier();
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const setupPin = async (pin) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const pinHash = await hashPin(pin);
+      const auth = await getAuthInstance();
+      const firebaseUser = auth.currentUser;
+
+      const { data } = await base44.functions.invoke("saveUserProfile", {
+        phone,
+        firebase_uid: firebaseUser?.uid,
+        pin_hash: pinHash,
+        profile_completed: false,
+      });
+      setUserProfile(data?.profile);
+
+      if (isResettingPin) {
+        sessionStorage.setItem("pin_verified", "true");
+        navigate("/");
+      } else {
+        setStep("profile");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to save PIN. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithPin = async (pin) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const pinHash = await hashPin(pin);
+      if (pinHash === userProfile?.pin_hash) {
+        sessionStorage.setItem("pin_verified", "true");
+        navigate("/");
+      } else {
+        setError("Incorrect PIN. Please try again.");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to verify PIN. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const forgotPin = async () => {
+    setError(null);
+    setIsResettingPin(true);
+    setLoading(true);
+    try {
+      const confirmation = await sendPhoneCode(phone);
+      setConfirmationResult(confirmation);
+      setStep("otp");
+      setResendTimer(60);
+    } catch (err) {
+      handleAuthError(err);
+      if (err.code === "auth/captcha-check-failed") {
+        clearRecaptchaVerifier();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveProfile = async (profileData) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const auth = await getAuthInstance();
+      const firebaseUser = auth.currentUser;
+
+      const { data } = await base44.functions.invoke("saveUserProfile", {
+        ...profileData,
+        phone,
+        firebase_uid: firebaseUser?.uid,
+        pin_hash: userProfile?.pin_hash,
+        verify_id: true,
+      });
+
+      if (data?.id_verified) {
+        sessionStorage.setItem("pin_verified", "true");
+        navigate("/");
+      } else {
+        setError(
+          "ID verification failed. The names on your ID don't match the names you provided. Please check your details and try again."
+        );
+      }
+    } catch (err) {
+      setError(err.message || "Failed to save profile. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
       <header className="flex items-center gap-2 px-6 h-20 shrink-0">
         <img
           src={LOGO_URL}
           alt="Neighbourhood Labour Connect"
           className="w-9 h-9 rounded-full object-cover"
         />
-        <span className="font-extrabold text-foreground">Neighbourhood Labour Connect</span>
+        <span className="font-extrabold text-foreground">
+          Neighbourhood Labour Connect
+        </span>
       </header>
 
-      {/* Main */}
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           {step === "phone" && (
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
-              <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
-                <Phone className="w-7 h-7 text-secondary-foreground" />
-              </div>
-              <h1 className="text-2xl font-extrabold text-foreground mb-2">Phone Verification</h1>
-              <p className="text-muted-foreground text-sm mb-6">
-                Enter your phone number and we'll send you a verification code via SMS.
-              </p>
-              <label className="text-sm font-medium text-foreground mb-2 block">Phone Number</label>
-              <Input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+254712345678"
-                className="h-12 rounded-xl text-base mb-4"
-                disabled={loading}
-                onKeyDown={(e) => e.key === "Enter" && !loading && sendCode()}
-              />
-              {error && (
-                <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/5 rounded-xl px-3 py-2 mb-4">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{error}</span>
-                </div>
-              )}
-              <Button
-                onClick={sendCode}
-                disabled={loading || !phone}
-                className="w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending code…
-                  </>
-                ) : (
-                  "Send Verification Code"
-                )}
-              </Button>
-            </div>
+            <PhoneStep
+              phone={phone}
+              setPhone={setPhone}
+              onSendCode={sendCode}
+              loading={loading}
+              error={error}
+            />
           )}
-
-          {step === "code" && (
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
-              <button
-                onClick={() => {
-                  setStep("phone");
-                  setError(null);
-                  setCode("");
-                }}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-              >
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
-                <Shield className="w-7 h-7 text-secondary-foreground" />
-              </div>
-              <h1 className="text-2xl font-extrabold text-foreground mb-2">Enter Verification Code</h1>
-              <p className="text-muted-foreground text-sm mb-6">
-                We sent a 6-digit code to{" "}
-                <span className="font-semibold text-foreground">{phone}</span>
-              </p>
-              <Input
-                type="text"
-                inputMode="numeric"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="••••••"
-                className="h-14 rounded-xl text-center text-2xl tracking-[0.5em] font-bold mb-4"
-                disabled={loading}
-                onKeyDown={(e) => e.key === "Enter" && !loading && verifyCode()}
-                autoFocus
-              />
-              {error && (
-                <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/5 rounded-xl px-3 py-2 mb-4">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{error}</span>
-                </div>
-              )}
-              <Button
-                onClick={verifyCode}
-                disabled={loading || code.length !== 6}
-                className="w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying…
-                  </>
-                ) : (
-                  "Verify & Continue"
-                )}
-              </Button>
-              <div className="text-center mt-4">
-                {resendTimer > 0 ? (
-                  <p className="text-sm text-muted-foreground">Resend code in {resendTimer}s</p>
-                ) : (
-                  <button
-                    onClick={resendCode}
-                    disabled={loading}
-                    className="text-sm text-[#2D7A3E] hover:underline font-medium"
-                  >
-                    Resend code
-                  </button>
-                )}
-              </div>
-            </div>
+          {step === "otp" && (
+            <OtpStep
+              phone={phone}
+              onVerify={verifyCode}
+              onResend={resendCode}
+              onBack={() => {
+                setStep("phone");
+                setError(null);
+                setIsResettingPin(false);
+              }}
+              loading={loading}
+              error={error}
+              resendTimer={resendTimer}
+            />
+          )}
+          {step === "pin-setup" && (
+            <PinStep
+              mode="setup"
+              onConfirm={setupPin}
+              loading={loading}
+              error={error}
+            />
+          )}
+          {step === "pin-login" && (
+            <PinStep
+              mode="login"
+              onConfirm={loginWithPin}
+              onForgotPin={forgotPin}
+              loading={loading}
+              error={error}
+            />
+          )}
+          {step === "profile" && (
+            <ProfileSetupStep
+              onSave={saveProfile}
+              loading={loading}
+              error={error}
+            />
           )}
         </div>
       </main>
 
-      {/* reCAPTCHA container (invisible badge) */}
+      {/* Single reCAPTCHA container — reused across all steps */}
       <div id="recaptcha-container" />
 
       <footer className="px-6 py-4 text-center">

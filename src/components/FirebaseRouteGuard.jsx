@@ -1,15 +1,17 @@
-import { Navigate } from "react-router-dom";
-import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
 
 /**
- * Route guard backed by Firebase auth state.
- * Redirects unauthenticated users to /firebase-auth and shows a
- * loading spinner while the onAuthStateChanged listener resolves.
+ * Route guard backed by Firebase auth state + UserProfile.
+ * Redirects to /firebase-auth when:
+ *   - the Firebase session is absent
+ *   - the profile is not yet completed
+ *   - the per-session PIN has not been entered
  */
-export default function FirebaseRouteGuard({ children }) {
-  const { user, loading } = useFirebaseAuth();
+export default function FirebaseRouteGuard() {
+  const { user, isLoadingAuth, isAuthenticated } = useAuth();
 
-  if (loading) {
+  if (isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
@@ -17,9 +19,17 @@ export default function FirebaseRouteGuard({ children }) {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/firebase-auth" replace />;
   }
 
-  return children;
+  if (!user.profile_completed) {
+    return <Navigate to="/firebase-auth" replace />;
+  }
+
+  if (sessionStorage.getItem("pin_verified") !== "true") {
+    return <Navigate to="/firebase-auth" replace />;
+  }
+
+  return <Outlet />;
 }

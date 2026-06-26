@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, BellRing, Check, BellOff } from "lucide-react";
+import { getFirebaseConfig, getMessagingToken } from "@/lib/firebase";
+import { useAuth } from "@/lib/AuthContext";
+import { Bell, Check, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PushNotificationEnabler() {
+  const { user } = useAuth();
   const [status, setStatus] = useState("loading");
   const [busy, setBusy] = useState(false);
 
@@ -13,8 +16,11 @@ export default function PushNotificationEnabler() {
         setStatus("unsupported");
         return;
       }
+      if (!user?.id) {
+        setStatus("notprovider");
+        return;
+      }
       try {
-        const user = await base44.auth.me();
         const providers = await base44.entities.ServiceProvider.filter(
           { created_by_id: user.id },
           null,
@@ -31,7 +37,7 @@ export default function PushNotificationEnabler() {
         setStatus("notprovider");
       }
     })();
-  }, []);
+  }, [user]);
 
   const enable = async () => {
     setBusy(true);
@@ -42,7 +48,7 @@ export default function PushNotificationEnabler() {
         return;
       }
 
-      const { data: config } = await base44.functions.invoke("getFirebaseConfig");
+      const config = await getFirebaseConfig();
 
       const swReg = await navigator.serviceWorker.register(
         `/firebase-messaging-sw.js?apiKey=${encodeURIComponent(
@@ -55,16 +61,8 @@ export default function PushNotificationEnabler() {
         { scope: "/" }
       );
 
-      const { initializeApp } = await import("firebase/app");
-      const { getMessaging, getToken } = await import("firebase/messaging");
-      const app = initializeApp(config);
-      const messaging = getMessaging(app);
-      const token = await getToken(messaging, {
-        vapidKey: config.vapidKey,
-        serviceWorkerRegistration: swReg,
-      });
+      const token = await getMessagingToken(config.vapidKey, swReg);
 
-      const user = await base44.auth.me();
       const existing = await base44.entities.DeviceToken.filter({
         user_id: user.id,
         token,

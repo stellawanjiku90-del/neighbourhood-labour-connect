@@ -7,13 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
-import { Navigate } from 'react-router-dom';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
 import Home from '@/pages/Home';
 import Providers from '@/pages/Providers';
 import ProviderDetail from '@/pages/ProviderDetail';
@@ -29,14 +23,11 @@ import Privacy from '@/pages/Privacy';
 import Refund from '@/pages/Refund';
 import AdminPanel from '@/pages/AdminPanel';
 import FirebaseAuth from '@/pages/FirebaseAuth';
-import FirebaseApp from '@/pages/FirebaseApp';
 import FirebaseRouteGuard from '@/components/FirebaseRouteGuard';
-// Add page imports here
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -45,27 +36,21 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/firebase-auth" element={<FirebaseAuth />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
-        <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<FirebaseRouteGuard />}>
           <Route path="/providers" element={<Providers />} />
           <Route path="/post" element={<PostJob />} />
           <Route path="/jobs" element={<MyJobs />} />
@@ -74,20 +59,11 @@ const AuthenticatedApp = () => {
           <Route path="/admin" element={<AdminPanel />} />
         </Route>
       </Route>
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+      <Route element={<FirebaseRouteGuard />}>
         <Route path="/provider/:id" element={<PageTransition><ProviderDetail /></PageTransition>} />
         <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
         <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />
       </Route>
-      <Route path="/firebase-auth" element={<FirebaseAuth />} />
-      <Route
-        path="/firebase-app"
-        element={
-          <FirebaseRouteGuard>
-            <FirebaseApp />
-          </FirebaseRouteGuard>
-        }
-      />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/refund" element={<Refund />} />

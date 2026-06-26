@@ -1,0 +1,62 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "phone": {
+      "type": "string",
+      "description": "Phone number with country code (unique identifier)"
+    },
+    "firebase_uid": {
+      "type": "string",
+      "description": "Firebase Authentication user UID"
+    },
+    "pin_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the user's 4-digit login PIN"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "surname": {
+      "type": "string"
+    },
+    "age": {
+      "type": "number"
+    },
+    "id_type": {
+      "type": "string",
+      "enum": [
+        "National ID",
+        "Passport",
+        "Driver's License"
+      ],
+      "description": "Type of identification document"
+    },
+    "id_number": {
+      "type": "string"
+    },
+    "id_photo_url": {
+      "type": "string",
+      "description": "URL of the uploaded ID document photo"
+    },
+    "id_names_extracted": {
+      "type": "string",
+      "description": "Names extracted from the ID by AI verification"
+    },
+    "id_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the ID names match the provided names"
+    },
+    "profile_photo_url": {
+      "type": "string"
+    },
+    "profile_completed": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "phone"
+  ]
+}
