@@ -6,11 +6,18 @@ import { useAuth } from "@/lib/AuthContext";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
-const BASE_NAV = [
+const CUSTOMER_NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/providers", label: "Find Help", icon: Search },
   { to: "/post", label: "Post Job", icon: PlusCircle },
   { to: "/jobs", label: "My Jobs", icon: Briefcase },
+  { to: "/messages", label: "Messages", icon: MessageCircle },
+  { to: "/settings", label: "Settings", icon: Settings },
+];
+
+const PROVIDER_NAV = [
+  { to: "/", label: "Home", icon: Home },
+  { to: "/jobs", label: "Available Jobs", icon: Briefcase },
   { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
@@ -38,6 +45,8 @@ function AnimatedOutlet() {
 
 export default function Layout() {
   const { user } = useAuth();
+  const BASE_NAV =
+    user?.role === "provider" ? PROVIDER_NAV : CUSTOMER_NAV;
   const nav = user?.role === "admin" ? [...BASE_NAV, ADMIN_NAV] : BASE_NAV;
 
   if (!user) {

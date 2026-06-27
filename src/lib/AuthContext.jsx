@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
               ? `${profile.first_name || ""} ${profile.surname || ""}`.trim()
               : phone,
             phone,
-            role: "user",
+            role: profile?.role || "customer",
             profile,
             profile_completed: profile?.profile_completed || false,
           });
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
             id: firebaseUser.uid,
             full_name: phone,
             phone,
-            role: "user",
+            role: "customer",
             profile: null,
             profile_completed: false,
           });
