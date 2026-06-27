@@ -106,7 +106,7 @@ export async function subscribeAuthState(callback) {
 
 let recaptchaVerifier = null;
 
-/** Ensures a clean DOM container exists for the invisible reCAPTCHA widget. */
+/** Ensures a DOM container exists for the invisible reCAPTCHA widget. */
 function getRecaptchaContainer() {
   let el = document.getElementById("recaptcha-container");
   if (!el) {
@@ -114,10 +114,6 @@ function getRecaptchaContainer() {
     el.id = "recaptcha-container";
     el.style.display = "none";
     document.body.appendChild(el);
-  } else {
-    // Purge any leftover rendered content (e.g. from an interrupted
-    // lifecycle) so the verifier can always render cleanly.
-    el.innerHTML = "";
   }
   return el;
 }
@@ -144,10 +140,6 @@ export function clearRecaptchaVerifier() {
     try { recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
   }
   recaptchaVerifier = null;
-  // Clear the container contents so a new verifier can render without
-  // "reCAPTCHA has already been rendered in this element".
-  const el = document.getElementById("recaptcha-container");
-  if (el) el.innerHTML = "";
 }
 
 /**
