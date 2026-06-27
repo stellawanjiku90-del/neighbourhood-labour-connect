@@ -26,9 +26,9 @@ export default function LandingPage() {
             Trusted local help, on demand.
           </p>
           <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto mb-6 leading-relaxed">
-            Connect with trusted cleaners, plumbers, electricians, barbers, tutors, movers,
-            nannies, drivers, and other local service providers. Post a job, receive offers,
-            compare ratings, and hire with confidence.
+            Connecting customers with trusted local service providers. Whether you want to hire
+            a professional or find your next job, our platform makes it easy to connect, negotiate,
+            and get things done.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/firebase-auth" className="w-full sm:w-auto">
