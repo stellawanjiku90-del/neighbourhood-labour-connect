@@ -58,7 +58,7 @@ export default function Settings() {
           </div>
 
           <Button
-            onClick={() => base44.auth.logout()}
+            onClick={() => logout()}
             variant="outline"
             className="w-full rounded-xl h-11 gap-2 text-destructive border-destructive/30 text-sm"
           >
