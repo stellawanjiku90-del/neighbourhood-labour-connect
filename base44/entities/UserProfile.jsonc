@@ -10,6 +10,15 @@
       "type": "string",
       "description": "Firebase Authentication user UID"
     },
+    "role": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "provider"
+      ],
+      "default": "customer",
+      "description": "Whether the user registered as a customer or a service provider"
+    },
     "pin_hash": {
       "type": "string",
       "description": "SHA-256 hash of the user's 4-digit login PIN"

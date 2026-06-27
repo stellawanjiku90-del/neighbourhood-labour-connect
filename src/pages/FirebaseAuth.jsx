@@ -12,6 +12,7 @@ import PhoneStep from "@/components/firebase/PhoneStep";
 import OtpStep from "@/components/firebase/OtpStep";
 import PinStep from "@/components/firebase/PinStep";
 import ProfileSetupStep from "@/components/firebase/ProfileSetupStep";
+import RoleStep from "@/components/firebase/RoleStep";
 
 const LOGO_URL =
   "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -22,6 +23,7 @@ export default function FirebaseAuth() {
   const [phone, setPhone] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [resendTimer, setResendTimer] = useState(0);
@@ -57,10 +59,10 @@ export default function FirebaseAuth() {
           } else if (profile?.pin_hash) {
             setStep("profile");
           } else {
-            setStep("pin-setup");
+            setStep("role");
           }
         } catch (e) {
-          setStep("pin-setup");
+          setStep("role");
         }
       } else {
         setStep("phone");
@@ -163,7 +165,7 @@ export default function FirebaseAuth() {
       } else if (profile?.pin_hash) {
         setStep("pin-login");
       } else {
-        setStep("pin-setup");
+        setStep("role");
       }
     } catch (err) {
       handleAuthError(err);
@@ -187,6 +189,11 @@ export default function FirebaseAuth() {
     }
   };
 
+  const selectRole = (r) => {
+    setRole(r);
+    setStep("pin-setup");
+  };
+
   const setupPin = async (pin) => {
     setError(null);
     setLoading(true);
@@ -199,6 +206,7 @@ export default function FirebaseAuth() {
         phone,
         firebase_uid: firebaseUser?.uid,
         pin_hash: pinHash,
+        role,
         profile_completed: false,
       });
       setUserProfile(data?.profile);
@@ -263,6 +271,7 @@ export default function FirebaseAuth() {
         phone,
         firebase_uid: firebaseUser?.uid,
         pin_hash: userProfile?.pin_hash,
+        role,
         verify_id: true,
       });
 
@@ -327,6 +336,9 @@ export default function FirebaseAuth() {
               error={error}
               resendTimer={resendTimer}
             />
+          )}
+          {step === "role" && (
+            <RoleStep onSelect={selectRole} loading={loading} />
           )}
           {step === "pin-setup" && (
             <PinStep
