@@ -27,9 +27,10 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-6">Settings</h1>
+    <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
+      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Settings</h1>
 
+      <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="bg-white rounded-2xl p-5 border border-slate-100 flex items-center gap-4 mb-4">
         <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-xl">
           {user?.full_name?.[0] || <User className="w-6 h-6" />}
@@ -82,6 +83,7 @@ export default function Settings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 }

@@ -35,15 +35,15 @@ export default function MyJobs() {
   };
 
   return (
-    <PullToRefresh onRefresh={refresh}>
-    <div className="max-w-3xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-6">My Jobs</h1>
+    <div className="h-full flex flex-col max-w-3xl mx-auto px-4 md:px-8 py-4 md:py-6">
+      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">My Jobs</h1>
 
+      <PullToRefresh onRefresh={refresh} className="flex-1 min-h-0">
       {jobs.length === 0 && (
         <p className="text-muted-foreground text-sm">No requests yet. Post one to get started.</p>
       )}
 
-      <div className="space-y-3 max-h-[62vh] overflow-y-auto pr-1">
+      <div className="space-y-3">
         {jobs.map((job) => {
           const icon = CATEGORIES.find((c) => c.name === job.category)?.icon;
           return (
@@ -91,6 +91,7 @@ export default function MyJobs() {
         })}
       </div>
 
+      </PullToRefresh>
       {rating && (
         <RateDialog
           open={!!rating}
@@ -100,6 +101,5 @@ export default function MyJobs() {
         />
       )}
     </div>
-    </PullToRefresh>
   );
 }

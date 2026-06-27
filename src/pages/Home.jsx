@@ -44,8 +44,9 @@ export default function Home() {
   const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <PullToRefresh onRefresh={refresh}>
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6">
+    <div className="h-full flex flex-col">
+    <PullToRefresh onRefresh={refresh} className="px-4 md:px-8">
+      <div className="max-w-5xl mx-auto py-4 md:py-6">
         {/* Brand bar */}
         <div className="flex items-center gap-2 mb-6 md:hidden">
           <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-8 h-8 rounded-full object-cover" />
@@ -124,5 +125,6 @@ export default function Home() {
         </div>
       </div>
     </PullToRefresh>
+    </div>
   );
 }

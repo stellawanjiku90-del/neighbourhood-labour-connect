@@ -67,7 +67,7 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-[100dvh] bg-background pt-[env(safe-area-inset-top)]">
       {/* Header */}
       <header className="flex items-center gap-3 px-4 h-16 bg-white border-b border-slate-100 shrink-0">
         <button onClick={() => navigate(-1)} className="text-muted-foreground">

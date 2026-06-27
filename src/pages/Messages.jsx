@@ -27,8 +27,8 @@ export default function Messages() {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-6">Messages</h1>
+    <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
+      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Messages</h1>
 
       {loading ? (
         <div className="flex justify-center py-16">
@@ -42,7 +42,7 @@ export default function Messages() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 max-h-[64vh] overflow-y-auto">
+        <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 flex-1 min-h-0 overflow-y-auto">
           {convos.map((c) => (
             <Link
               key={c.id}

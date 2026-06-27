@@ -45,9 +45,10 @@ export default function PostJob() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-6">Post a Request</h1>
+    <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
+      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Post a Request</h1>
 
+      <div className="flex-1 min-h-0 overflow-y-auto">
       <label className="text-sm font-semibold text-foreground">Service category</label>
       <div className="mt-2 mb-6">
         <CategorySearch value={category} onChange={setCategory} placeholder="Search and select a category…" />
@@ -105,6 +106,7 @@ export default function PostJob() {
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Post Request"}
         </Button>
+      </div>
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ function AnimatedOutlet() {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -30 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="min-w-0"
+        className="min-w-0 h-full flex flex-col"
       >
         {outlet}
       </motion.div>
@@ -53,9 +53,9 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="h-[100dvh] bg-background flex overflow-hidden">
       {/* Desktop lean-and-expand rail */}
-      <aside className="hidden md:flex group flex-col w-20 hover:w-60 transition-all duration-300 bg-white border-r border-slate-100 sticky top-0 h-screen pt-[env(safe-area-inset-top)] overflow-hidden z-30">
+      <aside className="hidden md:flex group flex-col w-20 hover:w-60 transition-all duration-300 bg-white border-r border-slate-100 h-full pt-[env(safe-area-inset-top)] overflow-hidden z-30">
         <div className="flex items-center gap-3 px-6 h-20 shrink-0">
           <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-9 h-9 rounded-full object-cover shrink-0" />
           <span className="font-extrabold text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
@@ -86,9 +86,8 @@ export default function Layout() {
         </nav>
       </aside>
 
-      <main className="flex-1 min-w-0 pt-[env(safe-area-inset-top)] pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col pt-[env(safe-area-inset-top)] pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
         <AnimatedOutlet />
-        <Footer />
       </main>
 
       {/* Mobile bottom nav */}

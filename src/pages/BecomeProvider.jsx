@@ -49,12 +49,13 @@ export default function BecomeProvider() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
+    <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-muted-foreground mb-5">
         <ArrowLeft className="w-5 h-5" /> Back
       </button>
-      <h1 className="text-2xl font-extrabold text-foreground mb-6">Become a Provider</h1>
+      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Become a Provider</h1>
 
+      <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="space-y-4">
         <div>
           <label className="text-sm font-semibold">Full name</label>
@@ -101,6 +102,7 @@ export default function BecomeProvider() {
         <Button onClick={submit} disabled={saving} className="w-full h-14 rounded-2xl text-base bg-[#1A1F2E] hover:bg-[#2A2F45]">
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "List me as a provider"}
         </Button>
+      </div>
       </div>
     </div>
   );

@@ -3,14 +3,15 @@ import { Loader2, RefreshCw } from "lucide-react";
 
 const THRESHOLD = 70;
 
-export default function PullToRefresh({ onRefresh, children }) {
+export default function PullToRefresh({ onRefresh, children, className }) {
   const [pull, setPull] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef(null);
   const active = useRef(false);
+  const scrollRef = useRef(null);
 
   const onTouchStart = (e) => {
-    if (window.scrollY <= 0 && !refreshing) {
+    if (scrollRef.current && scrollRef.current.scrollTop <= 0 && !refreshing) {
       startY.current = e.touches[0].clientY;
       active.current = true;
     }
@@ -19,7 +20,7 @@ export default function PullToRefresh({ onRefresh, children }) {
   const onTouchMove = (e) => {
     if (!active.current || refreshing) return;
     const delta = e.touches[0].clientY - startY.current;
-    if (delta > 0 && window.scrollY <= 0) {
+    if (delta > 0 && scrollRef.current && scrollRef.current.scrollTop <= 0) {
       setPull(Math.min(delta * 0.5, 100));
     }
   };
@@ -42,7 +43,13 @@ export default function PullToRefresh({ onRefresh, children }) {
   };
 
   return (
-    <div onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+    <div
+      ref={scrollRef}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className={`flex-1 min-h-0 overflow-y-auto ${className || ""}`}
+    >
       <div
         style={{
           transform: `translateY(${pull}px)`,

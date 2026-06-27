@@ -35,11 +35,12 @@ export default function ProviderDetail() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6 pb-32">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-muted-foreground mb-5">
+    <div className="h-[100dvh] flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-muted-foreground mb-5 shrink-0">
         <ArrowLeft className="w-5 h-5" /> Back
       </button>
 
+      <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="flex flex-col items-center text-center">
         {p.photo_url ? (
           <img src={p.photo_url} alt={p.name} className="w-28 h-28 rounded-3xl object-cover" />
@@ -71,7 +72,7 @@ export default function ProviderDetail() {
       {p.bio && <p className="text-muted-foreground mt-6 leading-relaxed">{p.bio}</p>}
 
       <h2 className="text-lg font-bold text-foreground mt-8 mb-3">Reviews</h2>
-      <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
+      <div className="space-y-3">
         {reviews.map((r) => (
           <div key={r.id} className="bg-white rounded-2xl p-4 border border-slate-100">
             <div className="flex items-center justify-between">
@@ -84,21 +85,21 @@ export default function ProviderDetail() {
         {reviews.length === 0 && <p className="text-sm text-muted-foreground">No reviews yet.</p>}
       </div>
 
-      {/* Floating actions */}
-      <div className="fixed bottom-16 md:bottom-4 inset-x-0 px-4">
-        <div className="max-w-2xl mx-auto flex gap-3">
-          {p.phone && (
-            <Button asChild variant="outline" className="rounded-2xl h-14 flex-1 bg-white">
-              <a href={`tel:${p.phone}`}><Phone className="w-5 h-5 mr-1" /> Call</a>
-            </Button>
-          )}
-          <Button variant="outline" className="rounded-2xl h-14 flex-1 bg-white" onClick={message}>
-            <MessageCircle className="w-5 h-5 mr-1" /> Message
+      </div>
+
+      {/* Actions */}
+      <div className="shrink-0 flex gap-3 pt-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+        {p.phone && (
+          <Button asChild variant="outline" className="rounded-2xl h-14 flex-1 bg-white">
+            <a href={`tel:${p.phone}`}><Phone className="w-5 h-5 mr-1" /> Call</a>
           </Button>
-          <Button onClick={hire} className="rounded-2xl h-14 flex-[1.5] bg-[#1A1F2E] hover:bg-[#2A2F45] text-base">
-            Hire Provider
-          </Button>
-        </div>
+        )}
+        <Button variant="outline" className="rounded-2xl h-14 flex-1 bg-white" onClick={message}>
+          <MessageCircle className="w-5 h-5 mr-1" /> Message
+        </Button>
+        <Button onClick={hire} className="rounded-2xl h-14 flex-[1.5] bg-[#1A1F2E] hover:bg-[#2A2F45] text-base">
+          Hire Provider
+        </Button>
       </div>
     </div>
   );
