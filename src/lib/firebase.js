@@ -191,7 +191,7 @@ export async function getRecaptchaVerifier() {
   } catch (err) {
     console.error("[Firebase] reCAPTCHA Enterprise setup failed:", err);
     enterpriseVerifier = null;
-    throw new Error("Could not initialize reCAPTCHA. Please refresh the page.");
+    throw err;
   } finally {
     enterpriseReadyPromise = null;
   }
