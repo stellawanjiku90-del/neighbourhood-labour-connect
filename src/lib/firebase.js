@@ -134,16 +134,12 @@ export async function getRecaptchaVerifier() {
   return recaptchaVerifier;
 }
 
-/** Destroys the reCAPTCHA verifier singleton AND the container element
- *  so a fresh one is created next time (avoid "already rendered" errors
- *  when returning to the phone step). */
+/** Destroys the reCAPTCHA verifier singleton so a fresh one is created next time. */
 export function clearRecaptchaVerifier() {
   if (recaptchaVerifier) {
     try { recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
   }
   recaptchaVerifier = null;
-  const container = document.getElementById("recaptcha-container");
-  if (container) container.remove();
 }
 
 /**
