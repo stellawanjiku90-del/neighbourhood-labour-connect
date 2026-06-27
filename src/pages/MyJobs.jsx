@@ -36,7 +36,7 @@ export default function MyJobs() {
 
   return (
     <div className="h-full flex flex-col max-w-3xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">My Jobs</h1>
+      <h1 className="text-2xl font-extrabold text-foreground mb-3 shrink-0">My Jobs</h1>
 
       <PullToRefresh onRefresh={refresh} className="flex-1 min-h-0">
       {jobs.length === 0 && (
@@ -47,9 +47,9 @@ export default function MyJobs() {
         {jobs.map((job) => {
           const icon = CATEGORIES.find((c) => c.name === job.category)?.icon;
           return (
-            <div key={job.id} className="bg-white rounded-2xl p-4 border border-slate-100">
+            <div key={job.id} className="bg-white rounded-2xl p-3 border border-slate-100">
               <div className="flex items-start gap-3">
-                <span className="w-11 h-11 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground shrink-0">
+                <span className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground shrink-0">
                   <CategoryIcon name={icon} />
                 </span>
                 <div className="min-w-0 flex-1">

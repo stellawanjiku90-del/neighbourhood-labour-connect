@@ -7,7 +7,7 @@ export default function ProviderCard({ provider, distance }) {
   return (
     <Link
       to={`/provider/${provider.id}`}
-      className="block bg-white rounded-2xl p-4 border border-slate-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+      className="block bg-white rounded-2xl p-3 border border-slate-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
     >
       <div className="flex gap-3">
         <div className="relative shrink-0">
@@ -16,10 +16,10 @@ export default function ProviderCard({ provider, distance }) {
               src={provider.photo_url}
               alt={provider.name}
               loading="lazy"
-              className="w-16 h-16 rounded-2xl object-cover"
+              className="w-14 h-14 rounded-2xl object-cover"
             />
           ) : (
-            <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-xl">
+            <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-lg">
               {provider.name?.[0]}
             </div>
           )}
@@ -37,13 +37,13 @@ export default function ProviderCard({ provider, distance }) {
           <p className="text-sm text-muted-foreground truncate">
             {(provider.professions || []).join(" · ")}
           </p>
-          <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex items-center gap-2 mt-1">
             <Stars value={provider.rating} size={13} />
             <span className="text-xs text-muted-foreground">
               {provider.rating?.toFixed(1)} ({provider.reviews_count})
             </span>
           </div>
-          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
             {distance != null && (
               <span className="flex items-center gap-0.5">
                 <MapPin className="w-3 h-3" /> {distance.toFixed(1)} km

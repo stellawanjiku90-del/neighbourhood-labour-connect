@@ -31,7 +31,7 @@ export default function Settings() {
       <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Settings</h1>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="bg-white rounded-2xl p-5 border border-slate-100 flex items-center gap-4 mb-4">
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 flex items-center gap-4 mb-3">
         <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-xl">
           {user?.full_name?.[0] || <User className="w-6 h-6" />}
         </div>
@@ -53,7 +53,7 @@ export default function Settings() {
       <Button
         onClick={() => base44.auth.logout()}
         variant="outline"
-        className="w-full mt-6 rounded-2xl h-12 gap-2 text-destructive border-destructive/30"
+        className="w-full mt-4 rounded-2xl h-12 gap-2 text-destructive border-destructive/30"
       >
         <LogOut className="w-5 h-5" /> Log out
       </Button>

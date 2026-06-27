@@ -28,7 +28,7 @@ export default function Messages() {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Messages</h1>
+      <h1 className="text-2xl font-extrabold text-foreground mb-3 shrink-0">Messages</h1>
 
       {loading ? (
         <div className="flex justify-center py-16">

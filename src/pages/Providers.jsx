@@ -44,7 +44,7 @@ export default function Providers() {
   return (
     <div className="h-full flex flex-col max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6">
       <div className="shrink-0">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h1 className="text-2xl font-extrabold text-foreground">Find Help</h1>
         <Sheet>
           <SheetTrigger asChild>
@@ -63,7 +63,7 @@ export default function Providers() {
         </Sheet>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-3">
         <CategorySearch
           value={category === "All" ? "" : category}
           onChange={(v) => setCategory(v || "All")}
@@ -71,7 +71,7 @@ export default function Providers() {
         />
       </div>
 
-      <div className="flex items-center justify-between mb-3 text-sm">
+      <div className="flex items-center justify-between mb-2 text-sm">
         <span className="text-muted-foreground">{list.length} providers</span>
         <div className="flex items-center gap-1 text-muted-foreground">
           <SlidersHorizontal className="w-4 h-4" />

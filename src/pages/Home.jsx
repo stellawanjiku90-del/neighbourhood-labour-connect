@@ -48,19 +48,16 @@ export default function Home() {
     <PullToRefresh onRefresh={refresh} className="px-4 md:px-8">
       <div className="max-w-5xl mx-auto py-4 md:py-6">
         {/* Brand bar */}
-        <div className="flex items-center gap-2 mb-6 md:hidden">
+        <div className="flex items-center gap-2 mb-4 md:hidden">
           <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-8 h-8 rounded-full object-cover" />
           <span className="font-extrabold text-foreground">Neighbourhood Labour Connect</span>
         </div>
 
         {/* Hero */}
-        <header className="mb-5">
+        <header className="mb-4">
           <p className="text-muted-foreground text-sm">{greet},</p>
           <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">{firstName} 👋</h1>
-          <p className="text-muted-foreground mt-1 max-w-md">
-            Need a hand? Find trusted people in your neighbourhood — or post a job and let them come to you.
-          </p>
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-3 mt-3">
             <Button
               onClick={() => navigate("/post")}
               className="rounded-2xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-12 px-5"
@@ -80,27 +77,27 @@ export default function Home() {
         <PushNotificationEnabler />
 
         {/* Stat cards */}
-        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
-          <div className="bg-white rounded-2xl p-4 md:p-5 border border-slate-100">
-            <p className="text-4xl md:text-5xl font-extrabold text-foreground">{top.length}</p>
+        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-4">
+          <div className="bg-white rounded-2xl p-3 md:p-4 border border-slate-100">
+            <p className="text-3xl md:text-4xl font-extrabold text-foreground">{top.length}</p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">Ready to help</p>
           </div>
-          <div className="bg-[#C9E8D8] rounded-2xl p-4 md:p-5">
-            <p className="text-4xl md:text-5xl font-extrabold text-[#2D7A3E]">{openJobs}</p>
+          <div className="bg-[#C9E8D8] rounded-2xl p-3 md:p-4">
+            <p className="text-3xl md:text-4xl font-extrabold text-[#2D7A3E]">{openJobs}</p>
             <p className="text-xs md:text-sm text-[#2D7A3E]/80 mt-1">Open jobs</p>
           </div>
           <Link
             to="/post?emergency=1"
-            className="bg-[#F5DCC8] rounded-2xl p-4 md:p-5 flex flex-col justify-between hover:shadow-md transition"
+            className="bg-[#F5DCC8] rounded-2xl p-3 md:p-4 flex flex-col justify-between hover:shadow-md transition"
           >
-            <Siren className="w-7 h-7 text-[#B36D25]" />
+            <Siren className="w-6 h-6 text-[#B36D25]" />
             <p className="text-xs md:text-sm font-semibold text-[#B36D25] mt-2">Emergency</p>
           </Link>
         </div>
 
         {/* Search categories */}
-        <div className="mb-6">
-          <h2 className="text-lg font-bold text-foreground mb-3">Find a service</h2>
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-foreground mb-2">Find a service</h2>
           <CategorySearch
             value=""
             onChange={(v) => v && navigate(`/providers?category=${encodeURIComponent(v)}`)}
@@ -109,7 +106,7 @@ export default function Home() {
         </div>
 
         {/* Top rated */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="w-5 h-5 text-[#2D7A3E]" />
           <h2 className="text-lg font-bold text-foreground">Top rated near you</h2>
         </div>

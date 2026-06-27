@@ -88,7 +88,7 @@ export default function PushNotificationEnabler() {
 
   if (status === "granted") {
     return (
-      <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 rounded-2xl px-4 py-3 mb-6">
+      <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 rounded-2xl px-4 py-3 mb-4">
         <Check className="w-4 h-4 shrink-0" />
         <span>Notifications enabled — you'll be alerted to nearby jobs.</span>
       </div>
@@ -97,7 +97,7 @@ export default function PushNotificationEnabler() {
 
   if (status === "denied") {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted rounded-2xl px-4 py-3 mb-6">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted rounded-2xl px-4 py-3 mb-4">
         <BellOff className="w-4 h-4 shrink-0" />
         <span>Notifications are blocked. Enable them in your browser settings to get job alerts.</span>
       </div>
@@ -105,7 +105,7 @@ export default function PushNotificationEnabler() {
   }
 
   return (
-    <div className="bg-secondary/60 rounded-2xl p-4 flex items-center gap-3 mb-6">
+    <div className="bg-secondary/60 rounded-2xl p-4 flex items-center gap-3 mb-4">
       <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
         <Bell className="w-5 h-5 text-secondary-foreground" />
       </div>

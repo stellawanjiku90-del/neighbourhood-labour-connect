@@ -43,13 +43,13 @@ export default function ProviderDetail() {
       <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="flex flex-col items-center text-center">
         {p.photo_url ? (
-          <img src={p.photo_url} alt={p.name} className="w-28 h-28 rounded-3xl object-cover" />
+          <img src={p.photo_url} alt={p.name} className="w-24 h-24 rounded-3xl object-cover" />
         ) : (
-          <div className="w-28 h-28 rounded-3xl bg-secondary flex items-center justify-center text-4xl font-bold text-secondary-foreground">
+          <div className="w-24 h-24 rounded-3xl bg-secondary flex items-center justify-center text-4xl font-bold text-secondary-foreground">
             {p.name?.[0]}
           </div>
         )}
-        <p className="text-5xl font-extrabold text-foreground mt-4">{(p.rating || 0).toFixed(1)}</p>
+        <p className="text-4xl font-extrabold text-foreground mt-3">{(p.rating || 0).toFixed(1)}</p>
         <Stars value={p.rating} size={20} className="mt-1" />
         <div className="flex items-center gap-1.5 mt-3">
           <h1 className="text-xl font-bold text-foreground">{p.name}</h1>
@@ -63,15 +63,15 @@ export default function ProviderDetail() {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mt-6">
+      <div className="grid grid-cols-3 gap-3 mt-4">
         <Stat icon={Briefcase} label="Jobs done" value={p.completed_jobs || 0} />
         <Stat icon={Award} label="Experience" value={`${p.years_experience || 0}y`} />
         <Stat icon={Heart} label="Reviews" value={p.reviews_count || 0} />
       </div>
 
-      {p.bio && <p className="text-muted-foreground mt-6 leading-relaxed">{p.bio}</p>}
+      {p.bio && <p className="text-muted-foreground mt-4 leading-relaxed">{p.bio}</p>}
 
-      <h2 className="text-lg font-bold text-foreground mt-8 mb-3">Reviews</h2>
+      <h2 className="text-lg font-bold text-foreground mt-5 mb-2">Reviews</h2>
       <div className="space-y-3">
         {reviews.map((r) => (
           <div key={r.id} className="bg-white rounded-2xl p-4 border border-slate-100">
@@ -107,7 +107,7 @@ export default function ProviderDetail() {
 
 function Stat({ icon: Icon, label, value }) {
   return (
-    <div className="bg-white rounded-2xl p-4 border border-slate-100 text-center">
+    <div className="bg-white rounded-2xl p-3 border border-slate-100 text-center">
       <Icon className="w-5 h-5 text-[#2D7A3E] mx-auto" />
       <p className="text-xl font-bold text-foreground mt-1">{value}</p>
       <p className="text-[11px] text-muted-foreground">{label}</p>
