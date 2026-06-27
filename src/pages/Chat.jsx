@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Send } from "lucide-react";
@@ -8,7 +9,7 @@ import { ArrowLeft, Send } from "lucide-react";
 export default function Chat() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [me, setMe] = useState(null);
+  const { user: me } = useAuth();
   const [convo, setConvo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -19,7 +20,6 @@ export default function Chat() {
     base44.entities.Message.filter({ conversation_id: id }, "created_date", 200).then(setMessages);
 
   useEffect(() => {
-    base44.auth.me().then(setMe).catch(() => {});
     base44.entities.Conversation.get(id).then(setConvo).catch(() => setConvo(false));
     loadMessages();
     const unsub = base44.entities.Message.subscribe((event) => {
@@ -73,18 +73,23 @@ export default function Chat() {
         <button onClick={() => navigate(-1)} className="text-muted-foreground">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        {convo && convo !== false && (
-          <>
-            {convo.provider_photo ? (
-              <img src={convo.provider_photo} alt={convo.provider_name} className="w-9 h-9 rounded-xl object-cover" />
-            ) : (
-              <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center font-bold text-secondary-foreground text-sm">
-                {convo.provider_name?.[0]}
-              </div>
-            )}
-            <p className="font-bold text-foreground">{convo.provider_name}</p>
-          </>
-        )}
+        {convo && convo !== false && (() => {
+          const isCustomer = me?.id === convo.customer_id;
+          const otherName = isCustomer ? convo.provider_name : convo.customer_name;
+          const otherPhoto = isCustomer ? convo.provider_photo : null;
+          return (
+            <>
+              {otherPhoto ? (
+                <img src={otherPhoto} alt={otherName} className="w-9 h-9 rounded-xl object-cover" />
+              ) : (
+                <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center font-bold text-secondary-foreground text-sm">
+                  {otherName?.[0]}
+                </div>
+              )}
+              <p className="font-bold text-foreground">{otherName}</p>
+            </>
+          );
+        })()}
       </header>
 
       {/* Messages */}

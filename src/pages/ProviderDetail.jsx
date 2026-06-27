@@ -8,11 +8,13 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { openConversation } from "@/lib/chat";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function ProviderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [p, setP] = useState(null);
   const [reviews, setReviews] = useState([]);
 
@@ -30,7 +32,7 @@ export default function ProviderDetail() {
 
   const hire = () => toast({ title: `Request sent to ${p.name}`, description: "They'll respond shortly." });
   const message = async () => {
-    const convo = await openConversation(p);
+    const convo = await openConversation(p, user);
     navigate(`/chat/${convo.id}`);
   };
 

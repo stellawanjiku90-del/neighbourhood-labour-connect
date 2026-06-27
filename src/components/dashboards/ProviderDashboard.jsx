@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PullToRefresh from "@/components/PullToRefresh";
 import BidDialog from "@/components/BidDialog";
+import { getOrCreateConversation } from "@/lib/chat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
-import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, Bell, CheckCircle2 } from "lucide-react";
+import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, Bell, CheckCircle2, MessageCircle } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
@@ -22,15 +23,19 @@ export default function ProviderDashboard() {
   const phone = user?.phone;
 
   const load = async () => {
-    const [providers, jobs, myAssigned] = await Promise.all([
+    const [providers, jobs, acceptedJobs, inProgressJobs] = await Promise.all([
       phone ? base44.entities.ServiceProvider.filter({ phone }, "-created_date", 1) : Promise.resolve([]),
       base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 50),
+      base44.entities.ServiceRequest.filter({ status: "accepted" }, "-created_date", 50),
       base44.entities.ServiceRequest.filter({ status: "in_progress" }, "-created_date", 50),
     ]);
     const me = providers[0] || null;
     setProvider(me);
     setOpenJobs(jobs);
-    setAssignedJobs(me ? myAssigned.filter((j) => j.assigned_provider_id === me.id) : []);
+    const myAssigned = [...acceptedJobs, ...inProgressJobs].filter(
+      (j) => me && j.assigned_provider_id === me.id
+    );
+    setAssignedJobs(me ? myAssigned : []);
     setLoadingProvider(false);
   };
 
@@ -55,6 +60,18 @@ export default function ProviderDashboard() {
       // ignore
     }
     setCompleting(null);
+  };
+
+  const messageCustomer = async (job) => {
+    if (!provider || !job.customer_id) return;
+    const convo = await getOrCreateConversation({
+      providerId: provider.id,
+      providerName: provider.name,
+      providerPhoto: provider.photo_url,
+      customerId: job.customer_id,
+      customerName: job.customer_name,
+    });
+    navigate(`/chat/${convo.id}`);
   };
 
   const firstName = user?.full_name?.split(" ")[0] || "there";
@@ -157,21 +174,34 @@ export default function ProviderDashboard() {
                         <MapPin className="w-3 h-3" /> {job.location_name}
                       </p>
                     )}
-                    <Button
-                      onClick={() => startJob(job)}
-                      disabled={completing === job.id}
-                      className="w-full mt-3 h-10 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
-                    >
-                      {completing === job.id ? (
-                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <CheckCircle2 className="w-4 h-4 mr-1" /> Start job
-                        </>
+                    <div className="flex gap-2 mt-3">
+                      {job.status === "accepted" && (
+                        <Button
+                          onClick={() => startJob(job)}
+                          disabled={completing === job.id}
+                          className="flex-1 h-10 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
+                        >
+                          {completing === job.id ? (
+                            <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <CheckCircle2 className="w-4 h-4 mr-1" /> Start job
+                            </>
+                          )}
+                        </Button>
                       )}
-                    </Button>
+                      <Button
+                        onClick={() => messageCustomer(job)}
+                        variant="outline"
+                        className="flex-1 h-10 rounded-xl bg-white"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-1" /> Message
+                      </Button>
+                    </div>
                     <p className="text-xs text-[#2D7A3E]/80 text-center mt-2">
-                      The customer will mark the job completed once work is done.
+                      {job.status === "accepted"
+                        ? "Tap Start job when you begin, then the customer confirms completion."
+                        : "Waiting for the customer to confirm completion."}
                     </p>
                   </div>
                 ))}

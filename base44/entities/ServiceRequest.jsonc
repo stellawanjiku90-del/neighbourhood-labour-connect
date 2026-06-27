@@ -47,6 +47,14 @@
     "rated": {
       "type": "boolean",
       "default": false
+    },
+    "customer_id": {
+      "type": "string",
+      "description": "Firebase UID of the customer who posted the request"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Display name of the customer"
     }
   },
   "required": [

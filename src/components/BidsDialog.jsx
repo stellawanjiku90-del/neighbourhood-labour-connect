@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Star, Loader2, CheckCircle2 } from "lucide-react";
+import { getOrCreateConversation } from "@/lib/chat";
 
 export default function BidsDialog({ open, onOpenChange, job, onDone }) {
   const [bids, setBids] = useState([]);
@@ -49,12 +50,20 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
   const assign = async (bid) => {
     setAssigning(bid.id);
     try {
+      const p = providers[bid.provider_id];
       await base44.entities.ServiceRequest.update(job.id, {
         status: "accepted",
         assigned_provider_id: bid.provider_id,
         assigned_provider_name: bid.provider_name,
       });
       await base44.entities.JobBid.update(bid.id, { status: "accepted" });
+      await getOrCreateConversation({
+        providerId: bid.provider_id,
+        providerName: bid.provider_name,
+        providerPhoto: p?.photo_url,
+        customerId: job.customer_id,
+        customerName: job.customer_name,
+      });
       onDone?.();
       onOpenChange(false);
     } catch (e) {

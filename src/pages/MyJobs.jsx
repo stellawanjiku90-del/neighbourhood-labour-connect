@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import CategoryIcon from "@/components/CategoryIcon";
 import RateDialog from "@/components/RateDialog";
 import BidsDialog from "@/components/BidsDialog";
+import { getOrCreateConversation } from "@/lib/chat";
+import { useAuth } from "@/lib/AuthContext";
 import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
-import { Siren, MapPin, Star, CheckCircle2, Users } from "lucide-react";
+import { Siren, MapPin, Star, CheckCircle2, Users, MessageCircle } from "lucide-react";
 import PullToRefresh from "@/components/PullToRefresh";
 
 const STATUS_STYLE = {
@@ -21,6 +24,8 @@ export default function MyJobs() {
   const [bidCounts, setBidCounts] = useState({});
   const [rating, setRating] = useState(null);
   const [bidsJob, setBidsJob] = useState(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const load = async () => {
     const [jobList, allBids] = await Promise.all([
@@ -42,6 +47,17 @@ export default function MyJobs() {
   const complete = async (job) => {
     await base44.entities.ServiceRequest.update(job.id, { status: "completed" });
     load();
+  };
+
+  const messageProvider = async (job) => {
+    if (!user || !job.assigned_provider_id) return;
+    const convo = await getOrCreateConversation({
+      providerId: job.assigned_provider_id,
+      providerName: job.assigned_provider_name,
+      customerId: user.id,
+      customerName: user.full_name,
+    });
+    navigate(`/chat/${convo.id}`);
   };
 
   return (
@@ -96,12 +112,21 @@ export default function MyJobs() {
                 )}
 
                 {(job.status === "accepted" || job.status === "in_progress") && (
-                  <Button
-                    onClick={() => complete(job)}
-                    className="w-full mt-3 rounded-2xl h-11 gap-1 bg-[#1A1F2E] hover:bg-[#2A2F45]"
-                  >
-                    <CheckCircle2 className="w-4 h-4" /> Mark completed
-                  </Button>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      onClick={() => messageProvider(job)}
+                      variant="outline"
+                      className="flex-1 rounded-2xl h-11 gap-1"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Message
+                    </Button>
+                    <Button
+                      onClick={() => complete(job)}
+                      className="flex-1 rounded-2xl h-11 gap-1 bg-[#1A1F2E] hover:bg-[#2A2F45]"
+                    >
+                      <CheckCircle2 className="w-4 h-4" /> Mark completed
+                    </Button>
+                  </div>
                 )}
 
                 {job.status === "completed" && !job.rated && job.assigned_provider_id && (

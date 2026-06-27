@@ -9,10 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Siren } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function PostJob() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const params = new URLSearchParams(useLocation().search);
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
@@ -31,6 +33,8 @@ export default function PostJob() {
     const created = await base44.entities.ServiceRequest.create({
       category,
       title,
+      customer_id: user?.id,
+      customer_name: user?.full_name,
       description,
       budget: budget ? Number(budget) : undefined,
       emergency,
