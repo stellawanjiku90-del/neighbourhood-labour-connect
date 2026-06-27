@@ -44,21 +44,10 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
       <h1 className="text-2xl font-extrabold text-foreground mb-6">Phone Verification</h1>
       <label className="text-sm font-medium text-foreground mb-2 block">Phone Number</label>
       <div className="flex gap-2 mb-2">
-        <select
-          value={country.code}
-          onChange={(e) => {
-            const next = COUNTRY_OPTIONS.find((c) => c.code === e.target.value);
-            if (next) setCountry(next);
-          }}
-          disabled={loading}
-          className="h-12 rounded-xl border border-input bg-transparent px-3 text-base font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          {COUNTRY_OPTIONS.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.flag} +{c.dial}
-            </option>
-          ))}
-        </select>
+        <div className="h-12 rounded-xl border border-input bg-muted px-3 flex items-center gap-1.5 text-base font-medium shrink-0">
+          <span className="text-lg leading-none">{country.flag}</span>
+          <span>+{country.dial}</span>
+        </div>
         <Input
           type="tel"
           inputMode="numeric"
