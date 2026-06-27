@@ -128,8 +128,7 @@ export async function getRecaptchaVerifier() {
   getRecaptchaContainer();
   recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier(
     "recaptcha-container",
-    { size: "invisible" },
-    auth
+    { size: "invisible" }
   );
   await recaptchaVerifier.render();
   return recaptchaVerifier;
