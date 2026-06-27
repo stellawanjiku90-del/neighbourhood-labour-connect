@@ -115,17 +115,17 @@ export default function ProviderDashboard() {
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background">
+    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background safe-area-inset">
       {/* Header */}
-      <header className="shrink-0 px-4 py-3 border-b border-border bg-background">
+      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background safe-area-top">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />
-            <h1 className="text-lg font-semibold text-foreground">{firstName}</h1>
+            <h1 className="text-base font-semibold text-foreground">{firstName}</h1>
           </div>
           <button
             onClick={toggleAvailable}
-            className={`text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+            className={`text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors ${
               provider.available ? "bg-[#C9E8D8] text-[#2D7A3E]" : "bg-muted text-muted-foreground"
             }`}
           >
@@ -135,32 +135,32 @@ export default function ProviderDashboard() {
       </header>
 
       {/* Stats */}
-      <div className="shrink-0 px-4 py-3 bg-background">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-card rounded-lg p-3 border border-border text-center">
-            <Wallet className="w-4 h-4 text-[#2D7A3E] mx-auto mb-1" />
-            <p className="text-lg font-bold text-foreground">{provider.earnings || 0}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">KES</p>
+      <div className="shrink-0 px-4 py-2 bg-background">
+        <div className="grid grid-cols-3 gap-1.5">
+          <div className="bg-card rounded-lg p-2 border border-border text-center">
+            <Wallet className="w-3.5 h-3.5 text-[#2D7A3E] mx-auto mb-0.5" />
+            <p className="text-base font-bold text-foreground">{provider.earnings || 0}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">KES</p>
           </div>
-          <div className="bg-[#C9E8D8] rounded-lg p-3 text-center">
-            <Briefcase className="w-4 h-4 text-[#2D7A3E] mx-auto mb-1" />
-            <p className="text-lg font-bold text-[#2D7A3E]">{provider.completed_jobs || 0}</p>
-            <p className="text-xs text-[#2D7A3E]/80 mt-0.5">Jobs</p>
+          <div className="bg-[#C9E8D8] rounded-lg p-2 text-center">
+            <Briefcase className="w-3.5 h-3.5 text-[#2D7A3E] mx-auto mb-0.5" />
+            <p className="text-base font-bold text-[#2D7A3E]">{provider.completed_jobs || 0}</p>
+            <p className="text-[10px] text-[#2D7A3E]/80 mt-0.5">Jobs</p>
           </div>
-          <div className="bg-[#F5DCC8] rounded-lg p-3 text-center">
-            <Star className="w-4 h-4 text-[#B36D25] mx-auto mb-1" />
-            <p className="text-lg font-bold text-[#B36D25]">{(provider.rating || 0).toFixed(1)}</p>
-            <p className="text-xs text-[#B36D25]/80 mt-0.5">Rating</p>
+          <div className="bg-[#F5DCC8] rounded-lg p-2 text-center">
+            <Star className="w-3.5 h-3.5 text-[#B36D25] mx-auto mb-0.5" />
+            <p className="text-base font-bold text-[#B36D25]">{(provider.rating || 0).toFixed(1)}</p>
+            <p className="text-[10px] text-[#B36D25]/80 mt-0.5">Rating</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="shrink-0 px-4 py-2 border-t border-border bg-background">
-        <div className="flex gap-2">
+      <div className="shrink-0 px-4 py-1.5 border-t border-border bg-background">
+        <div className="flex gap-1.5">
           <button
             onClick={() => setActiveTab("assigned")}
-            className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
+            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
               activeTab === "assigned" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
             }`}
           >
@@ -168,7 +168,7 @@ export default function ProviderDashboard() {
           </button>
           <button
             onClick={() => setActiveTab("open")}
-            className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
+            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
               activeTab === "open" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
             }`}
           >
@@ -178,37 +178,37 @@ export default function ProviderDashboard() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3">
-        <div className="flex gap-3 pb-2 h-full">
+      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-2">
+        <div className="flex gap-2 pb-2 h-full">
           {activeTab === "assigned" && assignedJobs.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center w-full py-8">No assigned jobs</p>
+            <p className="text-xs text-muted-foreground text-center w-full py-8">No assigned jobs</p>
           )}
           {activeTab === "assigned" && assignedJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[200px] shrink-0 bg-[#C9E8D8] rounded-lg border border-[#2D7A3E]/20 p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="text-xs font-medium text-[#2D7A3E] bg-white/60 px-2 py-1 rounded-md truncate max-w-[120px]">
+            <div key={job.id} className="min-w-[180px] shrink-0 bg-[#C9E8D8] rounded-lg border border-[#2D7A3E]/20 p-2">
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-[10px] font-medium text-[#2D7A3E] bg-white/60 px-1.5 py-0.5 rounded-md truncate max-w-[100px]">
                   {job.category}
                 </span>
-                {job.emergency && <Siren className="w-3 h-3 text-[#B36D25]" />}
+                {job.emergency && <Siren className="w-2.5 h-2.5 text-[#B36D25]" />}
               </div>
-              <h3 className="font-semibold text-sm text-foreground truncate mb-1">{job.title}</h3>
+              <h3 className="font-semibold text-xs text-foreground truncate mb-1">{job.title}</h3>
               {job.location_name && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
-                  <MapPin className="w-3 h-3" /> {job.location_name}
+                <p className="text-[10px] text-muted-foreground flex items-center gap-0.5 mb-1">
+                  <MapPin className="w-2.5 h-2.5" /> {job.location_name}
                 </p>
               )}
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 {job.status === "accepted" && (
                   <Button
                     onClick={() => startJob(job)}
                     disabled={completing === job.id}
-                    className="flex-1 h-8 rounded bg-[#2D7A3E] text-xs hover:bg-[#2D7A3E]/90"
+                    className="flex-1 h-7 rounded bg-[#2D7A3E] text-[10px] hover:bg-[#2D7A3E]/90"
                   >
                     {completing === job.id ? (
-                      <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      <div className="w-2.5 h-2.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> Start
+                        <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Start
                       </>
                     )}
                   </Button>
@@ -216,46 +216,46 @@ export default function ProviderDashboard() {
                 <Button
                   onClick={() => messageCustomer(job)}
                   variant="outline"
-                  className="flex-1 h-8 rounded bg-white text-xs"
+                  className="flex-1 h-7 rounded bg-white text-[10px]"
                 >
-                  <MessageCircle className="w-3 h-3 mr-1" /> Chat
+                  <MessageCircle className="w-2.5 h-2.5 mr-0.5" /> Chat
                 </Button>
               </div>
             </div>
           ))}
 
           {activeTab === "open" && openJobs.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center w-full py-8">No open jobs</p>
+            <p className="text-xs text-muted-foreground text-center w-full py-8">No open jobs</p>
           )}
           {activeTab === "open" && openJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[200px] shrink-0 bg-card rounded-lg border border-border p-3">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="text-xs font-medium text-[#2D7A3E] bg-[#C9E8D8] px-2 py-1 rounded-md truncate max-w-[100px]">
+            <div key={job.id} className="min-w-[180px] shrink-0 bg-card rounded-lg border border-border p-2">
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-[10px] font-medium text-[#2D7A3E] bg-[#C9E8D8] px-1.5 py-0.5 rounded-md truncate max-w-[80px]">
                   {job.category}
                 </span>
-                {job.emergency && <Siren className="w-3 h-3 text-[#B36D25]" />}
+                {job.emergency && <Siren className="w-2.5 h-2.5 text-[#B36D25]" />}
               </div>
-              <h3 className="font-semibold text-sm text-foreground truncate mb-1">{job.title}</h3>
+              <h3 className="font-semibold text-xs text-foreground truncate mb-1">{job.title}</h3>
               {job.location_name && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-                  <MapPin className="w-3 h-3" /> {job.location_name}
+                <p className="text-[10px] text-muted-foreground flex items-center gap-0.5 mb-1">
+                  <MapPin className="w-2.5 h-2.5" /> {job.location_name}
                 </p>
               )}
               {job._dist != null && job._dist !== Infinity && (
                 <p
-                  className={`text-xs font-medium mb-1 ${
+                  className={`text-[10px] font-medium mb-1 ${
                     job._dist <= (provider?.service_radius_km || 10) ? "text-[#2D7A3E]" : "text-muted-foreground"
                   }`}
                 >
                   {job._dist < 1 ? `${Math.round(job._dist * 1000)}m` : `${job._dist.toFixed(1)}km`}
                 </p>
               )}
-              {job.budget != null && <p className="text-sm font-bold text-foreground mb-2">KES {job.budget}</p>}
+              {job.budget != null && <p className="text-xs font-bold text-foreground mb-1">KES {job.budget}</p>}
               <Button
                 onClick={() => setBidJob(job)}
-                className="w-full h-8 rounded bg-[#2D7A3E] text-xs hover:bg-[#2D7A3E]/90"
+                className="w-full h-7 rounded bg-[#2D7A3E] text-[10px] hover:bg-[#2D7A3E]/90"
               >
-                <Check className="w-3 h-3 mr-1" /> Offer
+                <Check className="w-2.5 h-2.5 mr-0.5" /> Offer
               </Button>
             </div>
           ))}

@@ -51,9 +51,9 @@ export default function PostJob() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto bg-background">
+    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto bg-background safe-area-inset">
       {/* Header */}
-      <header className="shrink-0 px-4 py-3 border-b border-border bg-background flex items-center justify-between">
+      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between safe-area-top">
         <h1 className="text-lg font-semibold text-foreground">Post Request</h1>
         <Button onClick={() => navigate(-1)} variant="outline" className="h-9 text-sm rounded-lg px-4">Cancel</Button>
       </header>

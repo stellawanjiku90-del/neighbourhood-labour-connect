@@ -36,9 +36,9 @@ export default function Providers() {
   }, [providers, category, loc, sort]);
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background">
+    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background safe-area-inset">
       {/* Header */}
-      <div className="shrink-0 px-4 py-3 border-b border-border bg-background">
+      <div className="shrink-0 px-4 py-2.5 border-b border-border bg-background safe-area-top">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-semibold text-foreground">Find Help</h1>
           <Sheet>
