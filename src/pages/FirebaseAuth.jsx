@@ -277,7 +277,8 @@ export default function FirebaseAuth() {
 
       if (data?.id_verified) {
         sessionStorage.setItem("pin_verified", "true");
-        navigate("/");
+        const finalRole = data?.role || role;
+        navigate(finalRole === "provider" ? "/become-provider" : "/post");
       } else {
         setError(
           "ID verification failed. The names on your ID don't match the names you provided. Please check your details and try again."

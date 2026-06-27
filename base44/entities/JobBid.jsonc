@@ -1,0 +1,45 @@
+{
+  "name": "JobBid",
+  "type": "object",
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "The ServiceRequest this bid is for"
+    },
+    "request_title": {
+      "type": "string"
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "The ServiceProvider who made the offer"
+    },
+    "provider_name": {
+      "type": "string"
+    },
+    "provider_photo": {
+      "type": "string"
+    },
+    "charge": {
+      "type": "number",
+      "description": "The amount the provider will charge"
+    },
+    "message": {
+      "type": "string",
+      "description": "Optional note from the provider to the customer"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "request_id",
+    "provider_id",
+    "charge"
+  ]
+}

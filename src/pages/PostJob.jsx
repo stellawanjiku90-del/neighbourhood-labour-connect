@@ -28,7 +28,7 @@ export default function PostJob() {
       return;
     }
     setSaving(true);
-    await base44.entities.ServiceRequest.create({
+    const created = await base44.entities.ServiceRequest.create({
       category,
       title,
       description,
@@ -39,6 +39,10 @@ export default function PostJob() {
       lng: loc?.lng,
       status: "open",
     });
+    // Notify nearby pros instantly
+    base44.functions
+      .invoke("sendJobNearbyNotifications", { data: created })
+      .catch(() => {});
     setSaving(false);
     toast({ title: "Request posted!", description: "Nearby providers are being notified." });
     navigate("/jobs");

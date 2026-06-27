@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PullToRefresh from "@/components/PullToRefresh";
+import BidDialog from "@/components/BidDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
-import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, Bell } from "lucide-react";
+import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, Bell, CheckCircle2 } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
@@ -13,18 +14,23 @@ export default function ProviderDashboard() {
   const { user } = useAuth();
   const [provider, setProvider] = useState(null);
   const [openJobs, setOpenJobs] = useState([]);
+  const [assignedJobs, setAssignedJobs] = useState([]);
   const [loadingProvider, setLoadingProvider] = useState(true);
-  const [accepting, setAccepting] = useState(null);
+  const [bidJob, setBidJob] = useState(null);
+  const [completing, setCompleting] = useState(null);
 
   const phone = user?.phone;
 
   const load = async () => {
-    const [providers, jobs] = await Promise.all([
+    const [providers, jobs, myAssigned] = await Promise.all([
       phone ? base44.entities.ServiceProvider.filter({ phone }, "-created_date", 1) : Promise.resolve([]),
       base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 50),
+      base44.entities.ServiceRequest.filter({ status: "accepted" }, "-created_date", 50),
     ]);
-    setProvider(providers[0] || null);
+    const me = providers[0] || null;
+    setProvider(me);
     setOpenJobs(jobs);
+    setAssignedJobs(me ? myAssigned.filter((j) => j.assigned_provider_id === me.id) : []);
     setLoadingProvider(false);
   };
 
@@ -40,20 +46,15 @@ export default function ProviderDashboard() {
     setProvider(updated);
   };
 
-  const acceptJob = async (job) => {
-    if (!provider) return;
-    setAccepting(job.id);
+  const completeJob = async (job) => {
+    setCompleting(job.id);
     try {
-      await base44.entities.ServiceRequest.update(job.id, {
-        status: "accepted",
-        assigned_provider_id: provider.id,
-        assigned_provider_name: provider.name,
-      });
-      setOpenJobs((prev) => prev.filter((j) => j.id !== job.id));
+      await base44.entities.ServiceRequest.update(job.id, { status: "completed" });
+      setAssignedJobs((prev) => prev.filter((j) => j.id !== job.id));
     } catch (e) {
-      // ignore — button re-enables
+      // ignore
     }
-    setAccepting(null);
+    setCompleting(null);
   };
 
   const firstName = user?.full_name?.split(" ")[0] || "there";
@@ -95,7 +96,6 @@ export default function ProviderDashboard() {
             </div>
           ) : (
             <>
-              {/* Availability toggle */}
               <button
                 onClick={toggleAvailable}
                 className="w-full flex items-center justify-between bg-white rounded-2xl border border-slate-100 p-4 mb-4"
@@ -114,7 +114,6 @@ export default function ProviderDashboard() {
                 </span>
               </button>
 
-              {/* Stats */}
               <div className="grid grid-cols-3 gap-3 md:gap-4 mb-4">
                 <div className="bg-white rounded-2xl p-3 md:p-4 border border-slate-100">
                   <Wallet className="w-5 h-5 text-[#2D7A3E] mb-1" />
@@ -131,6 +130,48 @@ export default function ProviderDashboard() {
                   <p className="text-2xl md:text-3xl font-extrabold text-[#B36D25]">{(provider.rating || 0).toFixed(1)}</p>
                   <p className="text-xs md:text-sm text-[#B36D25]/80 mt-1">Rating</p>
                 </div>
+              </div>
+            </>
+          )}
+
+          {/* Assigned to you */}
+          {provider && assignedJobs.length > 0 && (
+            <>
+              <h2 className="text-lg font-bold text-foreground mb-2 mt-2">Assigned to you</h2>
+              <div className="space-y-3 mb-4">
+                {assignedJobs.map((job) => (
+                  <div key={job.id} className="bg-[#C9E8D8] rounded-2xl border border-[#2D7A3E]/20 p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-medium text-[#2D7A3E] bg-white/60 px-2 py-0.5 rounded-full">
+                        {job.category}
+                      </span>
+                      {job.emergency && (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#B36D25] bg-[#F5DCC8] px-2 py-0.5 rounded-full">
+                          <Siren className="w-3 h-3" /> Emergency
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-foreground">{job.title}</h3>
+                    {job.location_name && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <MapPin className="w-3 h-3" /> {job.location_name}
+                      </p>
+                    )}
+                    <Button
+                      onClick={() => completeJob(job)}
+                      disabled={completing === job.id}
+                      className="w-full mt-3 h-10 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
+                    >
+                      {completing === job.id ? (
+                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 mr-1" /> Mark completed
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ))}
               </div>
             </>
           )}
@@ -166,21 +207,15 @@ export default function ProviderDashboard() {
                         </p>
                       )}
                       {job.budget != null && (
-                        <p className="text-sm font-semibold text-foreground mt-1">KES {job.budget}</p>
+                        <p className="text-sm font-semibold text-foreground mt-1">Budget: KES {job.budget}</p>
                       )}
                     </div>
                     <Button
-                      onClick={() => acceptJob(job)}
-                      disabled={!provider || accepting === job.id}
+                      onClick={() => setBidJob(job)}
+                      disabled={!provider}
                       className="rounded-xl bg-[#2D7A3E] hover:bg-[#246332] h-10 px-4 shrink-0"
                     >
-                      {accepting === job.id ? (
-                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <Check className="w-4 h-4 mr-1" /> Accept
-                        </>
-                      )}
+                      <Check className="w-4 h-4 mr-1" /> Offer
                     </Button>
                   </div>
                 </div>
@@ -189,6 +224,14 @@ export default function ProviderDashboard() {
           )}
         </div>
       </PullToRefresh>
+
+      <BidDialog
+        open={!!bidJob}
+        onOpenChange={(v) => !v && setBidJob(null)}
+        job={bidJob}
+        provider={provider}
+        onDone={load}
+      />
     </div>
   );
 }
