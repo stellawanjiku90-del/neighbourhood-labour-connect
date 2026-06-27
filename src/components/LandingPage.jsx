@@ -48,9 +48,9 @@ export default function LandingPage() {
               © {new Date().getFullYear()} Neighbourhood Labour Connect
             </p>
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[10px] md:text-xs text-muted-foreground">
-              <a href="/terms" className="hover:text-foreground">Terms</a>
-              <a href="/privacy" className="hover:text-foreground">Privacy</a>
-              <a href="/refund" className="hover:text-foreground">Refund</a>
+              <Link to="/terms" className="hover:text-foreground">Terms</Link>
+              <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link to="/refund" className="hover:text-foreground">Refund</Link>
             </div>
           </div>
         </div>
