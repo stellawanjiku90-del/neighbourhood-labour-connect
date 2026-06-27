@@ -106,7 +106,7 @@ export async function subscribeAuthState(callback) {
 
 let recaptchaVerifier = null;
 
-/** Returns a clean DOM container for the invisible reCAPTCHA widget, purging any stale rendered content. */
+/** Ensures a clean DOM container exists for the invisible reCAPTCHA widget. */
 function getRecaptchaContainer() {
   let el = document.getElementById("recaptcha-container");
   if (!el) {
@@ -115,6 +115,8 @@ function getRecaptchaContainer() {
     el.style.display = "none";
     document.body.appendChild(el);
   } else {
+    // Purge any leftover rendered content (e.g. from an interrupted
+    // lifecycle) so the verifier can always render cleanly.
     el.innerHTML = "";
   }
   return el;
@@ -124,28 +126,15 @@ function getRecaptchaContainer() {
  * Returns the singleton standard Firebase invisible RecaptchaVerifier.
  * Firebase handles token generation and verification internally.
  */
-export async function getRecaptchaVerifier(forceReset = false) {
-  if (recaptchaVerifier && !forceReset) return recaptchaVerifier;
-  if (recaptchaVerifier) {
-    try { recaptchaVerifier.clear(); } catch (__) { /* ignore */ }
-    recaptchaVerifier = null;
-  }
+export async function getRecaptchaVerifier() {
+  if (recaptchaVerifier) return recaptchaVerifier;
   const auth = await getAuthInstance();
   getRecaptchaContainer();
-  try {
-    recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier(
-      "recaptcha-container",
-      { size: "invisible" }
-    );
-    await recaptchaVerifier.render();
-  } catch (e) {
-    // On "already rendered" the host is stale — purge it and retry once.
-    try {
-      const ctr = document.getElementById("recaptcha-container");
-      if (ctr) ctr.innerHTML = "";
-    } catch (_) { /* ignore */ }
-    throw e;
-  }
+  recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier(
+    "recaptcha-container",
+    { size: "invisible" }
+  );
+  await recaptchaVerifier.render();
   return recaptchaVerifier;
 }
 
@@ -155,6 +144,8 @@ export function clearRecaptchaVerifier() {
     try { recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
   }
   recaptchaVerifier = null;
+  // Clear the container contents so a new verifier can render without
+  // "reCAPTCHA has already been rendered in this element".
   const el = document.getElementById("recaptcha-container");
   if (el) el.innerHTML = "";
 }
