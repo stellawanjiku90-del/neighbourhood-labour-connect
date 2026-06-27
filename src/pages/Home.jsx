@@ -11,6 +11,5 @@ export default function Home() {
     return <LandingPage />;
   }
 
-  const role = user?.profile?.role;
-  return role === "provider" ? <ProviderDashboard /> : <CustomerDashboard />;
+  return user.role === "provider" ? <ProviderDashboard /> : <CustomerDashboard />;
 }
