@@ -16,6 +16,9 @@ Deno.serve(async (req) => {
       id_number,
       id_photo_url,
       profile_photo_url,
+      location_name,
+      lat,
+      lng,
       verify_id,
     } = data;
 
@@ -87,6 +90,9 @@ Deno.serve(async (req) => {
       id_names_extracted,
       id_verified,
       profile_photo_url,
+      location_name,
+      lat,
+      lng,
       profile_completed: data.profile_completed !== undefined ? data.profile_completed : true,
     };
 

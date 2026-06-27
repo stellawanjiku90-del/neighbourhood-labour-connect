@@ -60,6 +60,18 @@
     "profile_photo_url": {
       "type": "string"
     },
+    "location_name": {
+      "type": "string",
+      "description": "Auto-detected human-readable location (city, country)"
+    },
+    "lat": {
+      "type": "number",
+      "description": "Auto-detected latitude"
+    },
+    "lng": {
+      "type": "number",
+      "description": "Auto-detected longitude"
+    },
     "profile_completed": {
       "type": "boolean",
       "default": false

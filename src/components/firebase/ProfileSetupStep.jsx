@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { User, Upload, Loader2, AlertCircle, CreditCard, Check, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Upload, Loader2, AlertCircle, CreditCard, Check, X, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,58 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
   const [idPhotoUrl, setIdPhotoUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [locationName, setLocationName] = useState("");
+  const [lat, setLat] = useState(null);
+  const [lng, setLng] = useState(null);
+  const [detectingLocation, setDetectingLocation] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const fallback = () => {
+      fetch("https://ipapi.co/json/")
+        .then((r) => r.json())
+        .then((d) => {
+          if (!active) return;
+          if (d.latitude && d.longitude) {
+            setLat(d.latitude);
+            setLng(d.longitude);
+            setLocationName([d.city, d.country_name].filter(Boolean).join(", "));
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (active) setDetectingLocation(false);
+        });
+    };
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          if (!active) return;
+          const { latitude, longitude } = pos.coords;
+          setLat(latitude);
+          setLng(longitude);
+          try {
+            const r = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            const d = await r.json();
+            const parts = [d.city || d.locality || d.principalSubdivision, d.countryName].filter(Boolean);
+            setLocationName(parts.join(", "));
+          } catch {
+            setLocationName(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          }
+          if (active) setDetectingLocation(false);
+        },
+        () => fallback(),
+        { timeout: 8000 }
+      );
+    } else {
+      fallback();
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleProfilePhotoChange = (e) => {
     const file = e.target.files?.[0];
@@ -65,6 +117,9 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
         id_number: idNumber,
         profile_photo_url: profileUpload.file_url,
         id_photo_url: idUpload.file_url,
+        location_name: locationName,
+        lat,
+        lng,
       });
     } catch (e) {
       setUploading(false);
@@ -80,9 +135,22 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
         <User className="w-7 h-7 text-secondary-foreground" />
       </div>
       <h1 className="text-2xl font-extrabold text-foreground mb-2">Set Up Your Profile</h1>
-      <p className="text-muted-foreground text-sm mb-6">
+      <p className="text-muted-foreground text-sm mb-4">
         Complete your profile to start using Neighbourhood Labour Connect.
       </p>
+
+      <div className="flex items-center gap-2 bg-accent/60 rounded-xl px-3 py-2.5 mb-6">
+        <MapPin className="w-4 h-4 text-accent-foreground shrink-0" />
+        {detectingLocation ? (
+          <span className="text-sm text-muted-foreground flex items-center gap-2">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Detecting your location…
+          </span>
+        ) : (
+          <span className="text-sm font-medium text-accent-foreground">
+            {locationName || "Location unavailable"}
+          </span>
+        )}
+      </div>
 
       {/* Profile Photo */}
       <div className="flex flex-col items-center mb-6">
