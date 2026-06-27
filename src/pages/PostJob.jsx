@@ -51,85 +51,85 @@ export default function PostJob() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto">
-      {/* Ultra-compact header */}
-      <header className="shrink-0 px-4 py-2 border-b border-slate-100 bg-background flex items-center justify-between">
-        <h1 className="text-base font-bold text-foreground">Post Request</h1>
-        <Button onClick={() => navigate(-1)} variant="outline" className="h-7 text-xs rounded-lg px-3">Cancel</Button>
+    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto bg-background">
+      {/* Header */}
+      <header className="shrink-0 px-4 py-3 border-b border-border bg-background flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-foreground">Post Request</h1>
+        <Button onClick={() => navigate(-1)} variant="outline" className="h-9 text-sm rounded-lg px-4">Cancel</Button>
       </header>
 
-      {/* Fixed height content - NO scroll */}
-      <div className="flex-1 min-h-0 overflow-hidden px-4 py-2 flex flex-col gap-2">
-        {/* Row 1: Category */}
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-hidden px-4 py-3 flex flex-col gap-3">
+        {/* Category */}
         <div className="shrink-0">
-          <label className="text-[10px] font-semibold">Category *</label>
-          <CategorySearch value={category} onChange={setCategory} placeholder="Search…" />
+          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Category *</label>
+          <CategorySearch value={category} onChange={setCategory} placeholder="Search service category…" />
         </div>
 
-        {/* Row 2: Title */}
+        {/* Title */}
         <div className="shrink-0">
-          <label className="text-[10px] font-semibold">Title *</label>
+          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Title *</label>
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="What do you need?"
-            className="rounded-lg h-9 text-xs"
+            placeholder="What do you need help with?"
+            className="rounded-lg h-10"
           />
         </div>
 
-        {/* Row 3: Expandable details */}
+        {/* Expandable details */}
         <div className="shrink-0">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="w-full flex items-center justify-between text-[10px] font-semibold text-muted-foreground"
+            className="w-full flex items-center justify-between text-xs font-medium text-muted-foreground py-2"
           >
             {expanded ? "Hide details" : "Add details"}
-            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {expanded && (
-            <div className="mt-1 space-y-1.5">
+            <div className="mt-2 space-y-2">
               <Textarea
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe the job…"
-                className="rounded-lg text-xs"
+                placeholder="Describe the job in detail…"
+                className="rounded-lg"
               />
               <Input
                 type="number"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
-                placeholder="Budget (optional)"
-                className="rounded-lg h-9 text-xs"
+                placeholder="Your budget (optional)"
+                className="rounded-lg h-10"
               />
             </div>
           )}
         </div>
 
-        {/* Row 4: Location - compact */}
-        <div className="shrink-0 flex-1 min-h-0 overflow-hidden">
-          <label className="text-[10px] font-semibold">Location</label>
+        {/* Location */}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Location</label>
           <div className="h-full overflow-y-auto">
             <LocationPicker value={loc} onChange={setLoc} />
           </div>
         </div>
 
-        {/* Row 5: Emergency toggle */}
-        <div className="shrink-0 flex items-center justify-between bg-[#F5DCC8] rounded-lg p-2">
-          <div className="flex items-center gap-1.5 text-[#B36D25]">
-            <Siren className="w-3 h-3" />
-            <span className="font-semibold text-[10px]">Emergency</span>
+        {/* Emergency toggle */}
+        <div className="shrink-0 flex items-center justify-between bg-[#F5DCC8] rounded-lg p-3">
+          <div className="flex items-center gap-2 text-[#B36D25]">
+            <Siren className="w-4 h-4" />
+            <span className="font-medium text-sm">Emergency request</span>
           </div>
-          <Switch checked={emergency} onCheckedChange={setEmergency} className="scale-75" />
+          <Switch checked={emergency} onCheckedChange={setEmergency} />
         </div>
 
-        {/* Row 6: Submit button */}
+        {/* Submit */}
         <Button
           onClick={submit}
           disabled={saving}
-          className="shrink-0 h-9 rounded-lg text-xs bg-[#1A1F2E] hover:bg-[#2A2F45]"
+          className="shrink-0 h-10 rounded-lg text-sm font-medium bg-primary hover:bg-primary/90"
         >
-          {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : "Post Request"}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Post Request"}
         </Button>
       </div>
     </div>

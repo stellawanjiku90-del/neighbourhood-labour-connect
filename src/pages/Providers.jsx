@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { CATEGORIES, distanceKm } from "@/lib/categories";
+import { distanceKm } from "@/lib/categories";
 import CategorySearch from "@/components/CategorySearch";
 import ProviderCard from "@/components/ProviderCard";
 import LocationPicker from "@/components/LocationPicker";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
-import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Providers() {
   const params = new URLSearchParams(useLocation().search);
@@ -20,11 +19,6 @@ export default function Providers() {
   useEffect(() => {
     base44.entities.ServiceProvider.filter({ available: true }, "-rating", 50).then(setProviders);
   }, []);
-
-  const refresh = async () => {
-    const data = await base44.entities.ServiceProvider.filter({ available: true }, "-rating", 50);
-    setProviders(data);
-  };
 
   const list = useMemo(() => {
     let items = providers
@@ -42,18 +36,18 @@ export default function Providers() {
   }, [providers, category, loc, sort]);
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-5xl mx-auto">
-      {/* Compact header */}
-      <div className="shrink-0 px-4 md:px-8 py-2.5 border-b border-slate-100 bg-background">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-lg font-extrabold text-foreground">Find Help</h1>
+    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background">
+      {/* Header */}
+      <div className="shrink-0 px-4 py-3 border-b border-border bg-background">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-lg font-semibold text-foreground">Find Help</h1>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className={`rounded-xl gap-1.5 h-8 text-xs ${loc ? "bg-[#2D7A3E] text-white border-[#2D7A3E]" : ""}`}>
-                <MapPin className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{loc ? "Custom" : "Location"}</span>
+              <Button variant="outline" className={`rounded-lg h-9 px-3 text-sm ${loc ? "bg-primary text-primary-foreground border-primary" : ""}`}>
+                <MapPin className="w-4 h-4 mr-1" /> {loc ? "Custom" : "Location"}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-3xl">
+            <SheetContent side="bottom" className="rounded-t-xl">
               <SheetHeader>
                 <SheetTitle>Search location</SheetTitle>
               </SheetHeader>
@@ -62,8 +56,8 @@ export default function Providers() {
                 {loc && (
                   <Button
                     variant="outline"
-                    onClick={() => { setLoc(null); }}
-                    className="w-full mt-3 rounded-xl h-10 text-destructive border-destructive/30 text-sm"
+                    onClick={() => setLoc(null)}
+                    className="w-full mt-3 rounded-lg h-10 text-destructive border-destructive/30"
                   >
                     Clear location
                   </Button>
@@ -75,39 +69,33 @@ export default function Providers() {
         <CategorySearch
           value={category === "All" ? "" : category}
           onChange={(v) => setCategory(v || "All")}
-          placeholder="Search category…"
+          placeholder="Search service category…"
         />
-        <div className="flex items-center justify-between mt-2 text-xs">
+        <div className="flex items-center justify-between mt-3 text-sm">
           <span className="text-muted-foreground">{list.length} providers</span>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <button
-              onClick={() => setSort("distance")}
-              className={sort === "distance" ? "font-semibold text-[#2D7A3E]" : ""}
-            >
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <button onClick={() => setSort("distance")} className={sort === "distance" ? "font-semibold text-foreground" : ""}>
               Nearest
             </button>
             <span>·</span>
-            <button
-              onClick={() => setSort("rating")}
-              className={sort === "rating" ? "font-semibold text-[#2D7A3E]" : ""}
-            >
+            <button onClick={() => setSort("rating")} className={sort === "rating" ? "font-semibold text-foreground" : ""}>
               Top rated
             </button>
           </div>
         </div>
       </div>
 
-      {/* Horizontal scroll only - NO vertical scroll */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-2">
-        <div className="flex gap-2 pb-1 h-full">
+      {/* Horizontal scroll */}
+      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3">
+        <div className="flex gap-3 pb-2 h-full">
           {list.map((p) => (
-            <div key={p.id} className="min-w-[200px] shrink-0">
+            <div key={p.id} className="min-w-[180px] shrink-0">
               <ProviderCard provider={p} distance={p._dist} compact />
             </div>
           ))}
         </div>
         {list.length === 0 && (
-          <p className="text-muted-foreground text-xs text-center py-4">No providers found</p>
+          <p className="text-sm text-muted-foreground text-center py-8">No providers found</p>
         )}
       </div>
     </div>

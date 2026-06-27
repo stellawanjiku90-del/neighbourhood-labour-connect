@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import PullToRefresh from "@/components/PullToRefresh";
 import BidDialog from "@/components/BidDialog";
 import { getOrCreateConversation } from "@/lib/chat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
-import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, Bell, CheckCircle2, MessageCircle, ListFilter } from "lucide-react";
+import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, CheckCircle2, MessageCircle } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
@@ -105,10 +104,10 @@ export default function ProviderDashboard() {
   if (!provider) {
     return (
       <div className="h-[100dvh] flex flex-col items-center justify-center px-8">
-        <Wrench className="w-10 h-10 text-[#2D7A3E] mb-3" />
-        <h2 className="text-lg font-bold text-foreground mb-1">Become a Provider</h2>
-        <p className="text-xs text-muted-foreground mb-4 text-center">Create your profile to receive jobs</p>
-        <Button onClick={() => navigate("/become-provider")} className="rounded-xl bg-[#2D7A3E] h-10 px-6">
+        <Wrench className="w-12 h-12 text-[#2D7A3E] mb-3" />
+        <h2 className="text-xl font-bold text-foreground mb-1">Become a Provider</h2>
+        <p className="text-sm text-muted-foreground mb-4 text-center">Create your profile to receive jobs</p>
+        <Button onClick={() => navigate("/become-provider")} className="rounded-lg bg-[#2D7A3E] h-10 px-6">
           Get Started
         </Button>
       </div>
@@ -116,124 +115,147 @@ export default function ProviderDashboard() {
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden">
-      {/* Ultra-compact header */}
-      <header className="shrink-0 px-4 py-2 border-b border-slate-100 bg-background">
+    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background">
+      {/* Header */}
+      <header className="shrink-0 px-4 py-3 border-b border-border bg-background">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={LOGO_URL} alt="Logo" className="w-6 h-6 rounded-full" />
-            <h1 className="text-base font-bold text-foreground">{firstName}</h1>
+          <div className="flex items-center gap-2.5">
+            <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />
+            <h1 className="text-lg font-semibold text-foreground">{firstName}</h1>
           </div>
           <button
             onClick={toggleAvailable}
-            className={`text-xs font-semibold px-2.5 py-1 rounded-md ${provider.available ? "bg-[#C9E8D8] text-[#2D7A3E]" : "bg-slate-100 text-muted-foreground"}`}
+            className={`text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+              provider.available ? "bg-[#C9E8D8] text-[#2D7A3E]" : "bg-muted text-muted-foreground"
+            }`}
           >
             {provider.available ? "Available" : "Unavailable"}
           </button>
         </div>
       </header>
 
-      {/* Stats row */}
-      <div className="shrink-0 px-4 py-2 bg-background">
-        <div className="grid grid-cols-3 gap-1.5">
-          <div className="bg-white rounded-lg p-2 border border-slate-100 text-center">
-            <Wallet className="w-3 h-3 text-[#2D7A3E] mx-auto mb-0.5" />
-            <p className="text-base font-bold text-foreground">{provider.earnings || 0}</p>
-            <p className="text-[9px] text-muted-foreground">KES</p>
+      {/* Stats */}
+      <div className="shrink-0 px-4 py-3 bg-background">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-card rounded-lg p-3 border border-border text-center">
+            <Wallet className="w-4 h-4 text-[#2D7A3E] mx-auto mb-1" />
+            <p className="text-lg font-bold text-foreground">{provider.earnings || 0}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">KES</p>
           </div>
-          <div className="bg-[#C9E8D8] rounded-lg p-2 text-center">
-            <Briefcase className="w-3 h-3 text-[#2D7A3E] mx-auto mb-0.5" />
-            <p className="text-base font-bold text-[#2D7A3E]">{provider.completed_jobs || 0}</p>
-            <p className="text-[9px] text-[#2D7A3E]/80">Jobs</p>
+          <div className="bg-[#C9E8D8] rounded-lg p-3 text-center">
+            <Briefcase className="w-4 h-4 text-[#2D7A3E] mx-auto mb-1" />
+            <p className="text-lg font-bold text-[#2D7A3E]">{provider.completed_jobs || 0}</p>
+            <p className="text-xs text-[#2D7A3E]/80 mt-0.5">Jobs</p>
           </div>
-          <div className="bg-[#F5DCC8] rounded-lg p-2 text-center">
-            <Star className="w-3 h-3 text-[#B36D25] mx-auto mb-0.5" />
-            <p className="text-base font-bold text-[#B36D25]">{(provider.rating || 0).toFixed(1)}</p>
-            <p className="text-[9px] text-[#B36D25]/80">Rating</p>
+          <div className="bg-[#F5DCC8] rounded-lg p-3 text-center">
+            <Star className="w-4 h-4 text-[#B36D25] mx-auto mb-1" />
+            <p className="text-lg font-bold text-[#B36D25]">{(provider.rating || 0).toFixed(1)}</p>
+            <p className="text-xs text-[#B36D25]/80 mt-0.5">Rating</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="shrink-0 px-4 py-1.5 border-t border-b border-slate-100 bg-background">
-        <div className="flex gap-1">
+      <div className="shrink-0 px-4 py-2 border-t border-border bg-background">
+        <div className="flex gap-2">
           <button
             onClick={() => setActiveTab("assigned")}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md ${activeTab === "assigned" ? "bg-[#C9E8D8] text-[#2D7A3E]" : "text-muted-foreground"}`}
+            className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
+              activeTab === "assigned" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
+            }`}
           >
             Assigned ({assignedJobs.length})
           </button>
           <button
             onClick={() => setActiveTab("open")}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md ${activeTab === "open" ? "bg-[#C9E8D8] text-[#2D7A3E]" : "text-muted-foreground"}`}
+            className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
+              activeTab === "open" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
+            }`}
           >
             Open ({openJobs.length})
           </button>
         </div>
       </div>
 
-      {/* Content - horizontal scroll only, no vertical */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-2">
-        <div className="flex gap-1.5 pb-1 h-full">
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3">
+        <div className="flex gap-3 pb-2 h-full">
           {activeTab === "assigned" && assignedJobs.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center w-full py-4">No assigned jobs</p>
+            <p className="text-sm text-muted-foreground text-center w-full py-8">No assigned jobs</p>
           )}
           {activeTab === "assigned" && assignedJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[180px] shrink-0 bg-[#C9E8D8] rounded-lg border border-[#2D7A3E]/20 p-2">
-              <div className="flex items-center gap-1 mb-1">
-                <span className="text-[9px] font-medium text-[#2D7A3E] bg-white/60 px-1 py-0.5 rounded-full truncate max-w-[120px]">
+            <div key={job.id} className="min-w-[200px] shrink-0 bg-[#C9E8D8] rounded-lg border border-[#2D7A3E]/20 p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-xs font-medium text-[#2D7A3E] bg-white/60 px-2 py-1 rounded-md truncate max-w-[120px]">
                   {job.category}
                 </span>
-                {job.emergency && <Siren className="w-2.5 h-2.5 text-[#B36D25]" />}
+                {job.emergency && <Siren className="w-3 h-3 text-[#B36D25]" />}
               </div>
-              <h3 className="font-semibold text-xs text-foreground truncate">{job.title}</h3>
+              <h3 className="font-semibold text-sm text-foreground truncate mb-1">{job.title}</h3>
               {job.location_name && (
-                <p className="text-[9px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
-                  <MapPin className="w-2.5 h-2.5" /> {job.location_name}
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
+                  <MapPin className="w-3 h-3" /> {job.location_name}
                 </p>
               )}
-              <div className="flex gap-1 mt-1.5">
+              <div className="flex gap-2">
                 {job.status === "accepted" && (
                   <Button
                     onClick={() => startJob(job)}
                     disabled={completing === job.id}
-                    className="flex-1 h-6 rounded bg-[#2D7A3E] text-[10px]"
+                    className="flex-1 h-8 rounded bg-[#2D7A3E] text-xs hover:bg-[#2D7A3E]/90"
                   >
-                    {completing === job.id ? <div className="w-2.5 h-2.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <><CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Start</>}
+                    {completing === job.id ? (
+                      <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-3 h-3 mr-1" /> Start
+                      </>
+                    )}
                   </Button>
                 )}
-                <Button onClick={() => messageCustomer(job)} variant="outline" className="flex-1 h-6 rounded bg-white text-[10px]">
-                  <MessageCircle className="w-2.5 h-2.5 mr-0.5" /> Chat
+                <Button
+                  onClick={() => messageCustomer(job)}
+                  variant="outline"
+                  className="flex-1 h-8 rounded bg-white text-xs"
+                >
+                  <MessageCircle className="w-3 h-3 mr-1" /> Chat
                 </Button>
               </div>
             </div>
           ))}
 
           {activeTab === "open" && openJobs.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center w-full py-4">No open jobs</p>
+            <p className="text-sm text-muted-foreground text-center w-full py-8">No open jobs</p>
           )}
           {activeTab === "open" && openJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[180px] shrink-0 bg-white rounded-lg border border-slate-100 p-2">
-              <div className="flex items-center gap-1 mb-0.5">
-                <span className="text-[9px] font-medium text-[#2D7A3E] bg-[#C9E8D8] px-1 py-0.5 rounded-full truncate max-w-[100px]">
+            <div key={job.id} className="min-w-[200px] shrink-0 bg-card rounded-lg border border-border p-3">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-xs font-medium text-[#2D7A3E] bg-[#C9E8D8] px-2 py-1 rounded-md truncate max-w-[100px]">
                   {job.category}
                 </span>
-                {job.emergency && <Siren className="w-2.5 h-2.5 text-[#B36D25]" />}
+                {job.emergency && <Siren className="w-3 h-3 text-[#B36D25]" />}
               </div>
-              <h3 className="font-semibold text-xs text-foreground truncate">{job.title}</h3>
+              <h3 className="font-semibold text-sm text-foreground truncate mb-1">{job.title}</h3>
               {job.location_name && (
-                <p className="text-[9px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
-                  <MapPin className="w-2.5 h-2.5" /> {job.location_name}
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                  <MapPin className="w-3 h-3" /> {job.location_name}
                 </p>
               )}
               {job._dist != null && job._dist !== Infinity && (
-                <p className={`text-[9px] font-medium mt-0.5 ${job._dist <= (provider?.service_radius_km || 10) ? "text-[#2D7A3E]" : "text-muted-foreground"}`}>
+                <p
+                  className={`text-xs font-medium mb-1 ${
+                    job._dist <= (provider?.service_radius_km || 10) ? "text-[#2D7A3E]" : "text-muted-foreground"
+                  }`}
+                >
                   {job._dist < 1 ? `${Math.round(job._dist * 1000)}m` : `${job._dist.toFixed(1)}km`}
                 </p>
               )}
-              {job.budget != null && <p className="text-[10px] font-bold text-foreground mt-0.5">KES {job.budget}</p>}
-              <Button onClick={() => setBidJob(job)} className="w-full h-6 rounded bg-[#2D7A3E] mt-1 text-[10px]">
-                <Check className="w-2.5 h-2.5 mr-0.5" /> Offer
+              {job.budget != null && <p className="text-sm font-bold text-foreground mb-2">KES {job.budget}</p>}
+              <Button
+                onClick={() => setBidJob(job)}
+                className="w-full h-8 rounded bg-[#2D7A3E] text-xs hover:bg-[#2D7A3E]/90"
+              >
+                <Check className="w-3 h-3 mr-1" /> Offer
               </Button>
             </div>
           ))}
