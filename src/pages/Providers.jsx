@@ -48,8 +48,8 @@ export default function Providers() {
         <h1 className="text-2xl font-extrabold text-foreground">Find Help</h1>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" className="rounded-2xl gap-2">
-              <MapPin className="w-4 h-4" /> Location
+            <Button variant="outline" className={`rounded-2xl gap-2 ${loc ? "bg-[#2D7A3E] text-white border-[#2D7A3E]" : ""}`}>
+              <MapPin className="w-4 h-4" /> {loc ? "Custom" : "Location"}
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="rounded-t-3xl">
@@ -58,6 +58,15 @@ export default function Providers() {
             </SheetHeader>
             <div className="py-4">
               <LocationPicker value={loc} onChange={setLoc} />
+              {loc && (
+                <Button
+                  variant="outline"
+                  onClick={() => { setLoc(null); }}
+                  className="w-full mt-3 rounded-2xl h-11 text-destructive border-destructive/30"
+                >
+                  Clear location — show all providers
+                </Button>
+              )}
             </div>
           </SheetContent>
         </Sheet>
