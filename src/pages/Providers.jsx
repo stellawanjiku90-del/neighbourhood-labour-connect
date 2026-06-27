@@ -97,17 +97,19 @@ export default function Providers() {
         </div>
       </div>
 
-      {/* Scrollable grid */}
-      <PullToRefresh onRefresh={refresh} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pr-0.5">
+      {/* Horizontal scroll only - NO vertical scroll */}
+      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-2">
+        <div className="flex gap-2 pb-1 h-full">
           {list.map((p) => (
-            <ProviderCard key={p.id} provider={p} distance={p._dist} />
+            <div key={p.id} className="min-w-[200px] shrink-0">
+              <ProviderCard provider={p} distance={p._dist} compact />
+            </div>
           ))}
         </div>
         {list.length === 0 && (
-          <p className="text-muted-foreground text-xs mt-6 text-center">No providers found</p>
+          <p className="text-muted-foreground text-xs text-center py-4">No providers found</p>
         )}
-      </PullToRefresh>
+      </div>
     </div>
   );
 }
