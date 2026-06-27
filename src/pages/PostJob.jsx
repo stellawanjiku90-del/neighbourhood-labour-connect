@@ -94,7 +94,8 @@ export default function PostJob() {
         </div>
 
         <div>
-          <label className="text-sm font-semibold">Location</label>
+          <label className="text-sm font-semibold">Where do you need the service?</label>
+          <p className="text-xs text-muted-foreground mb-1.5">Search any area or use your current location. Nearby pros (within 10 km) are notified first.</p>
           <div className="mt-1.5">
             <LocationPicker value={loc} onChange={setLoc} />
           </div>

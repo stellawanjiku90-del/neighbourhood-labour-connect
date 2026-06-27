@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Phone, Loader2, AlertCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { COUNTRY_OPTIONS, DEFAULT_COUNTRY, getCountryByCode } from "@/lib/countries";
+import { COUNTRY_OPTIONS, DEFAULT_COUNTRY, getCountryByCode, placeholderForCountry, formatLocalNumber } from "@/lib/countries";
 
 export default function PhoneStep({ phone, setPhone, onSendCode, loading, error }) {
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
@@ -28,8 +28,13 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
   }, []);
 
   useEffect(() => {
-    setPhone("+" + country.dial + localNumber.replace(/\s/g, ""));
+    setPhone("+" + country.dial + localNumber.replace(/\D/g, ""));
   }, [country, localNumber, setPhone]);
+
+  // Re-format the local number when the country changes (different length/grouping)
+  useEffect(() => {
+    setLocalNumber((prev) => formatLocalNumber(prev, country.length));
+  }, [country, setLocalNumber]);
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
@@ -56,12 +61,13 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
         </select>
         <Input
           type="tel"
+          inputMode="numeric"
           value={localNumber}
-          onChange={(e) => setLocalNumber(e.target.value)}
-          placeholder="712 345 678"
+          onChange={(e) => setLocalNumber(formatLocalNumber(e.target.value, country.length))}
+          placeholder={placeholderForCountry(country)}
           className="h-12 rounded-xl text-base flex-1"
           disabled={loading}
-          onKeyDown={(e) => e.key === "Enter" && !loading && localNumber && onSendCode()}
+          onKeyDown={(e) => e.key === "Enter" && !loading && localNumber.replace(/\D/g, "").length >= country.length && onSendCode()}
         />
       </div>
       {detecting && (
@@ -77,7 +83,7 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
       )}
       <Button
         onClick={onSendCode}
-        disabled={loading || localNumber.length < 6}
+        disabled={loading || localNumber.replace(/\D/g, "").length < country.length}
         className="w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
       >
         {loading ? (
