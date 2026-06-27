@@ -106,17 +106,22 @@ export async function subscribeAuthState(callback) {
 
 let recaptchaVerifier = null;
 
-/** Returns a clean DOM container for the invisible reCAPTCHA widget, purging any stale rendered content. */
+/**
+ * Returns a brand-new hidden container element, replacing any
+ * previous one. This destroys any stale reCAPTCHA DOM bindings
+ * that `innerHTML = ""` cannot clear, guaranteeing a clean host for
+ * RecaptchaVerifier.
+ */
 function getRecaptchaContainer() {
-  let el = document.getElementById("recaptcha-container");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "recaptcha-container";
-    el.style.display = "none";
-    document.body.appendChild(el);
-  } else {
-    el.innerHTML = "";
-  }
+  // Remove the old element (and any invisible iframe + grecaptcha
+  // binding attached to it) entirely.
+  const old = document.getElementById("recaptcha-container");
+  if (old) old.remove();
+
+  const el = document.createElement("div");
+  el.id = "recaptcha-container";
+  el.style.display = "none";
+  document.body.appendChild(el);
   return el;
 }
 
@@ -139,11 +144,9 @@ export async function getRecaptchaVerifier(forceReset = false) {
     );
     await recaptchaVerifier.render();
   } catch (e) {
-    // On "already rendered" the host is stale — purge it and retry once.
-    try {
-      const ctr = document.getElementById("recaptcha-container");
-      if (ctr) ctr.innerHTML = "";
-    } catch (_) { /* ignore */ }
+    // On "already rendered" the host has a stale bindings the SDK
+    // won't overwrite — nuke and recreate the element entirely.
+    try { document.getElementById("recaptcha-container")?.remove(); } catch (_) { /* ignore */ }
     throw e;
   }
   return recaptchaVerifier;
