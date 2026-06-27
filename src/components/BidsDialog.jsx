@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Star, Loader2, CheckCircle2 } from "lucide-react";
+import { Star, Loader2, CheckCircle2, MessageCircle } from "lucide-react";
 import { getOrCreateConversation } from "@/lib/chat";
 
 export default function BidsDialog({ open, onOpenChange, job, onDone }) {
@@ -16,6 +18,8 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
   const [providers, setProviders] = useState({});
   const [loading, setLoading] = useState(false);
   const [assigning, setAssigning] = useState(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const load = async () => {
     if (!job) return;
@@ -70,6 +74,19 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
       // ignore
     }
     setAssigning(null);
+  };
+
+  const message = async (bid) => {
+    const p = providers[bid.provider_id];
+    const convo = await getOrCreateConversation({
+      providerId: bid.provider_id,
+      providerName: bid.provider_name,
+      providerPhoto: p?.photo_url,
+      customerId: user?.id,
+      customerName: user?.full_name,
+    });
+    onOpenChange(false);
+    navigate(`/chat/${convo.id}`);
   };
 
   const sorted = [...bids].sort((a, b) => {
@@ -132,21 +149,30 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
                   {bid.message && (
                     <p className="text-sm text-muted-foreground mt-2">{bid.message}</p>
                   )}
-                  <Button
-                    onClick={() => assign(bid)}
-                    disabled={assigning === bid.id}
-                    className="w-full mt-3 h-10 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
-                  >
-                    {assigning === bid.id ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Assigning…
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 mr-1" /> Assign this pro
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      onClick={() => message(bid)}
+                      variant="outline"
+                      className="flex-1 h-10 rounded-xl bg-white"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-1" /> Message
+                    </Button>
+                    <Button
+                      onClick={() => assign(bid)}
+                      disabled={assigning === bid.id}
+                      className="flex-1 h-10 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
+                    >
+                      {assigning === bid.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Assigning…
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 mr-1" /> Assign
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               );
             })}
