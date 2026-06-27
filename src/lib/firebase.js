@@ -89,138 +89,67 @@ export async function subscribeAuthState(callback) {
   return auth.onAuthStateChanged(callback);
 }
 
-// ─── reCAPTCHA Enterprise ─────────────────────────────────────────
-// Uses Google reCAPTCHA Enterprise (invisible, score-based) instead of
-// the standard Firebase RecaptchaVerifier. The enterprise script is
-// loaded in index.html. A custom verifier object implements Firebase's
-// ApplicationVerifier interface (type + verify) so signInWithPhoneNumber
-// can use the Enterprise token directly — no DOM container needed.
+// ─── reCAPTCHA (standard Firebase invisible verifier) ─────────────
+// Uses Firebase Authentication's built-in invisible RecaptchaVerifier.
+// Firebase automatically uses whatever reCAPTCHA integration is
+// configured in the Firebase Authentication console (Identity
+// Platform) — no manual site keys or enterprise.js loading required.
+// A single hidden container element is reused throughout the flow.
 
-let enterpriseVerifier = null;
-let enterpriseReadyPromise = null;
+let recaptchaVerifier = null;
 
-function loadRecaptchaEnterpriseScript(siteKey) {
-  return new Promise((resolve, reject) => {
-    if (window.grecaptcha?.enterprise) return resolve();
-    const existing = document.querySelector('script[src*="recaptcha/enterprise.js"]');
-    if (existing) existing.remove();
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/enterprise.js?render=${siteKey}`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load reCAPTCHA Enterprise script."));
-    document.head.appendChild(script);
-  });
-}
-
-/** Waits for grecaptcha.enterprise to be available on window. */
-function waitForGrecaptcha() {
-  return new Promise((resolve, reject) => {
-    if (window.grecaptcha?.enterprise) return resolve();
-    let tries = 0;
-    const interval = setInterval(() => {
-      tries++;
-      if (window.grecaptcha?.enterprise) {
-        clearInterval(interval);
-        resolve();
-      } else if (tries > 50) {
-        clearInterval(interval);
-        reject(new Error("reCAPTCHA Enterprise failed to load."));
-      }
-    }, 100);
-  });
+/** Ensures a DOM container exists for the invisible reCAPTCHA widget. */
+function getRecaptchaContainer() {
+  let el = document.getElementById("recaptcha-container");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "recaptcha-container";
+    el.style.display = "none";
+    document.body.appendChild(el);
+  }
+  return el;
 }
 
 /**
- * Returns the singleton Enterprise reCAPTCHA verifier — a plain object
- * implementing Firebase's ApplicationVerifier interface (type, verify,
- * render, clear). Compatible with auth.signInWithPhoneNumber().
+ * Returns the singleton standard Firebase invisible RecaptchaVerifier.
+ * Firebase handles token generation and verification internally.
  */
 export async function getRecaptchaVerifier() {
-  if (enterpriseVerifier) return enterpriseVerifier;
-  if (enterpriseReadyPromise) {
-    await enterpriseReadyPromise;
-    return enterpriseVerifier;
-  }
-  enterpriseReadyPromise = (async () => {
-    await initFirebase();
-    let siteKey = firebaseConfig?.recaptchaEnterpriseSiteKey;
-    if (!siteKey) {
-      // Fallback: fetch config fresh in case the cached config predates the secret.
-      const { data } = await base44.functions.invoke("getFirebaseConfig");
-      firebaseConfig = { ...firebaseConfig, ...data };
-      siteKey = firebaseConfig?.recaptchaEnterpriseSiteKey;
-    }
-    if (!siteKey) {
-      throw new Error("reCAPTCHA Enterprise site key is not configured. Set RECAPTCHA_ENTERPRISE_SITE_KEY in app secrets.");
-    }
-    await loadRecaptchaEnterpriseScript(siteKey);
-    await waitForGrecaptcha();
-    const verifier = {
-      type: "recaptcha",
-      async verify() {
-        await waitForGrecaptcha();
-        return new Promise((resolve, reject) => {
-          window.grecaptcha.enterprise.ready(async () => {
-            try {
-              const token = await window.grecaptcha.enterprise.execute(
-                firebaseConfig.recaptchaEnterpriseSiteKey,
-                { action: "LOGIN" }
-              );
-              console.log("[Firebase] reCAPTCHA Enterprise token:", token ? "✓" : "✗");
-              resolve(token);
-            } catch (err) {
-              console.error("[Firebase] reCAPTCHA Enterprise error:", err);
-              reject(err);
-            }
-          });
-        });
-      },
-      async render() {
-        return 1; // Enterprise is invisible — no widget to render
-      },
-      clear() {
-        // No-op — enterprise tokens are single-use, no widget to destroy
-      },
-      _reset() {
-        // No-op — called by Firebase compat SDK after each verification.
-        // Enterprise tokens are single-use; nothing to reset.
-      },
-    };
-    console.log("[Firebase] reCAPTCHA Enterprise verifier ready");
-    return verifier;
-  })();
-  try {
-    enterpriseVerifier = await enterpriseReadyPromise;
-    return enterpriseVerifier;
-  } catch (err) {
-    console.error("[Firebase] reCAPTCHA Enterprise setup failed:", err);
-    enterpriseVerifier = null;
-    throw err;
-  } finally {
-    enterpriseReadyPromise = null;
-  }
+  if (recaptchaVerifier) return recaptchaVerifier;
+  const auth = await getAuthInstance();
+  getRecaptchaContainer();
+  recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier(
+    "recaptcha-container",
+    { size: "invisible" },
+    auth
+  );
+  await recaptchaVerifier.render();
+  return recaptchaVerifier;
 }
 
-/** Resets the Enterprise verifier singleton (no widget to destroy). */
+/** Destroys the reCAPTCHA verifier singleton so a fresh one is created next time. */
 export function clearRecaptchaVerifier() {
-  if (enterpriseVerifier?.clear) {
-    try { enterpriseVerifier.clear(); } catch (e) { /* ignore */ }
+  if (recaptchaVerifier) {
+    try { recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
   }
-  enterpriseVerifier = null;
-  enterpriseReadyPromise = null;
+  recaptchaVerifier = null;
 }
 
 /**
  * Sends an SMS verification code to the given phone number using
- * reCAPTCHA Enterprise for bot protection.
+ * Firebase's standard invisible reCAPTCHA verifier.
  */
 export async function sendPhoneCode(phone) {
   const auth = await getAuthInstance();
   const verifier = await getRecaptchaVerifier();
   console.log("[Firebase] Sending SMS to", phone);
-  return auth.signInWithPhoneNumber(phone, verifier);
+  try {
+    return await auth.signInWithPhoneNumber(phone, verifier);
+  } catch (err) {
+    // A failed attempt consumes the verifier — reset so the next try works.
+    clearRecaptchaVerifier();
+    throw err;
+  }
 }
 
 /** Signs out the current Firebase user and clears the reCAPTCHA verifier. */

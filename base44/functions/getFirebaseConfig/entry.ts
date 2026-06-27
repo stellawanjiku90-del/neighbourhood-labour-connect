@@ -7,7 +7,6 @@ Deno.serve(async (req) => {
       messagingSenderId: Deno.env.get("FIREBASE_MESSAGING_SENDER_ID"),
       appId: Deno.env.get("FIREBASE_APP_ID"),
       vapidKey: Deno.env.get("FIREBASE_VAPID_KEY"),
-      recaptchaEnterpriseSiteKey: Deno.env.get("RECAPTCHA_ENTERPRISE_SITE_KEY"),
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
