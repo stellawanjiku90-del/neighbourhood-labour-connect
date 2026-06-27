@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { User, Upload, Loader2, AlertCircle, CreditCard, Check, X, MapPin } from "lucide-react";
+import { User, Upload, Loader2, AlertCircle, CreditCard, Check, X, MapPin, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -131,6 +132,9 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
+      <Link to="/firebase-auth" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <ArrowLeft className="w-4 h-4" /> Back
+      </Link>
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
         <User className="w-7 h-7 text-secondary-foreground" />
       </div>

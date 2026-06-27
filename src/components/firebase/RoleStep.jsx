@@ -1,3 +1,6 @@
+import { ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+
 const OPTIONS = [
   {
     value: "customer",
@@ -14,6 +17,9 @@ const OPTIONS = [
 export default function RoleStep({ onSelect, loading }) {
   return (
     <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
+      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <ArrowLeft className="w-4 h-4" /> Back
+      </Link>
       <h1 className="text-2xl font-extrabold text-foreground mb-6">
         How will you use NLC?
       </h1>

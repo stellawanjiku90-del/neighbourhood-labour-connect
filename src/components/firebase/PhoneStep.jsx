@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Phone, Loader2, AlertCircle, MapPin } from "lucide-react";
+import { Phone, Loader2, AlertCircle, MapPin, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 import { COUNTRY_OPTIONS, DEFAULT_COUNTRY, getCountryByCode, placeholderForCountry, formatLocalNumber } from "@/lib/countries";
 
 export default function PhoneStep({ phone, setPhone, onSendCode, loading, error }) {
@@ -38,6 +39,9 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
+      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <ArrowLeft className="w-4 h-4" /> Back
+      </Link>
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
         <Phone className="w-7 h-7 text-secondary-foreground" />
       </div>
