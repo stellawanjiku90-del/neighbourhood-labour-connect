@@ -50,6 +50,11 @@ export default function FirebaseAuth() {
           const profile = data?.profile;
           setUserProfile(profile);
 
+          // Restore the saved role so re-login detects the original registration role
+          if (profile?.role) {
+            setRole(profile.role);
+          }
+
           if (profile?.profile_completed && profile?.pin_hash) {
             if (sessionStorage.getItem("pin_verified") === "true") {
               navigate("/");
