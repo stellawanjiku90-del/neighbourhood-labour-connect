@@ -145,7 +145,13 @@ export async function getRecaptchaVerifier() {
   }
   enterpriseReadyPromise = (async () => {
     await initFirebase();
-    const siteKey = firebaseConfig?.recaptchaEnterpriseSiteKey;
+    let siteKey = firebaseConfig?.recaptchaEnterpriseSiteKey;
+    if (!siteKey) {
+      // Fallback: fetch config fresh in case the cached config predates the secret.
+      const { data } = await base44.functions.invoke("getFirebaseConfig");
+      firebaseConfig = { ...firebaseConfig, ...data };
+      siteKey = firebaseConfig?.recaptchaEnterpriseSiteKey;
+    }
     if (!siteKey) {
       throw new Error("reCAPTCHA Enterprise site key is not configured. Set RECAPTCHA_ENTERPRISE_SITE_KEY in app secrets.");
     }
