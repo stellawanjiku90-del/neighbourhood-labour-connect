@@ -38,79 +38,78 @@ export default function CustomerDashboard() {
   const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="h-full flex flex-col">
-      <PullToRefresh onRefresh={refresh} className="px-4 md:px-8">
-        <div className="max-w-5xl mx-auto py-4 md:py-6">
-          <div className="flex items-center gap-2 mb-4 md:hidden">
-            <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-8 h-8 rounded-full object-cover" />
-            <span className="font-extrabold text-foreground">Neighbourhood Labour Connect</span>
-          </div>
-
-          <header className="mb-4">
-            <p className="text-muted-foreground text-sm">{greet},</p>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">{firstName} 👋</h1>
-            <div className="flex gap-3 mt-3">
-              <Button
-                onClick={() => navigate("/post")}
-                className="rounded-2xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-12 px-5"
-              >
-                <Plus className="w-5 h-5 mr-1" /> Post a Job
-              </Button>
-              <Button
-                onClick={() => navigate("/providers")}
-                variant="outline"
-                className="rounded-2xl h-12 px-5"
-              >
-                Find Help
-              </Button>
+    <div className="h-[100dvh] flex flex-col overflow-hidden">
+      {/* Header - compact */}
+      <header className="shrink-0 px-4 md:px-8 py-3 border-b border-slate-100 bg-background">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-full object-cover md:hidden" />
+            <div>
+              <p className="text-xs text-muted-foreground">{greet}</p>
+              <h1 className="text-lg font-extrabold text-foreground">{firstName} 👋</h1>
             </div>
-          </header>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/post")} className="rounded-xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-9 px-3 text-xs">
+              <Plus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Post</span>
+            </Button>
+            <Button onClick={() => navigate("/providers")} variant="outline" className="rounded-xl h-9 px-3 text-xs">
+              <span className="hidden sm:inline">Find Help</span><span className="sm:hidden">Browse</span>
+            </Button>
+          </div>
+        </div>
+      </header>
 
+      {/* Scrollable content area */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-3">
+        <div className="max-w-5xl mx-auto space-y-3">
           <PushNotificationEnabler />
 
-          <div className="grid grid-cols-3 gap-3 md:gap-4 mb-4">
-            <div className="bg-white rounded-2xl p-3 md:p-4 border border-slate-100">
-              <p className="text-3xl md:text-4xl font-extrabold text-foreground">{top.length}</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">Ready to help</p>
+          {/* Stats - compact */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-white rounded-xl p-2.5 border border-slate-100">
+              <p className="text-2xl font-extrabold text-foreground">{top.length}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Providers</p>
             </div>
-            <div className="bg-[#C9E8D8] rounded-2xl p-3 md:p-4">
-              <p className="text-3xl md:text-4xl font-extrabold text-[#2D7A3E]">{openJobs}</p>
-              <p className="text-xs md:text-sm text-[#2D7A3E]/80 mt-1">Open jobs</p>
+            <div className="bg-[#C9E8D8] rounded-xl p-2.5">
+              <p className="text-2xl font-extrabold text-[#2D7A3E]">{openJobs}</p>
+              <p className="text-[10px] text-[#2D7A3E]/80 mt-0.5">Open jobs</p>
             </div>
-            <Link
-              to="/post?emergency=1"
-              className="bg-[#F5DCC8] rounded-2xl p-3 md:p-4 flex flex-col justify-between hover:shadow-md transition"
-            >
-              <Siren className="w-6 h-6 text-[#B36D25]" />
-              <p className="text-xs md:text-sm font-semibold text-[#B36D25] mt-2">Emergency</p>
+            <Link to="/post?emergency=1" className="bg-[#F5DCC8] rounded-xl p-2.5 flex flex-col justify-center">
+              <Siren className="w-4 h-4 text-[#B36D25] mb-1" />
+              <p className="text-[10px] font-semibold text-[#B36D25]">Emergency</p>
             </Link>
           </div>
 
-          <div className="mb-4">
-            <h2 className="text-lg font-bold text-foreground mb-2">Find a service</h2>
+          {/* Search */}
+          <div>
+            <p className="text-xs font-semibold mb-1.5">Find a service</p>
             <CategorySearch
               value=""
               onChange={(v) => v && navigate(`/providers?category=${encodeURIComponent(v)}`)}
-              placeholder="Search for a service category…"
+              placeholder="Search category…"
             />
           </div>
 
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-[#2D7A3E]" />
-            <h2 className="text-lg font-bold text-foreground">Top rated near you</h2>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
-            {top.map((p) => (
-              <div key={p.id} className="min-w-[78%] sm:min-w-[260px] snap-start shrink-0">
-                <ProviderCard provider={p} />
-              </div>
-            ))}
-            {top.length === 0 && (
-              <p className="text-muted-foreground text-sm">No providers available yet.</p>
-            )}
+          {/* Top providers carousel */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <TrendingUp className="w-4 h-4 text-[#2D7A3E]" />
+              <h2 className="text-sm font-bold text-foreground">Top rated</h2>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 snap-x">
+              {top.map((p) => (
+                <div key={p.id} className="min-w-[85%] sm:min-w-[240px] snap-start shrink-0">
+                  <ProviderCard provider={p} />
+                </div>
+              ))}
+              {top.length === 0 && (
+                <p className="text-muted-foreground text-xs">No providers yet</p>
+              )}
+            </div>
           </div>
         </div>
-      </PullToRefresh>
+      </div>
     </div>
   );
 }

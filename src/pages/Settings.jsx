@@ -27,62 +27,70 @@ export default function Settings() {
   };
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Settings</h1>
+    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto">
+      {/* Compact header */}
+      <header className="shrink-0 px-4 md:px-8 py-3 border-b border-slate-100 bg-background">
+        <h1 className="text-lg font-extrabold text-foreground">Settings</h1>
+      </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 flex items-center gap-4 mb-3">
-        <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-xl">
-          {user?.full_name?.[0] || <User className="w-6 h-6" />}
-        </div>
-        <div className="min-w-0">
-          <p className="font-bold text-foreground truncate">{user?.full_name || "—"}</p>
-          <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
-        </div>
-      </div>
+      {/* Scrollable content */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-3">
+        <div className="space-y-3">
+          {/* Profile card */}
+          <div className="bg-white rounded-xl p-3 border border-slate-100 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-lg shrink-0">
+              {user?.full_name?.[0] || <User className="w-5 h-5" />}
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-foreground truncate">{user?.full_name || "—"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+          </div>
 
-      <PushNotificationEnabler />
+          <PushNotificationEnabler />
 
-      <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden">
-        <Link to="/become-provider" className="flex items-center gap-3 px-5 py-4 hover:bg-muted">
-          <HandHelping className="w-5 h-5 text-[#2D7A3E]" />
-          <span className="font-medium">Become a service provider</span>
-        </Link>
-      </div>
+          {/* Actions */}
+          <div className="bg-white rounded-xl border border-slate-100 divide-y divide-slate-100 overflow-hidden">
+            <Link to="/become-provider" className="flex items-center gap-3 px-4 py-3 hover:bg-muted">
+              <HandHelping className="w-5 h-5 text-[#2D7A3E]" />
+              <span className="font-medium text-sm">Become a provider</span>
+            </Link>
+          </div>
 
-      <Button
-        onClick={() => base44.auth.logout()}
-        variant="outline"
-        className="w-full mt-4 rounded-2xl h-12 gap-2 text-destructive border-destructive/30"
-      >
-        <LogOut className="w-5 h-5" /> Log out
-      </Button>
-
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="outline" className="w-full mt-2 rounded-2xl h-12 gap-2 text-destructive border-destructive/30">
-            <Trash2 className="w-5 h-5" /> Delete Account
+          <Button
+            onClick={() => base44.auth.logout()}
+            variant="outline"
+            className="w-full rounded-xl h-11 gap-2 text-destructive border-destructive/30 text-sm"
+          >
+            <LogOut className="w-4 h-4" /> Log out
           </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete account?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This permanently removes your profile, jobs, conversations, and reviews. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={deleteAccount}
-              disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleting ? "Deleting…" : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="w-full rounded-xl h-11 gap-2 text-destructive border-destructive/30 text-sm">
+                <Trash2 className="w-4 h-4" /> Delete Account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete account?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently removes your profile, jobs, conversations, and reviews. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={deleteAccount}
+                  disabled={deleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {deleting ? "Deleting…" : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </div>
   );

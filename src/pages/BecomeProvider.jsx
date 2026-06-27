@@ -27,7 +27,7 @@ export default function BecomeProvider() {
 
   const submit = async () => {
     if (!name || professions.length === 0) {
-      toast({ title: "Add your name and at least one profession", variant: "destructive" });
+      toast({ title: "Add name and at least one profession", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -44,65 +44,65 @@ export default function BecomeProvider() {
       available: true,
     });
     setSaving(false);
-    toast({ title: "You're listed!", description: "Customers can now find you." });
+    toast({ title: "You're listed!", description: "Customers can now find you" });
     navigate("/providers");
   };
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-muted-foreground mb-3">
-        <ArrowLeft className="w-5 h-5" /> Back
-      </button>
-      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Become a Provider</h1>
+    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto">
+      {/* Compact header */}
+      <header className="shrink-0 px-4 md:px-8 py-3 border-b border-slate-100 bg-background flex items-center gap-2">
+        <button onClick={() => navigate(-1)} className="text-muted-foreground">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-lg font-extrabold text-foreground">Become Provider</h1>
+      </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="space-y-3">
-        <div>
-          <label className="text-sm font-semibold">Full name</label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-2xl h-11 mt-1.5" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
+      {/* Scrollable form */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-3">
+        <div className="space-y-3">
           <div>
-            <label className="text-sm font-semibold">Phone</label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-2xl h-11 mt-1.5" />
+            <label className="text-xs font-semibold">Full name *</label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl h-10 mt-1" />
           </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-semibold">Phone</label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl h-10 mt-1" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold">Years exp.</label>
+              <Input type="number" value={years} onChange={(e) => setYears(e.target.value)} className="rounded-xl h-10 mt-1" />
+            </div>
+          </div>
+
           <div>
-            <label className="text-sm font-semibold">Years experience</label>
-            <Input type="number" value={years} onChange={(e) => setYears(e.target.value)} className="rounded-2xl h-11 mt-1.5" />
+            <label className="text-xs font-semibold">Professions *</label>
+            <div className="mt-1">
+              <CategorySearch multiple selected={professions} onToggle={toggle} placeholder="Search professions…" />
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label className="text-sm font-semibold">Professions</label>
-          <div className="mt-2">
-            <CategorySearch
-              multiple
-              selected={professions}
-              onToggle={toggle}
-              placeholder="Search and add professions…"
-            />
+          <div>
+            <label className="text-xs font-semibold">Service radius: {radius[0]} km</label>
+            <Slider value={radius} onValueChange={setRadius} min={1} max={100} step={1} className="mt-2" />
           </div>
-        </div>
 
-        <div>
-          <label className="text-sm font-semibold">Service radius: {radius[0]} km</label>
-          <Slider value={radius} onValueChange={setRadius} min={1} max={100} step={1} className="mt-2" />
-        </div>
+          <div>
+            <label className="text-xs font-semibold">Base location</label>
+            <div className="mt-1"><LocationPicker value={loc} onChange={setLoc} /></div>
+          </div>
 
-        <div>
-          <label className="text-sm font-semibold">Base location</label>
-          <div className="mt-1.5"><LocationPicker value={loc} onChange={setLoc} /></div>
-        </div>
+          <div>
+            <label className="text-xs font-semibold">About you</label>
+            <Textarea rows={2} value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl mt-1" placeholder="Tell customers about your work…" />
+          </div>
 
-        <div>
-          <label className="text-sm font-semibold">About you</label>
-          <Textarea rows={2} value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-2xl mt-1.5" placeholder="Tell customers about your work…" />
+          <Button onClick={submit} disabled={saving} className="w-full rounded-xl h-11 text-sm bg-[#1A1F2E] hover:bg-[#2A2F45]">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "List as Provider"}
+          </Button>
         </div>
-
-        <Button onClick={submit} disabled={saving}           className="w-full h-12 rounded-2xl text-base bg-[#1A1F2E] hover:bg-[#2A2F45]">
-          {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "List me as a provider"}
-        </Button>
-      </div>
       </div>
     </div>
   );

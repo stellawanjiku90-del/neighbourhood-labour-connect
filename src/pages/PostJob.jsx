@@ -26,7 +26,7 @@ export default function PostJob() {
 
   const submit = async () => {
     if (!category || !title) {
-      toast({ title: "Add a category and title", variant: "destructive" });
+      toast({ title: "Add category and title", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -43,80 +43,82 @@ export default function PostJob() {
       lng: loc?.lng,
       status: "open",
     });
-    // Notify nearby pros instantly
-    base44.functions
-      .invoke("sendJobNearbyNotifications", { data: created })
-      .catch(() => {});
+    base44.functions.invoke("sendJobNearbyNotifications", { data: created }).catch(() => {});
     setSaving(false);
-    toast({ title: "Request posted!", description: "Nearby providers are being notified." });
+    toast({ title: "Request posted!", description: "Nearby providers notified" });
     navigate("/jobs");
   };
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
-      <h1 className="text-2xl font-extrabold text-foreground mb-4 shrink-0">Post a Request</h1>
+    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto">
+      {/* Compact header */}
+      <header className="shrink-0 px-4 md:px-8 py-3 border-b border-slate-100 bg-background flex items-center justify-between">
+        <h1 className="text-lg font-extrabold text-foreground">Post Request</h1>
+        <Button onClick={() => navigate(-1)} variant="outline" className="h-8 text-xs rounded-xl">Cancel</Button>
+      </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
-      <label className="text-sm font-semibold text-foreground">Service category</label>
-      <div className="mt-2 mb-4">
-        <CategorySearch value={category} onChange={setCategory} placeholder="Search and select a category…" />
-      </div>
+      {/* Scrollable form */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-3">
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold">Service category *</label>
+            <CategorySearch value={category} onChange={setCategory} placeholder="Search category…" />
+          </div>
 
-      <div className="space-y-3">
-        <div>
-          <label className="text-sm font-semibold">What do you need?</label>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Deep clean a 2-bedroom apartment"
-            className="rounded-2xl h-11 mt-1.5"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-semibold">Details (optional)</label>
-          <Textarea
-            rows={2}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe the job…"
-            className="rounded-2xl mt-1.5"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-semibold">Budget (optional)</label>
-          <Input
-            type="number"
-            value={budget}
-            onChange={(e) => setBudget(e.target.value)}
-            placeholder="Amount"
-            className="rounded-2xl h-11 mt-1.5"
-          />
-        </div>
+          <div>
+            <label className="text-xs font-semibold">What do you need? *</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Clean 2-bedroom apartment"
+              className="rounded-xl h-10 mt-1"
+            />
+          </div>
 
-        <div>
-          <label className="text-sm font-semibold">Where do you need the service?</label>
-          <p className="text-xs text-muted-foreground mb-1.5">Search any area or use your current location. Nearby pros (within 10 km) are notified first.</p>
-          <div className="mt-1.5">
+          <div>
+            <label className="text-xs font-semibold">Details</label>
+            <Textarea
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe the job…"
+              className="rounded-xl mt-1"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold">Budget</label>
+            <Input
+              type="number"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              placeholder="Amount"
+              className="rounded-xl h-10 mt-1"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold">Location</label>
+            <p className="text-[10px] text-muted-foreground mb-1">Search any area or use current location</p>
             <LocationPicker value={loc} onChange={setLoc} />
           </div>
-        </div>
 
-        <div className="flex items-center justify-between bg-[#F5DCC8] rounded-2xl p-3">
-          <div className="flex items-center gap-2 text-[#B36D25]">
-            <Siren className="w-5 h-5" />
-            <span className="font-semibold text-sm">Emergency — dispatch nearest</span>
+          <div className="flex items-center justify-between bg-[#F5DCC8] rounded-xl p-3">
+            <div className="flex items-center gap-2 text-[#B36D25]">
+              <Siren className="w-4 h-4" />
+              <span className="font-semibold text-xs">Emergency</span>
+            </div>
+            <Switch checked={emergency} onCheckedChange={setEmergency} />
           </div>
-          <Switch checked={emergency} onCheckedChange={setEmergency} />
-        </div>
 
-        <Button
-          onClick={submit}
-          disabled={saving}
-          className="w-full h-12 rounded-2xl text-base bg-[#1A1F2E] hover:bg-[#2A2F45]"
-        >
-          {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Post Request"}
-        </Button>
-      </div>
+          <Button
+            onClick={submit}
+            disabled={saving}
+            className="w-full h-11 rounded-xl text-sm bg-[#1A1F2E] hover:bg-[#2A2F45]"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Post Request"}
+          </Button>
+        </div>
       </div>
     </div>
   );
