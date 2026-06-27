@@ -10,6 +10,37 @@ import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, Bell, CheckCircl
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Sort open jobs so the provider's immediate area (within service radius) shows first.
+function sortByProximity(jobs, provider) {
+  if (!provider || provider.lat == null || provider.lng == null) return jobs;
+  const radius = provider.service_radius_km || 10;
+  const withDist = jobs.map((j) => {
+    const dist =
+      j.lat != null && j.lng != null
+        ? haversine(provider.lat, provider.lng, j.lat, j.lng)
+        : Infinity;
+    return { ...j, _dist: dist };
+  });
+  withDist.sort((a, b) => {
+    const aNear = a._dist <= radius ? 0 : 1;
+    const bNear = b._dist <= radius ? 0 : 1;
+    if (aNear !== bNear) return aNear - bNear;
+    return a._dist - b._dist;
+  });
+  return withDist;
+}
+
 export default function ProviderDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -31,7 +62,7 @@ export default function ProviderDashboard() {
     ]);
     const me = providers[0] || null;
     setProvider(me);
-    setOpenJobs(jobs);
+    setOpenJobs(sortByProximity(jobs, me));
     const myAssigned = [...acceptedJobs, ...inProgressJobs].filter(
       (j) => me && j.assigned_provider_id === me.id
     );
@@ -237,6 +268,11 @@ export default function ProviderDashboard() {
                       {job.location_name && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <MapPin className="w-3 h-3" /> {job.location_name}
+                        </p>
+                      )}
+                      {job._dist != null && job._dist !== Infinity && (
+                        <p className={`text-xs font-medium mt-1 ${job._dist <= (provider?.service_radius_km || 10) ? "text-[#2D7A3E]" : "text-muted-foreground"}`}>
+                          {job._dist < 1 ? `${Math.round(job._dist * 1000)} m away` : `${job._dist.toFixed(1)} km away`}
                         </p>
                       )}
                       {job.budget != null && (
