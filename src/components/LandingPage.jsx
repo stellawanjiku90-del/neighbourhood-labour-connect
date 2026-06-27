@@ -7,37 +7,32 @@ const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f685
 
 export default function LandingPage() {
   return (
-    <div className="h-[100dvh] w-full overflow-hidden bg-background flex flex-col">
+    <div className="h-[100dvh] w-full overflow-hidden bg-background flex flex-col safe-area-inset">
       {/* Header */}
-      <header className="shrink-0 border-b border-slate-100 bg-background/90 backdrop-blur">
-        <div className="max-w-5xl mx-auto px-4 md:px-8 h-14 flex items-center gap-2.5">
-          <img src={LOGO_URL} alt="Neighbourhood Labour Connect logo" className="w-9 h-9 rounded-full object-cover" />
-          <span className="font-extrabold text-foreground text-base md:text-lg">Neighbourhood Labour Connect</span>
+      <header className="shrink-0 border-b border-slate-100 bg-background/90 backdrop-blur safe-area-top">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 h-12 flex items-center gap-2">
+          <img src={LOGO_URL} alt="Neighbourhood Labour Connect logo" className="w-7 h-7 rounded-full object-cover" />
+          <span className="font-bold text-foreground text-sm md:text-base">Neighbourhood Labour Connect</span>
         </div>
       </header>
 
-      {/* Hero — centered, fills available space */}
-      <main className="flex-1 min-h-0 flex items-center justify-center px-4 md:px-8">
-        <div className="w-full max-w-2xl text-center">
-          <h1 className="text-2xl md:text-4xl font-extrabold text-foreground mb-2 leading-tight">
-            Neighbourhood Labour Connect
+      {/* Hero — compact, centered */}
+      <main className="flex-1 min-h-0 flex items-center justify-center px-4 md:px-6 py-4 md:py-6">
+        <div className="w-full max-w-lg text-center">
+          <h1 className="text-xl md:text-3xl font-extrabold text-foreground mb-1.5 leading-tight">
+            Trusted local help, on demand
           </h1>
-          <p className="text-base md:text-lg font-semibold text-foreground mb-3">
-            Trusted local help, on demand.
+          <p className="text-xs md:text-sm text-muted-foreground mb-4 leading-relaxed max-w-md mx-auto">
+            Connect with trusted local service providers or find your next job. Easy hiring, fair pricing, secure payments.
           </p>
-          <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto mb-6 leading-relaxed">
-            Connecting customers with trusted local service providers. Whether you want to hire
-            a professional or find your next job, our platform makes it easy to connect, negotiate,
-            and get things done.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <Link to="/firebase-auth" className="w-full sm:w-auto">
-              <Button className="rounded-2xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-12 px-8 w-full">
-                Get Started <ArrowRight className="w-4 h-4 ml-1" />
+              <Button className="rounded-xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-10 px-6 w-full text-sm">
+                Get Started <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Link>
             <Link to="/firebase-auth" className="w-full sm:w-auto">
-              <Button variant="outline" className="rounded-2xl h-12 px-8 w-full">
+              <Button variant="outline" className="rounded-xl h-10 px-6 w-full text-sm">
                 Sign In
               </Button>
             </Link>
@@ -45,6 +40,21 @@ export default function LandingPage() {
         </div>
       </main>
 
+      {/* Compact Footer */}
+      <footer className="shrink-0 border-t border-slate-100 bg-background safe-area-bottom">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-3">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-2">
+            <p className="text-[10px] md:text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Neighbourhood Labour Connect
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[10px] md:text-xs text-muted-foreground">
+              <Link to="/terms" className="hover:text-foreground">Terms</Link>
+              <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link to="/refund" className="hover:text-foreground">Refund</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

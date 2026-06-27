@@ -3,7 +3,6 @@ import { Outlet, NavLink, useLocation, useOutlet } from "react-router-dom";
 import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, Shield } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
-import Footer from "@/components/Footer";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
@@ -44,9 +43,8 @@ export default function Layout() {
   if (!user) {
     return (
       <div className="h-[100dvh] bg-background overflow-hidden flex flex-col">
-        <main className="min-w-0 flex-1 min-h-0 overflow-y-auto pt-[env(safe-area-inset-top)]">
+        <main className="min-w-0 flex-1 min-h-0 overflow-y-auto pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           <AnimatedOutlet />
-          <Footer />
         </main>
       </div>
     );
