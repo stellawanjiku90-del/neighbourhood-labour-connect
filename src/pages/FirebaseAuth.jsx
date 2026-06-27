@@ -65,7 +65,7 @@ export default function FirebaseAuth() {
           setStep("role");
         }
       } else {
-        setStep("phone");
+        setStep("role");
       }
       setCheckingAuth(false);
     })
@@ -165,7 +165,7 @@ export default function FirebaseAuth() {
       } else if (profile?.pin_hash) {
         setStep("pin-login");
       } else {
-        setStep("role");
+        setStep("pin-setup");
       }
     } catch (err) {
       handleAuthError(err);
@@ -191,7 +191,7 @@ export default function FirebaseAuth() {
 
   const selectRole = (r) => {
     setRole(r);
-    setStep("pin-setup");
+    setStep("phone");
   };
 
   const setupPin = async (pin) => {
