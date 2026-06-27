@@ -39,7 +39,7 @@ export function useGeoLocation() {
           setLoading(false);
           resolve(null);
         },
-        { enableHighAccuracy: false, timeout: 10000 }
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
     });
   }, []);
