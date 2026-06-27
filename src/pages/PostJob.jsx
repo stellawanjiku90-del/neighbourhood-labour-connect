@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import CategorySearch from "@/components/CategorySearch";
 import LocationPicker from "@/components/LocationPicker";
@@ -24,6 +24,10 @@ export default function PostJob() {
   const [emergency, setEmergency] = useState(params.get("emergency") === "1");
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
+
+  if (user?.role === "provider") {
+    return <Navigate to="/" replace />;
+  }
 
   const submit = async () => {
     if (!category || !title) {

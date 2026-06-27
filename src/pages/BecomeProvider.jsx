@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import CategorySearch from "@/components/CategorySearch";
 import LocationPicker from "@/components/LocationPicker";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function BecomeProvider() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -21,6 +23,10 @@ export default function BecomeProvider() {
   const [radius, setRadius] = useState([10]);
   const [loc, setLoc] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  if (user?.role === "provider") {
+    return <Navigate to="/" replace />;
+  }
 
   const toggle = (n) =>
     setProfessions((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));

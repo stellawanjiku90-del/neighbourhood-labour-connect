@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { distanceKm } from "@/lib/categories";
 import CategorySearch from "@/components/CategorySearch";
 import ProviderCard from "@/components/ProviderCard";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 
 export default function Providers() {
+  const { user } = useAuth();
   const params = new URLSearchParams(useLocation().search);
   const [category, setCategory] = useState(params.get("category") || "All");
   const [providers, setProviders] = useState([]);
@@ -35,6 +37,9 @@ export default function Providers() {
     return items;
   }, [providers, category, loc, sort]);
 
+  if (user?.role === "provider") {
+    return <Navigate to="/jobs" replace />;
+  }
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden bg-background safe-area-inset">
       {/* Header */}
