@@ -5,6 +5,7 @@ import CategorySearch from "@/components/CategorySearch";
 import ProviderCard from "@/components/ProviderCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
+import LegalLinks from "@/components/LegalLinks";
 import { Plus, Siren, Users } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -116,6 +117,8 @@ export default function CustomerDashboard() {
                 ))}
               </div>
             </div>
+
+            <LegalLinks />
           </div>
         )}
 
@@ -131,6 +134,7 @@ export default function CustomerDashboard() {
                 ))}
               </div>
             </div>
+            <LegalLinks />
           </div>
         )}
       </div>

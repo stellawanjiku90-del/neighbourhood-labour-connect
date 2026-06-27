@@ -5,6 +5,7 @@ import BidDialog from "@/components/BidDialog";
 import { getOrCreateConversation } from "@/lib/chat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
+import LegalLinks from "@/components/LegalLinks";
 import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, CheckCircle2, MessageCircle } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -261,6 +262,8 @@ export default function ProviderDashboard() {
           ))}
         </div>
       </div>
+
+      <LegalLinks />
 
       <BidDialog open={!!bidJob} onOpenChange={(v) => !v && setBidJob(null)} job={bidJob} provider={provider} onDone={load} />
     </div>

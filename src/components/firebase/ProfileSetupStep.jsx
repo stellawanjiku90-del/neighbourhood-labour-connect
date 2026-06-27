@@ -29,54 +29,73 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
   const [lat, setLat] = useState(null);
   const [lng, setLng] = useState(null);
   const [detectingLocation, setDetectingLocation] = useState(true);
+  const [locationDenied, setLocationDenied] = useState(false);
 
   useEffect(() => {
     let active = true;
-    const fallback = () => {
-      fetch("https://ipapi.co/json/")
-        .then((r) => r.json())
-        .then((d) => {
-          if (!active) return;
-          if (d.latitude && d.longitude) {
-            setLat(d.latitude);
-            setLng(d.longitude);
-            setLocationName([d.city, d.country_name].filter(Boolean).join(", "));
-          }
-        })
-        .catch(() => {})
-        .finally(() => {
-          if (active) setDetectingLocation(false);
-        });
-    };
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          if (!active) return;
-          const { latitude, longitude } = pos.coords;
-          setLat(latitude);
-          setLng(longitude);
-          try {
-            const r = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-            );
-            const d = await r.json();
-            const parts = [d.city || d.locality || d.principalSubdivision, d.countryName].filter(Boolean);
-            setLocationName(parts.join(", "));
-          } catch {
-            setLocationName(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-          }
-          if (active) setDetectingLocation(false);
-        },
-        () => fallback(),
-        { timeout: 8000 }
-      );
-    } else {
-      fallback();
+    if (!navigator.geolocation) {
+      setLocationDenied(true);
+      setDetectingLocation(false);
+      return;
     }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        if (!active) return;
+        const { latitude, longitude } = pos.coords;
+        setLat(latitude);
+        setLng(longitude);
+        try {
+          const r = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          );
+          const d = await r.json();
+          const parts = [d.city || d.locality || d.principalSubdivision, d.countryName].filter(Boolean);
+          setLocationName(parts.join(", "));
+        } catch {
+          setLocationName(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+        }
+        if (active) setDetectingLocation(false);
+      },
+      () => {
+        if (active) {
+          setLocationDenied(true);
+          setDetectingLocation(false);
+        }
+      },
+      { timeout: 20000 }
+    );
     return () => {
       active = false;
     };
   }, []);
+
+  const tryLocationAgain = () => {
+    setLocationDenied(false);
+    setDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setLat(latitude);
+        setLng(longitude);
+        try {
+          const r = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          );
+          const d = await r.json();
+          const parts = [d.city || d.locality || d.principalSubdivision, d.countryName].filter(Boolean);
+          setLocationName(parts.join(", "));
+        } catch {
+          setLocationName(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+        }
+        setDetectingLocation(false);
+      },
+      () => {
+        setLocationDenied(true);
+        setDetectingLocation(false);
+      },
+      { timeout: 20000 }
+    );
+  };
 
   const handleProfilePhotoChange = (e) => {
     const file = e.target.files?.[0];
@@ -102,6 +121,10 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
     }
     if (!profilePhoto || !idPhoto) {
       setLocalError("Please upload both your profile photo and ID photo.");
+      return;
+    }
+    if (!lat || !lng) {
+      setLocalError("Location access is required. Please allow location and try again.");
       return;
     }
 
@@ -143,16 +166,32 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
         Complete your profile to start using Neighbourhood Labour Connect.
       </p>
 
-      <div className="flex items-center gap-2 bg-accent/60 rounded-xl px-3 py-2.5 mb-6">
-        <MapPin className="w-4 h-4 text-accent-foreground shrink-0" />
-        {detectingLocation ? (
-          <span className="text-sm text-muted-foreground flex items-center gap-2">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Detecting your location…
-          </span>
-        ) : (
-          <span className="text-sm font-medium text-accent-foreground">
-            {locationName || "Location unavailable"}
-          </span>
+      <div className={`flex items-start gap-2 rounded-xl px-3 py-2.5 mb-6 ${locationDenied ? "bg-destructive/10" : "bg-accent/60"}`}>
+        {locationDenied ? <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" /> : <MapPin className="w-4 h-4 text-accent-foreground shrink-0 mt-0.5" />}
+        <div className="min-w-0">
+          {detectingLocation ? (
+            <span className="text-sm text-muted-foreground flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Detecting your location…
+            </span>
+          ) : locationDenied ? (
+            <div>
+              <p className="text-sm font-medium text-destructive">
+                Location access is required to use this app
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Please allow location access in your browser settings and click the button below.
+              </p>
+            </div>
+          ) : (
+            <span className="text-sm font-medium text-accent-foreground">
+              {locationName || "Location unavailable"}
+            </span>
+          )}
+        </div>
+        {locationDenied && (
+          <button type="button" onClick={tryLocationAgain} className="shrink-0 text-xs font-semibold text-foreground underline hover:no-underline">
+            Grant access
+          </button>
         )}
       </div>
 
