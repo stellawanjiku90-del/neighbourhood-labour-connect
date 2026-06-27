@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Shield, HandHelping } from "lucide-react";
+import { LogOut, User, HandHelping } from "lucide-react";
 import { Link } from "react-router-dom";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 import { useAuth } from "@/lib/AuthContext";
@@ -27,7 +27,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
       <h1 className="text-2xl font-extrabold text-foreground mb-6">Settings</h1>
 
       <div className="bg-white rounded-2xl p-5 border border-slate-100 flex items-center gap-4 mb-4">
@@ -47,10 +47,6 @@ export default function Settings() {
           <HandHelping className="w-5 h-5 text-[#2D7A3E]" />
           <span className="font-medium">Become a service provider</span>
         </Link>
-        <div className="flex items-center gap-3 px-5 py-4 text-muted-foreground">
-          <Shield className="w-5 h-5" />
-          <span>Verification & documents (coming soon)</span>
-        </div>
       </div>
 
       <Button

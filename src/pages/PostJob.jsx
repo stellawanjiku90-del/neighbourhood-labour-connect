@@ -45,7 +45,7 @@ export default function PostJob() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
       <h1 className="text-2xl font-extrabold text-foreground mb-6">Post a Request</h1>
 
       <label className="text-sm font-semibold text-foreground">Service category</label>

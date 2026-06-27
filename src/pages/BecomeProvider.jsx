@@ -49,7 +49,7 @@ export default function BecomeProvider() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6">
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-muted-foreground mb-5">
         <ArrowLeft className="w-5 h-5" /> Back
       </button>

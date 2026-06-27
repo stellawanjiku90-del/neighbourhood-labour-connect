@@ -35,7 +35,7 @@ export default function ProviderDetail() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10 pb-32">
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-6 pb-32">
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-muted-foreground mb-5">
         <ArrowLeft className="w-5 h-5" /> Back
       </button>
@@ -71,7 +71,7 @@ export default function ProviderDetail() {
       {p.bio && <p className="text-muted-foreground mt-6 leading-relaxed">{p.bio}</p>}
 
       <h2 className="text-lg font-bold text-foreground mt-8 mb-3">Reviews</h2>
-      <div className="space-y-3">
+      <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
         {reviews.map((r) => (
           <div key={r.id} className="bg-white rounded-2xl p-4 border border-slate-100">
             <div className="flex items-center justify-between">

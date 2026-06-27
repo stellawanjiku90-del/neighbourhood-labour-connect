@@ -43,7 +43,7 @@ export default function Providers() {
 
   return (
     <PullToRefresh onRefresh={refresh}>
-    <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
+    <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-extrabold text-foreground">Find Help</h1>
         <Sheet>
@@ -91,7 +91,7 @@ export default function Providers() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-3">
+      <div className="grid sm:grid-cols-2 gap-3 max-h-[58vh] overflow-y-auto pr-1">
         {list.map((p) => (
           <ProviderCard key={p.id} provider={p} distance={p._dist} />
         ))}

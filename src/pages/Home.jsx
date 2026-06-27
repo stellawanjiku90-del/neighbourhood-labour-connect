@@ -5,8 +5,6 @@ import CategorySearch from "@/components/CategorySearch";
 import ProviderCard from "@/components/ProviderCard";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 import PullToRefresh from "@/components/PullToRefresh";
-import TrustBadges from "@/components/TrustBadges";
-import HowItWorks from "@/components/HowItWorks";
 import LandingPage from "@/components/LandingPage";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
@@ -47,7 +45,7 @@ export default function Home() {
 
   return (
     <PullToRefresh onRefresh={refresh}>
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6">
         {/* Brand bar */}
         <div className="flex items-center gap-2 mb-6 md:hidden">
           <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-8 h-8 rounded-full object-cover" />
@@ -55,7 +53,7 @@ export default function Home() {
         </div>
 
         {/* Hero */}
-        <header className="mb-8">
+        <header className="mb-5">
           <p className="text-muted-foreground text-sm">{greet},</p>
           <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">{firstName} 👋</h1>
           <p className="text-muted-foreground mt-1 max-w-md">
@@ -80,10 +78,8 @@ export default function Home() {
 
         <PushNotificationEnabler />
 
-        <TrustBadges />
-
         {/* Stat cards */}
-        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
           <div className="bg-white rounded-2xl p-4 md:p-5 border border-slate-100">
             <p className="text-4xl md:text-5xl font-extrabold text-foreground">{top.length}</p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">Ready to help</p>
@@ -101,10 +97,8 @@ export default function Home() {
           </Link>
         </div>
 
-        <HowItWorks />
-
         {/* Search categories */}
-        <div className="mb-10">
+        <div className="mb-6">
           <h2 className="text-lg font-bold text-foreground mb-3">Find a service</h2>
           <CategorySearch
             value=""
@@ -118,9 +112,11 @@ export default function Home() {
           <TrendingUp className="w-5 h-5 text-[#2D7A3E]" />
           <h2 className="text-lg font-bold text-foreground">Top rated near you</h2>
         </div>
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
           {top.map((p) => (
-            <ProviderCard key={p.id} provider={p} />
+            <div key={p.id} className="min-w-[78%] sm:min-w-[260px] snap-start shrink-0">
+              <ProviderCard provider={p} />
+            </div>
           ))}
           {top.length === 0 && (
             <p className="text-muted-foreground text-sm">No providers available yet.</p>

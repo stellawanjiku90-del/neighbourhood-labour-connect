@@ -36,14 +36,14 @@ export default function MyJobs() {
 
   return (
     <PullToRefresh onRefresh={refresh}>
-    <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-10">
+    <div className="max-w-3xl mx-auto px-4 md:px-8 py-4 md:py-6">
       <h1 className="text-2xl font-extrabold text-foreground mb-6">My Jobs</h1>
 
       {jobs.length === 0 && (
         <p className="text-muted-foreground text-sm">No requests yet. Post one to get started.</p>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-3 max-h-[62vh] overflow-y-auto pr-1">
         {jobs.map((job) => {
           const icon = CATEGORIES.find((c) => c.name === job.category)?.icon;
           return (
