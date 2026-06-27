@@ -36,10 +36,7 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
         <Phone className="w-7 h-7 text-secondary-foreground" />
       </div>
-      <h1 className="text-2xl font-extrabold text-foreground mb-2">Phone Verification</h1>
-      <p className="text-muted-foreground text-sm mb-6">
-        We detected your country. Enter the rest of your phone number and we'll send a code via SMS.
-      </p>
+      <h1 className="text-2xl font-extrabold text-foreground mb-6">Phone Verification</h1>
       <label className="text-sm font-medium text-foreground mb-2 block">Phone Number</label>
       <div className="flex gap-2 mb-2">
         <select

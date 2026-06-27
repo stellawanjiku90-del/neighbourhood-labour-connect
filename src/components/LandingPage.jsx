@@ -19,11 +19,6 @@ export default function LandingPage() {
       {/* Hero — centered, fills available space */}
       <main className="flex-1 min-h-0 flex items-center justify-center px-4 md:px-8">
         <div className="w-full max-w-2xl text-center">
-          <img
-            src={LOGO_URL}
-            alt="Neighbourhood Labour Connect"
-            className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover mx-auto mb-4"
-          />
           <h1 className="text-2xl md:text-4xl font-extrabold text-foreground mb-2 leading-tight">
             Neighbourhood Labour Connect
           </h1>
@@ -50,14 +45,6 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* Compact about strip at the bottom */}
-      <footer className="shrink-0 border-t border-slate-100 bg-white">
-        <div className="max-w-5xl mx-auto px-4 md:px-8 py-3 md:py-4 text-center">
-          <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-            Find trusted nearby verified providers and compare offers, ratings, and reviews before hiring.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

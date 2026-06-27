@@ -21,13 +21,9 @@ export default function RoleStep({ onSelect, loading }) {
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
         <HandHelping className="w-7 h-7 text-secondary-foreground" />
       </div>
-      <h1 className="text-2xl font-extrabold text-foreground mb-2">
+      <h1 className="text-2xl font-extrabold text-foreground mb-6">
         How will you use NLC?
       </h1>
-      <p className="text-muted-foreground text-sm mb-6">
-        Choose how you'll use Neighbourhood Labour Connect. You can always offer
-        services later from Settings.
-      </p>
 
       <div className="space-y-3 mb-6">
         {OPTIONS.map((o) => (
@@ -48,10 +44,6 @@ export default function RoleStep({ onSelect, loading }) {
           </button>
         ))}
       </div>
-
-      <p className="text-xs text-muted-foreground text-center">
-        Your phone number is your account — it stays the same whichever you choose.
-      </p>
     </div>
   );
 }
