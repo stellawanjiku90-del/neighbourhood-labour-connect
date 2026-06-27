@@ -19,9 +19,6 @@ export default function LandingPage() {
       {/* Hero — compact, centered */}
       <main className="flex-1 min-h-0 flex items-center justify-center px-4 md:px-6 py-4 md:py-6">
         <div className="w-full max-w-lg text-center">
-          <span className="block text-[10px] md:text-xs font-heading font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">
-            Neighbourhood Labour Connect
-          </span>
           <h1 className="text-xl md:text-3xl font-extrabold text-foreground mb-1.5 leading-tight">
             Trusted local help, on demand
           </h1>

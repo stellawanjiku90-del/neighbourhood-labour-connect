@@ -34,7 +34,7 @@ export default function Settings() {
       </header>
 
       {/* Scrollable content */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-3 pb-16">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-3">
         <div className="space-y-3">
           {/* Profile card */}
           <div className="bg-white rounded-xl p-3 border border-slate-100 flex items-center gap-3">
@@ -90,13 +90,6 @@ export default function Settings() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-
-        {/* Policy links – required for Google Play */}
-        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 pt-6 pb-2 text-[11px] text-muted-foreground">
-          <Link to="/terms" className="hover:text-foreground">Terms</Link>
-          <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
-          <Link to="/refund" className="hover:text-foreground">Refund Policy</Link>
         </div>
       </div>
     </div>
