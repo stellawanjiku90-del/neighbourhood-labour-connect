@@ -43,8 +43,8 @@ export default function Layout() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <main className="min-w-0 pt-[env(safe-area-inset-top)]">
+      <div className="h-[100dvh] bg-background overflow-hidden flex flex-col">
+        <main className="min-w-0 flex-1 min-h-0 overflow-y-auto pt-[env(safe-area-inset-top)]">
           <AnimatedOutlet />
           <Footer />
         </main>

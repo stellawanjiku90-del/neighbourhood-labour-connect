@@ -300,7 +300,7 @@ export default function FirebaseAuth() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-[100dvh] bg-background overflow-hidden flex flex-col">
       <header className="flex items-center gap-2 px-6 h-20 shrink-0">
         <img
           src={LOGO_URL}
@@ -312,7 +312,7 @@ export default function FirebaseAuth() {
         </span>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-4 py-8">
+      <main className="flex-1 min-h-0 overflow-y-auto flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           {step === "phone" && (
             <PhoneStep

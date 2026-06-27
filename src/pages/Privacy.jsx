@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default function Privacy() {
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
+    <div className="h-[100dvh] overflow-y-auto max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
