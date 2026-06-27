@@ -25,7 +25,7 @@ export default function ProviderDashboard() {
     const [providers, jobs, myAssigned] = await Promise.all([
       phone ? base44.entities.ServiceProvider.filter({ phone }, "-created_date", 1) : Promise.resolve([]),
       base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 50),
-      base44.entities.ServiceRequest.filter({ status: "accepted" }, "-created_date", 50),
+      base44.entities.ServiceRequest.filter({ status: "in_progress" }, "-created_date", 50),
     ]);
     const me = providers[0] || null;
     setProvider(me);
@@ -46,10 +46,10 @@ export default function ProviderDashboard() {
     setProvider(updated);
   };
 
-  const completeJob = async (job) => {
+  const startJob = async (job) => {
     setCompleting(job.id);
     try {
-      await base44.entities.ServiceRequest.update(job.id, { status: "completed" });
+      await base44.entities.ServiceRequest.update(job.id, { status: "in_progress" });
       setAssignedJobs((prev) => prev.filter((j) => j.id !== job.id));
     } catch (e) {
       // ignore
@@ -158,7 +158,7 @@ export default function ProviderDashboard() {
                       </p>
                     )}
                     <Button
-                      onClick={() => completeJob(job)}
+                      onClick={() => startJob(job)}
                       disabled={completing === job.id}
                       className="w-full mt-3 h-10 rounded-xl bg-[#2D7A3E] hover:bg-[#246332]"
                     >
@@ -166,10 +166,13 @@ export default function ProviderDashboard() {
                         <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                       ) : (
                         <>
-                          <CheckCircle2 className="w-4 h-4 mr-1" /> Mark completed
+                          <CheckCircle2 className="w-4 h-4 mr-1" /> Start job
                         </>
                       )}
                     </Button>
+                    <p className="text-xs text-[#2D7A3E]/80 text-center mt-2">
+                      The customer will mark the job completed once work is done.
+                    </p>
                   </div>
                 ))}
               </div>

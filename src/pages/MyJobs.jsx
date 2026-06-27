@@ -95,7 +95,7 @@ export default function MyJobs() {
                   </Button>
                 )}
 
-                {job.status === "accepted" && (
+                {(job.status === "accepted" || job.status === "in_progress") && (
                   <Button
                     onClick={() => complete(job)}
                     className="w-full mt-3 rounded-2xl h-11 gap-1 bg-[#1A1F2E] hover:bg-[#2A2F45]"
