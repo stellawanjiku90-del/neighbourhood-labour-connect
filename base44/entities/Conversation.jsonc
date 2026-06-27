@@ -22,6 +22,16 @@
     },
     "last_sender_id": {
       "type": "string"
+    },
+    "customer_revealed_number": {
+      "type": "boolean",
+      "default": false,
+      "description": "Customer has consented to reveal their phone number"
+    },
+    "provider_revealed_number": {
+      "type": "boolean",
+      "default": false,
+      "description": "Provider has consented to reveal their phone number"
     }
   },
   "required": [

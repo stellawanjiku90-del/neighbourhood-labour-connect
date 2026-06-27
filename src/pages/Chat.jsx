@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Phone } from "lucide-react";
 
 export default function Chat() {
   const { id } = useParams();
@@ -14,13 +14,18 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [revealed, setRevealed] = useState({ customer: false, provider: false });
+  const [otherPhone, setOtherPhone] = useState(null);
   const bottomRef = useRef(null);
 
   const loadMessages = () =>
     base44.entities.Message.filter({ conversation_id: id }, "created_date", 200).then(setMessages);
 
   useEffect(() => {
-    base44.entities.Conversation.get(id).then(setConvo).catch(() => setConvo(false));
+    base44.entities.Conversation.get(id).then((c) => {
+      setConvo(c);
+      setRevealed({ customer: !!c?.customer_revealed_number, provider: !!c?.provider_revealed_number });
+    }).catch(() => setConvo(false));
     loadMessages();
     const unsub = base44.entities.Message.subscribe((event) => {
       if (event?.data?.conversation_id === id || event?.type === "delete") loadMessages();
@@ -31,6 +36,37 @@ export default function Chat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const toggleReveal = async () => {
+    if (!convo || !me) return;
+    const isCustomer = me.id === convo.customer_id;
+    const key = isCustomer ? "customer_revealed_number" : "provider_revealed_number";
+    const updated = await base44.entities.Conversation.update(id, { [key]: true });
+    setConvo(updated);
+    setRevealed({ customer: !!updated.customer_revealed_number, provider: !!updated.provider_revealed_number });
+  };
+
+  // Fetch the other party's phone once they have consented to share (otherRevealed)
+  useEffect(() => {
+    if (!otherRevealed || !convo || !me) return;
+    (async () => {
+      if (isCustomer && convo.provider_id) {
+        const prov = await base44.entities.ServiceProvider.get(convo.provider_id).catch(() => null);
+        setOtherPhone(prov?.phone ? prov.phone : "unavailable");
+      } else if (!isCustomer) {
+        // customer's phone lives on the UserProfile via firebase_uid
+        const phys = await base44.entities.UserProfile.filter({ firebase_uid: convo.customer_id }, null, 1).catch(() => []);
+        setOtherPhone(phys[0]?.phone ? phys[0].phone : "unavailable");
+      }
+    })();
+  }, [otherRevealed]);
+
+  // My phone, and whether the other party has also revealed
+  const myPhone = me?.phone;
+  const isCustomer = me?.id === convo?.customer_id;
+  const iRevealed = isCustomer ? revealed.customer : revealed.provider;
+  const otherRevealed = isCustomer ? revealed.provider : revealed.customer;
+  const bothRevealed = revealed.customer && revealed.provider;
 
   const send = async (e) => {
     e.preventDefault();
@@ -90,7 +126,34 @@ export default function Chat() {
             </>
           );
         })()}
+        <div className="ml-auto flex items-center gap-2">
+          {convo && convo !== false && (() => {
+            if (otherRevealed && otherPhone && otherPhone !== "unavailable") {
+              return (
+                <a href={`tel:${otherPhone}`} className="flex items-center gap-1 text-xs font-medium text-[#2D7A3E] whitespace-nowrap">
+                  <Phone className="w-4 h-4" /> Call
+                </a>
+              );
+            }
+            if (iRevealed) {
+              if (bothRevealed && otherPhone === "unavailable") {
+                return <p className="text-[11px] text-muted-foreground whitespace-nowrap">Number hidden</p>;
+              }
+              return <p className="text-xs text-muted-foreground whitespace-nowrap">Waiting…</p>;
+            }
+            return (
+              <button onClick={toggleReveal} className="flex items-center gap-1 text-xs text-[#2D7A3E] font-medium whitespace-nowrap hover:underline">
+                <Phone className="w-3.5 h-3.5" /> Share number
+              </button>
+            );
+          })()}
+        </div>
       </header>
+      {bothRevealed && otherPhone && otherPhone !== "unavailable" && (
+        <div className="shrink-0 flex items-center justify-center gap-2 px-4 py-1.5 bg-[#C9E8D8] text-[11px] font-medium text-[#2D7A3E]">
+          <Phone className="w-3.5 h-3.5" /> Numbers shared — both parties can now call each other
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
