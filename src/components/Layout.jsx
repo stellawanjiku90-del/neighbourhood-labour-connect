@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink, useLocation, useOutlet } from "react-router-dom";
-import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, Shield, Gift } from "lucide-react";
+import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, Shield, Gift, Wallet } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -11,13 +11,14 @@ const CUSTOMER_NAV = [
   { to: "/providers", label: "Find Help", icon: Search },
   { to: "/post", label: "Post Job", icon: PlusCircle },
   { to: "/jobs", label: "My Jobs", icon: Briefcase },
-  { to: "/referrals", label: "Refer", icon: Gift },
+  { to: "/earnings", label: "Earnings", icon: Wallet },
   { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 const PROVIDER_NAV = [
   { to: "/", label: "Home", icon: Home },
+  { to: "/earnings", label: "Earnings", icon: Wallet },
   { to: "/referrals", label: "Refer", icon: Gift },
   { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/settings", label: "Settings", icon: Settings },

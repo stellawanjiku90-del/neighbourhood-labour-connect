@@ -29,6 +29,7 @@ const Refund = lazy(() => import('@/pages/Refund'));
 const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
 const Referrals = lazy(() => import('@/pages/Referrals'));
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
+const Earnings = lazy(() => import('@/pages/Earnings'));
 
 const LoadingFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/referrals" element={<Referrals />} />
+          <Route path="/earnings" element={<Earnings />} />
           <Route path="/subscribe" element={<Subscribe />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
