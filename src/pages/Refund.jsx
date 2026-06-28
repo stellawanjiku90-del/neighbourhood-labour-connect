@@ -45,7 +45,7 @@ export default function Refund() {
         <section>
           <h2 className="text-lg font-bold mb-2">6. Contact</h2>
           <p className="text-muted-foreground">
-            To request a refund or report an issue, please contact Base44 support with details of the service request.
+            To request a refund or report an issue, please contact Neighbourhood Labour Connect support with details of the service request.
           </p>
         </section>
       </div>

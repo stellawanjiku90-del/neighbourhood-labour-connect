@@ -45,7 +45,7 @@ export default function Privacy() {
         <section>
           <h2 className="text-lg font-bold mb-2">6. Contact</h2>
           <p className="text-muted-foreground">
-            If you have questions about this Privacy Policy, please contact Base44 support.
+            If you have questions about this Privacy Policy, please contact Neighbourhood Labour Connect support.
           </p>
         </section>
       </div>
