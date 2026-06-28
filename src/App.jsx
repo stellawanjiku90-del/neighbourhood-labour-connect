@@ -27,6 +27,8 @@ const Terms = lazy(() => import('@/pages/Terms'));
 const Privacy = lazy(() => import('@/pages/Privacy'));
 const Refund = lazy(() => import('@/pages/Refund'));
 const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
+const Referrals = lazy(() => import('@/pages/Referrals'));
+const Subscribe = lazy(() => import('@/pages/Subscribe'));
 
 const LoadingFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -63,6 +65,8 @@ const AuthenticatedApp = () => {
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/referrals" element={<Referrals />} />
+          <Route path="/subscribe" element={<Subscribe />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/refund" element={<Refund />} />

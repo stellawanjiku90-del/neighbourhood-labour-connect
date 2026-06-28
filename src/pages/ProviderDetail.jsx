@@ -9,12 +9,15 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { openConversation } from "@/lib/chat";
 import { useAuth } from "@/lib/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 
 export default function ProviderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { active, loading: subLoading } = useSubscription();
   const [p, setP] = useState(null);
   const [reviews, setReviews] = useState([]);
 
@@ -28,6 +31,9 @@ export default function ProviderDetail() {
   }
   if (p === false) {
     return <div className="text-center py-20 text-muted-foreground">Provider not found.</div>;
+  }
+  if (!subLoading && !active) {
+    return <SubscriptionPaywall />;
   }
 
   const hire = () => toast({ title: `Request sent to ${p.name}`, description: "They'll respond shortly." });

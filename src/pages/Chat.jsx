@@ -5,11 +5,14 @@ import { useAuth } from "@/lib/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Send, Phone } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 
 export default function Chat() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user: me } = useAuth();
+  const { active, loading: subLoading } = useSubscription();
   const [convo, setConvo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -101,6 +104,10 @@ export default function Chat() {
       setSending(false);
     }
   };
+
+  if (!subLoading && !active) {
+    return <SubscriptionPaywall />;
+  }
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background pt-[env(safe-area-inset-top)]">

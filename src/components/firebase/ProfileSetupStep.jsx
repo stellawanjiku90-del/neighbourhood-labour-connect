@@ -30,6 +30,7 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
   const [lng, setLng] = useState(null);
   const [detectingLocation, setDetectingLocation] = useState(true);
   const [locationDenied, setLocationDenied] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -144,6 +145,7 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
         location_name: locationName,
         lat,
         lng,
+        referral_code_used: referralCode.trim().toUpperCase() || undefined,
       });
     } catch (e) {
       setUploading(false);
@@ -316,6 +318,21 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
         </div>
         <p className="text-xs text-muted-foreground mt-1.5">
           We'll verify that the names on your ID match the names you provided.
+        </p>
+      </div>
+
+      {/* Referral Code */}
+      <div className="mb-4">
+        <Label className="mb-1.5 block">Referral Code (optional)</Label>
+        <Input
+          value={referralCode}
+          onChange={(e) => setReferralCode(e.target.value)}
+          placeholder="e.g. NLC-AB3X9K"
+          className="h-11 rounded-xl"
+          disabled={loading || uploading}
+        />
+        <p className="text-xs text-muted-foreground mt-1.5">
+          Got referred by a friend? Enter their code to link them as your referrer.
         </p>
       </div>
 

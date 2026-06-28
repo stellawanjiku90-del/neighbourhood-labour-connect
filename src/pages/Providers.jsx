@@ -9,6 +9,8 @@ import LocationPicker from "@/components/LocationPicker";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 
 export default function Providers() {
   const { user } = useAuth();
@@ -17,6 +19,7 @@ export default function Providers() {
   const [providers, setProviders] = useState([]);
   const [loc, setLoc] = useState(null);
   const [sort, setSort] = useState("distance");
+  const { active, loading: subLoading } = useSubscription();
 
   useEffect(() => {
     base44.entities.ServiceProvider.filter({ available: true }, "-rating", 50).then(setProviders);
@@ -39,6 +42,9 @@ export default function Providers() {
 
   if (user?.role === "provider") {
     return <Navigate to="/jobs" replace />;
+  }
+  if (!subLoading && !active) {
+    return <SubscriptionPaywall />;
   }
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden bg-background safe-area-inset">

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Shield, Users, Briefcase, Star, Loader2 } from "lucide-react";
+import SubscriptionManager from "@/components/admin/SubscriptionManager";
 
 export default function AdminPanel() {
   const { user, isAuthenticated } = useAuth();
@@ -86,6 +87,8 @@ export default function AdminPanel() {
               <p className="text-muted-foreground text-sm px-5 py-8 text-center">No providers yet.</p>
             )}
           </div>
+
+          <SubscriptionManager />
         </>
       )}
     </div>

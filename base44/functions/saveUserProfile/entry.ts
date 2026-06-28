@@ -1,5 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
+// Generate a unique referral code like "NLC-AB3X9K"
+function generateReferralCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return "NLC-" + code;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -20,6 +30,7 @@ Deno.serve(async (req) => {
       lat,
       lng,
       verify_id,
+      referral_code_used,
     } = data;
 
     if (!phone) {
@@ -27,9 +38,6 @@ Deno.serve(async (req) => {
     }
 
     // ─── ID Verification via InvokeLLM ──────────────────────────
-    // If an ID photo is provided and verify_id is true, use the LLM
-    // to extract names from the ID document and compare them with
-    // the user-provided first name and surname.
     let id_verified = false;
     let id_names_extracted = "";
 
@@ -58,24 +66,37 @@ Deno.serve(async (req) => {
 
         id_names_extracted = `${result.first_name || ""} ${result.surname || ""}`.trim();
 
-        // Match in either name order (first/surname may be swapped on some IDs)
         const directMatch =
           extractedFirst === providedFirst && extractedSurname === providedSurname;
         const swappedMatch =
           extractedFirst === providedSurname && extractedSurname === providedFirst;
-        // Also check if the full name string contains both provided names
         const fullMatch =
           extractedFull.includes(providedFirst) && extractedFull.includes(providedSurname);
 
         id_verified = directMatch || swappedMatch || fullMatch;
       } catch (e) {
-        // If LLM verification fails, mark as not verified but continue saving
         id_verified = false;
         id_names_extracted = "Verification failed: " + e.message;
       }
     }
 
-    // ─── Save / Update UserProfile ───────────────────────────────
+    // ─── Resolve referrer if a referral code was provided ────────
+    let referred_by = null;
+    let referrerProfile = null;
+    const normalizedCode = (referral_code_used || "").trim().toUpperCase();
+
+    if (normalizedCode) {
+      const referrers = await base44.asServiceRole.entities.UserProfile.filter(
+        { referral_code: normalizedCode },
+        null,
+        1
+      );
+      if (referrers.length > 0 && referrers[0].phone !== phone) {
+        referrerProfile = referrers[0];
+        referred_by = referrerProfile.firebase_uid || null;
+      }
+    }
+
     const profileData = {
       phone,
       firebase_uid,
@@ -98,14 +119,48 @@ Deno.serve(async (req) => {
 
     const existing = await base44.asServiceRole.entities.UserProfile.filter({ phone });
 
+    const createReferralRecord = async (profile) => {
+      if (!referred_by || !referrerProfile || !firebase_uid) return;
+      const existingRef = await base44.asServiceRole.entities.Referral.filter(
+        { referrer_id: referred_by, referred_id: firebase_uid },
+        null,
+        1
+      );
+      if (existingRef.length > 0) return;
+      await base44.asServiceRole.entities.Referral.create({
+        referrer_id: referred_by,
+        referrer_name:
+          `${referrerProfile.first_name || ""} ${referrerProfile.surname || ""}`.trim() ||
+          referrerProfile.phone,
+        referred_id: firebase_uid,
+        referred_name: `${first_name || ""} ${surname || ""}`.trim() || phone,
+        referred_phone: phone,
+        referral_code_used: normalizedCode,
+        status: "registered",
+      });
+    };
+
     if (existing.length > 0) {
+      const existingRec = existing[0];
+      // Preserve existing referral_code; generate one if missing
+      if (!existingRec.referral_code) {
+        profileData.referral_code = generateReferralCode();
+      }
+      // Only set referred_by if not already set and a referrer was resolved
+      if (!existingRec.referred_by && referred_by) {
+        profileData.referred_by = referred_by;
+      }
       const profile = await base44.asServiceRole.entities.UserProfile.update(
-        existing[0].id,
+        existingRec.id,
         profileData
       );
+      await createReferralRecord(profile);
       return Response.json({ profile, id_verified });
     } else {
+      profileData.referral_code = generateReferralCode();
+      if (referred_by) profileData.referred_by = referred_by;
       const profile = await base44.asServiceRole.entities.UserProfile.create(profileData);
+      await createReferralRecord(profile);
       return Response.json({ profile, id_verified });
     }
   } catch (error) {

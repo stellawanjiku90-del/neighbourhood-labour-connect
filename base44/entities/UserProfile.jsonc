@@ -75,6 +75,14 @@
     "profile_completed": {
       "type": "boolean",
       "default": false
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "Unique shareable referral code for this user"
+    },
+    "referred_by": {
+      "type": "string",
+      "description": "Firebase UID of the user who referred them"
     }
   },
   "required": [
