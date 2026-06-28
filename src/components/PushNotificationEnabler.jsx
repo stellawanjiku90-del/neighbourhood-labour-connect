@@ -20,22 +20,9 @@ export default function PushNotificationEnabler() {
         setStatus("notprovider");
         return;
       }
-      try {
-        const providers = await base44.entities.ServiceProvider.filter(
-          { created_by_id: user.id },
-          null,
-          1
-        );
-        if (providers.length === 0) {
-          setStatus("notprovider");
-          return;
-        }
-        if (Notification.permission === "granted") setStatus("granted");
-        else if (Notification.permission === "denied") setStatus("denied");
-        else setStatus("provider");
-      } catch {
-        setStatus("notprovider");
-      }
+      if (Notification.permission === "granted") setStatus("granted");
+      else if (Notification.permission === "denied") setStatus("denied");
+      else setStatus("provider");
     })();
   }, [user]);
 
@@ -90,7 +77,7 @@ export default function PushNotificationEnabler() {
     return (
       <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 rounded-2xl px-4 py-3 mb-4">
         <Check className="w-4 h-4 shrink-0" />
-        <span>Notifications enabled — you'll be alerted to nearby jobs.</span>
+        <span>Notifications enabled — you'll get subscription reminders and job alerts.</span>
       </div>
     );
   }
@@ -110,9 +97,9 @@ export default function PushNotificationEnabler() {
         <Bell className="w-5 h-5 text-secondary-foreground" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-foreground">Get instant job alerts</p>
+        <p className="font-semibold text-sm text-foreground">Enable notifications</p>
         <p className="text-xs text-muted-foreground">
-          Be notified the moment a customer posts a job near you.
+          Get subscription reminders and job alerts on your device.
         </p>
       </div>
       <Button
