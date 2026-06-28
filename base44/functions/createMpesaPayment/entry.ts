@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: "IntaSend keys not configured" }, { status: 500 });
     }
 
-    const apiRef = `NLC-SUB-${user.id}-${Date.now()}`;
+    const apiRef = `NLC|${user.id}`;
 
     const response = await fetch(INTASEND_API_URL, {
       method: "POST",
