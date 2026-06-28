@@ -301,7 +301,7 @@ export default function FirebaseAuth() {
 
   return (
     <div className="h-[100dvh] bg-background overflow-hidden flex flex-col safe-area-inset">
-      <header className="flex items-center gap-2 px-5 md:px-6 h-16 md:h-20 shrink-0 safe-area-top">
+      <header className="flex items-center gap-2 px-4 md:px-6 h-14 md:h-16 shrink-0 safe-area-top">
         <img
           src={LOGO_URL}
           alt="Neighbourhood Labour Connect"
@@ -313,7 +313,7 @@ export default function FirebaseAuth() {
       </header>
 
       <main className="flex-1 min-h-0 overflow-y-auto">
-        <div className="min-h-full flex items-center justify-center px-4 py-6 md:py-8">
+        <div className="flex items-start justify-center px-4 pt-2 pb-6">
         <div className="w-full max-w-md">
           {step === "phone" && (
             <PhoneStep
@@ -370,7 +370,7 @@ export default function FirebaseAuth() {
         </div>
       </main>
 
-      <footer className="px-6 py-3 text-center">
+      <footer className="px-6 py-2 text-center safe-area-bottom">
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} Neighbourhood Labour Connect
         </p>
