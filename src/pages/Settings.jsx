@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, HandHelping } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LogOut, User } from "lucide-react";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 import { useAuth } from "@/lib/AuthContext";
 import {
@@ -48,14 +47,6 @@ export default function Settings() {
           </div>
 
           <PushNotificationEnabler />
-
-          {/* Actions */}
-          <div className="bg-white rounded-xl border border-slate-100 divide-y divide-slate-100 overflow-hidden">
-            <Link to="/become-provider" className="flex items-center gap-3 px-4 py-3 hover:bg-muted">
-              <HandHelping className="w-5 h-5 text-[#2D7A3E]" />
-              <span className="font-medium text-sm">Become a provider</span>
-            </Link>
-          </div>
 
           <Button
             onClick={() => base44.auth.logout()}

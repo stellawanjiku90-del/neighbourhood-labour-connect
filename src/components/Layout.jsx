@@ -17,7 +17,6 @@ const CUSTOMER_NAV = [
 
 const PROVIDER_NAV = [
   { to: "/", label: "Home", icon: Home },
-  { to: "/jobs", label: "Available Jobs", icon: Briefcase },
   { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/settings", label: "Settings", icon: Settings },
 ];

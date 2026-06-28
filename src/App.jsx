@@ -12,6 +12,7 @@ import Home from '@/pages/Home';
 import PageTransition from '@/components/PageTransition';
 import FirebaseAuth from '@/pages/FirebaseAuth';
 import FirebaseRouteGuard from '@/components/FirebaseRouteGuard';
+import RoleGuard from '@/components/RoleGuard';
 
 // Lazy-loaded routes for code splitting
 const Providers = lazy(() => import('@/pages/Providers'));
@@ -59,18 +60,24 @@ const AuthenticatedApp = () => {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route element={<FirebaseRouteGuard />}>
-          <Route path="/providers" element={<Providers />} />
-          <Route path="/post" element={<PostJob />} />
-          <Route path="/jobs" element={<MyJobs />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route element={<RoleGuard allow={["customer"]} />}>
+            <Route path="/providers" element={<Providers />} />
+            <Route path="/post" element={<PostJob />} />
+            <Route path="/jobs" element={<MyJobs />} />
+          </Route>
         </Route>
       </Route>
       <Route element={<FirebaseRouteGuard />}>
-        <Route path="/provider/:id" element={<PageTransition><ProviderDetail /></PageTransition>} />
-        <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
         <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />
+        <Route element={<RoleGuard allow={["customer"]} />}>
+          <Route path="/provider/:id" element={<PageTransition><ProviderDetail /></PageTransition>} />
+        </Route>
+        <Route element={<RoleGuard allow={["provider"]} />}>
+          <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
+        </Route>
       </Route>
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
