@@ -140,6 +140,11 @@ export function clearRecaptchaVerifier() {
     try { recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
   }
   recaptchaVerifier = null;
+  // Remove the container element entirely. Calling .clear() alone leaves the
+  // rendered grecaptcha widget in the DOM, so creating a new verifier on the
+  // same element throws "reCAPTCHA has already been rendered in this element".
+  const el = document.getElementById("recaptcha-container");
+  if (el) el.remove();
 }
 
 /**

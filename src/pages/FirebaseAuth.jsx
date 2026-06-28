@@ -300,8 +300,8 @@ export default function FirebaseAuth() {
   }
 
   return (
-    <div className="h-[100dvh] bg-background overflow-hidden flex flex-col">
-      <header className="flex items-center gap-2 px-5 md:px-6 h-16 md:h-20 shrink-0">
+    <div className="h-[100dvh] bg-background overflow-hidden flex flex-col safe-area-inset">
+      <header className="flex items-center gap-2 px-5 md:px-6 h-16 md:h-20 shrink-0 safe-area-top">
         <img
           src={LOGO_URL}
           alt="Neighbourhood Labour Connect"

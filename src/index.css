@@ -110,6 +110,10 @@
     padding-top: env(safe-area-inset-top);
   }
 
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   button, a, nav, svg {
     -webkit-user-select: none;
     user-select: none;
