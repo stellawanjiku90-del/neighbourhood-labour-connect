@@ -32,13 +32,34 @@ export default function FirebaseAuth() {
   const [isResettingPin, setIsResettingPin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // On mount: if an active PIN session exists, go home. Otherwise clear any
-  // stale Firebase session so the phone-first flow starts from a clean state.
+  // On mount: if an active PIN session exists, go home — unless the profile
+  // is incomplete, in which case resume at the profile step so the user can
+  // finish registration. Otherwise clear any stale Firebase session so the
+  // phone-first flow starts from a clean state.
   useEffect(() => {
     let active = true;
     (async () => {
       if (sessionStorage.getItem("pin_verified") === "true") {
-        navigate("/");
+        const stored = sessionStorage.getItem("pin_session_profile");
+        if (stored) {
+          try {
+            const profile = JSON.parse(stored);
+            if (profile.profile_completed) {
+              window.location.href = "/";
+              return;
+            }
+            // Incomplete profile — resume at the profile step.
+            setPhone(profile.phone || "");
+            setUserProfile(profile);
+            setRole(profile.role || "customer");
+            setStep("profile");
+            setCheckingAuth(false);
+            return;
+          } catch (e) {
+            // fall through to clean sign-out
+          }
+        }
+        window.location.href = "/";
         return;
       }
       try {
@@ -185,7 +206,7 @@ export default function FirebaseAuth() {
         });
         const profile = data?.profile;
         setPinSession(profile);
-        navigate("/");
+        window.location.href = "/";
       } else {
         // New registration: save initial profile with PIN + role.
         const { data } = await base44.functions.invoke("saveUserProfile", {
@@ -213,7 +234,7 @@ export default function FirebaseAuth() {
       if (pinHash === userProfile?.pin_hash) {
         if (userProfile?.profile_completed) {
           setPinSession(userProfile);
-          navigate("/");
+          window.location.href = "/";
         } else {
           // Resume an incomplete registration at the profile step.
           setRole(userProfile?.role || "customer");
@@ -263,7 +284,7 @@ export default function FirebaseAuth() {
 
       if (data?.id_verified) {
         setPinSession(data?.profile);
-        navigate(role === "provider" ? "/become-provider" : "/");
+        window.location.href = role === "provider" ? "/become-provider" : "/";
       } else {
         setError(
           "ID verification failed. The names on your ID don't match the names you provided. Please check your details and try again."
