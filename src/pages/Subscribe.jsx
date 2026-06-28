@@ -10,11 +10,13 @@ export default function Subscribe() {
   const [paymentState, setPaymentState] = useState("idle"); // idle | pending | success | failed
   const [invoiceId, setInvoiceId] = useState(null);
   const [error, setError] = useState(null);
+  const [errorDetails, setErrorDetails] = useState(null);
   const [phone, setPhone] = useState("");
   const pollRef = useRef(null);
 
   const startPayment = async () => {
     setError(null);
+    setErrorDetails(null);
     setPaymentState("pending");
     try {
       const res = await base44.functions.invoke("createMpesaPayment", {
@@ -23,11 +25,16 @@ export default function Subscribe() {
       setInvoiceId(res.data.invoice_id);
       setPhone(res.data.phone);
     } catch (err) {
+      const intasendError = err.response?.data?.intasend_error;
       setError(
         err.response?.data?.error ||
         err.message ||
         "Failed to initiate payment. Please try again."
       );
+      if (intasendError) {
+        setErrorDetails(intasendError);
+        console.error("[IntaSend] Payment initiation failed:", intasendError);
+      }
       setPaymentState("failed");
     }
   };
@@ -151,7 +158,26 @@ export default function Subscribe() {
           <h1 className="text-xl font-extrabold text-foreground mb-1">
             Payment Not Completed
           </h1>
-          <p className="text-sm text-muted-foreground mb-4">{error}</p>
+          <p className="text-sm text-muted-foreground mb-3">{error}</p>
+          {errorDetails && (
+            <div className="bg-muted/50 rounded-lg p-3 mb-4 text-left space-y-1">
+              <p className="text-xs font-semibold text-foreground">
+                IntaSend Diagnostics
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Environment: <span className="font-medium text-foreground">{errorDetails.environment || "unknown"}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                HTTP Status: <span className="font-medium text-foreground">{errorDetails.http_status}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Endpoint: <span className="font-mono text-foreground break-all">{errorDetails.endpoint}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Raw Response: <span className="font-mono text-foreground break-all">{errorDetails.raw_body}</span>
+              </p>
+            </div>
+          )}
           <button
             onClick={startPayment}
             className="w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332] text-white font-semibold"

@@ -1,8 +1,16 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const INTASEND_STATUS_URL = "https://api.intasend.com/api/v1/payment/status/";
 const SUBSCRIPTION_AMOUNT = 1.00; // USD stored in DB
 const LEVEL_RATES = [0.10, 0.05, 0.02]; // Level 1=10%, 2=5%, 3=2%
+
+function resolveBaseUrl(apiKey, publishableKey) {
+  const isTest =
+    (apiKey && apiKey.includes("test")) ||
+    (publishableKey && publishableKey.includes("test"));
+  return isTest
+    ? "https://sandbox.intasend.com"
+    : "https://api.intasend.com";
+}
 
 Deno.serve(async (req) => {
   try {
@@ -21,8 +29,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: "IntaSend keys not configured" }, { status: 500 });
     }
 
+    const baseUrl = resolveBaseUrl(apiKey, publishableKey);
+    const endpoint = `${baseUrl}/api/v1/payment/status/`;
+
     // Query IntaSend for the current payment status
-    const response = await fetch(INTASEND_STATUS_URL, {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,14 +45,15 @@ Deno.serve(async (req) => {
       }),
     });
 
-    const text = await response.text();
+    const rawText = await response.text();
     let data;
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(rawText);
     } catch {
+      // Non-JSON response — still pending or transient server error
       return Response.json({
         state: "PENDING",
-        note: "Payment is still being processed.",
+        note: `IntaSend returned a non-JSON response (HTTP ${response.status}): "${rawText.trim()}". Payment is still being processed.`,
       });
     }
     const state = data.invoice?.state;
