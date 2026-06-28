@@ -63,6 +63,9 @@ const AuthenticatedApp = () => {
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/refund" element={<Refund />} />
           <Route element={<RoleGuard allow={["customer"]} />}>
             <Route path="/providers" element={<Providers />} />
             <Route path="/post" element={<PostJob />} />
@@ -79,9 +82,6 @@ const AuthenticatedApp = () => {
           <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
         </Route>
       </Route>
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/refund" element={<Refund />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
