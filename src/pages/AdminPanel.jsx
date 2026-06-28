@@ -22,18 +22,11 @@ export default function AdminPanel() {
 
     (async () => {
       try {
-        const [p, jobs, reviews] = await Promise.all([
-          base44.entities.ServiceProvider.list("-created_date", 50),
-          base44.entities.ServiceRequest.list("-created_date", 50),
-          base44.entities.Review.list("-created_date", 50),
-        ]);
-        setProviders(p);
-        setStats({
-          providers: p.length,
-          jobs: jobs.length,
-          openJobs: jobs.filter((j) => j.status === "open").length,
-          reviews: reviews.length,
+        const { data } = await base44.functions.invoke("getAdminData", {
+          firebase_uid: user.id,
         });
+        setProviders(data.providers || []);
+        setStats(data.stats || { providers: 0, jobs: 0, openJobs: 0, reviews: 0 });
       } catch (e) {
         console.error(e);
       } finally {

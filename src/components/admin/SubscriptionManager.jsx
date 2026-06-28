@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, CreditCard } from "lucide-react";
 
 export default function SubscriptionManager() {
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [subs, setSubs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,12 +13,11 @@ export default function SubscriptionManager() {
 
   const load = async () => {
     try {
-      const [userProfiles, subscriptions] = await Promise.all([
-        base44.entities.UserProfile.list("-created_date", 100),
-        base44.entities.Subscription.filter({ status: "active" }, "-created_date", 100),
-      ]);
-      setUsers(userProfiles);
-      setSubs(subscriptions);
+      const { data } = await base44.functions.invoke("getAdminData", {
+        firebase_uid: user?.id,
+      });
+      setUsers(data.userProfiles || []);
+      setSubs(data.subscriptions || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -25,8 +26,9 @@ export default function SubscriptionManager() {
   };
 
   useEffect(() => {
+    if (!user?.id) return;
     load();
-  }, []);
+  }, [user?.id]);
 
   const activeByUser = {};
   subs.forEach((s) => {
@@ -38,7 +40,10 @@ export default function SubscriptionManager() {
   const activate = async (firebaseUid) => {
     setActivating(firebaseUid);
     try {
-      await base44.functions.invoke("activateSubscription", { target_user_id: firebaseUid });
+      await base44.functions.invoke("activateSubscription", {
+        target_user_id: firebaseUid,
+        admin_firebase_uid: user?.id,
+      });
       await load();
     } catch (e) {
       console.error(e);

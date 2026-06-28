@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { CreditCard, Check, Loader2, X, Smartphone } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 
 export default function Subscribe() {
   const { active, periodEnd, loading } = useSubscription();
+  const { user } = useAuth();
   const [paymentState, setPaymentState] = useState("idle"); // idle | pending | success | failed
   const [invoiceId, setInvoiceId] = useState(null);
   const [error, setError] = useState(null);
@@ -15,7 +17,9 @@ export default function Subscribe() {
     setError(null);
     setPaymentState("pending");
     try {
-      const res = await base44.functions.invoke("createMpesaPayment", {});
+      const res = await base44.functions.invoke("createMpesaPayment", {
+        firebase_uid: user?.id,
+      });
       setInvoiceId(res.data.invoice_id);
       setPhone(res.data.phone);
     } catch (err) {
@@ -39,6 +43,7 @@ export default function Subscribe() {
       try {
         const res = await base44.functions.invoke("checkMpesaPayment", {
           invoice_id: invoiceId,
+          firebase_uid: user?.id,
         });
         const state = res.data.state;
 

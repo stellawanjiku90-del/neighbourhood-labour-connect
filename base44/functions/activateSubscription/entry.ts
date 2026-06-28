@@ -6,12 +6,21 @@ const LEVEL_RATES = [0.10, 0.05, 0.02]; // Level 1 = 10%, Level 2 = 5%, Level 3 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    if (user.role !== "admin") return Response.json({ error: "Forbidden — admin only" }, { status: 403 });
-
-    const { target_user_id } = await req.json();
+    const { target_user_id, admin_firebase_uid } = await req.json();
     if (!target_user_id) return Response.json({ error: "target_user_id required" }, { status: 400 });
+    if (!admin_firebase_uid) return Response.json({ error: "admin_firebase_uid required" }, { status: 400 });
+
+    // Verify the caller is an admin via their UserProfile
+    const callerProfiles = await base44.asServiceRole.entities.UserProfile.filter(
+      { firebase_uid: admin_firebase_uid }, null, 1
+    );
+    if (callerProfiles.length === 0) {
+      return Response.json({ error: "Profile not found" }, { status: 404 });
+    }
+    if (callerProfiles[0].role !== "admin") {
+      return Response.json({ error: "Forbidden — admin only" }, { status: 403 });
+    }
+    const adminName = `${callerProfiles[0].first_name || ""} ${callerProfiles[0].surname || ""}`.trim() || callerProfiles[0].phone;
 
     // Look up the subscriber's UserProfile by firebase_uid
     const profiles = await base44.asServiceRole.entities.UserProfile.filter(
@@ -39,7 +48,7 @@ Deno.serve(async (req) => {
       amount: SUBSCRIPTION_AMOUNT,
       period_start: now.toISOString(),
       period_end: periodEnd.toISOString(),
-      activated_by: user.id,
+      activated_by: adminName,
     });
 
     // ─── Cascade referral earnings up to 3 levels ───────────────

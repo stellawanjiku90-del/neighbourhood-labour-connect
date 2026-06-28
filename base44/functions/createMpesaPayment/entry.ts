@@ -6,12 +6,14 @@ const KES_AMOUNT = 130; // KES equivalent of $1/month
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const { firebase_uid } = await req.json();
+    if (!firebase_uid) {
+      return Response.json({ error: "firebase_uid required" }, { status: 400 });
+    }
 
     // Fetch the user's profile to get their phone number and name
     const profiles = await base44.asServiceRole.entities.UserProfile.filter(
-      { firebase_uid: user.id }, null, 1
+      { firebase_uid }, null, 1
     );
     if (profiles.length === 0) {
       return Response.json({ error: "Profile not found" }, { status: 404 });
@@ -28,7 +30,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: "IntaSend keys not configured" }, { status: 500 });
     }
 
-    const apiRef = `NLC|${user.id}`;
+    const apiRef = `NLC|${firebase_uid}`;
 
     const response = await fetch(INTASEND_API_URL, {
       method: "POST",
