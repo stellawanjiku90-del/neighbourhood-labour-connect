@@ -6,6 +6,17 @@ import { subscribeAuthState, signOutFirebase } from "@/lib/firebase";
 
 const AuthContext = createContext();
 
+const buildUserFromProfile = (profile, fallbackId) => ({
+  id: profile?.firebase_uid || fallbackId || profile?.phone,
+  full_name: profile
+    ? `${profile.first_name || ""} ${profile.surname || ""}`.trim() || profile.phone
+    : profile?.phone,
+  phone: profile?.phone,
+  role: profile?.role || "customer",
+  profile,
+  profile_completed: profile?.profile_completed || false,
+});
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,10 +32,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // ─── Subscribe to Firebase auth state ──────────────────────────
-  // The Firebase user object is the single source of truth for the
-  // session. When a Firebase user is present, we fetch the matching
-  // UserProfile and merge them into the `user` value consumed by
-  // the rest of the app via useAuth().
+  // Firebase is only used for OTP verification (registration & PIN reset).
+  // Returning users log in with phone + PIN and are authenticated via a
+  // PIN session stored in sessionStorage (no Firebase session needed).
   useEffect(() => {
     let active = true;
     let unsub = () => {};
@@ -39,18 +49,8 @@ export const AuthProvider = ({ children }) => {
             phone,
           });
           const profile = data?.profile;
-          setUser({
-            id: firebaseUser.uid,
-            full_name: profile
-              ? `${profile.first_name || ""} ${profile.surname || ""}`.trim()
-              : phone,
-            phone,
-            role: profile?.role || "customer",
-            profile,
-            profile_completed: profile?.profile_completed || false,
-          });
+          setUser(buildUserFromProfile(profile, firebaseUser.uid));
         } catch (e) {
-          // Profile fetch failed — still mark as authenticated with Firebase user only
           setUser({
             id: firebaseUser.uid,
             full_name: phone,
@@ -62,8 +62,22 @@ export const AuthProvider = ({ children }) => {
         }
         setIsAuthenticated(true);
       } else {
-        setUser(null);
-        setIsAuthenticated(false);
+        // No Firebase session — restore a PIN session if one is active.
+        const pinVerified = sessionStorage.getItem("pin_verified") === "true";
+        const storedProfile = sessionStorage.getItem("pin_session_profile");
+        if (pinVerified && storedProfile) {
+          try {
+            const profile = JSON.parse(storedProfile);
+            setUser(buildUserFromProfile(profile, profile?.firebase_uid));
+            setIsAuthenticated(true);
+          } catch (e) {
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       }
       setIsLoadingAuth(false);
       setAuthChecked(true);
@@ -82,6 +96,15 @@ export const AuthProvider = ({ children }) => {
       unsub();
     };
   }, []);
+
+  // ─── PIN session: authenticate a returning user without Firebase ──
+  const setPinSession = (profile) => {
+    if (!profile) return;
+    sessionStorage.setItem("pin_verified", "true");
+    sessionStorage.setItem("pin_session_profile", JSON.stringify(profile));
+    setUser(buildUserFromProfile(profile, profile?.firebase_uid));
+    setIsAuthenticated(true);
+  };
 
   const checkAppState = async () => {
     try {
@@ -137,6 +160,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     sessionStorage.removeItem("pin_verified");
+    sessionStorage.removeItem("pin_session_profile");
     try {
       await signOutFirebase();
     } catch (e) {
@@ -163,6 +187,7 @@ export const AuthProvider = ({ children }) => {
         authChecked,
         logout,
         navigateToLogin,
+        setPinSession,
       }}
     >
       {children}

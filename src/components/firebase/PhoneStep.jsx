@@ -81,10 +81,10 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
       >
         {loading ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending code…
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Checking…
           </>
         ) : (
-          "Send Verification Code"
+          "Continue"
         )}
       </Button>
     </div>

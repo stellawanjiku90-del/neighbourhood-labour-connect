@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Lock, Loader2, AlertCircle, KeyRound } from "lucide-react";
+import { Lock, Loader2, AlertCircle, KeyRound, ArrowLeft, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
-export default function PinStep({ mode, onConfirm, onForgotPin, loading, error }) {
+export default function PinStep({ mode, onConfirm, onForgotPin, onBack, infoMessage, loading, error }) {
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [stage, setStage] = useState(1); // 1 = enter, 2 = confirm (setup only)
@@ -47,6 +47,14 @@ export default function PinStep({ mode, onConfirm, onForgotPin, loading, error }
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+      )}
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
         {isSetup ? (
           <KeyRound className="w-7 h-7 text-secondary-foreground" />
@@ -68,6 +76,12 @@ export default function PinStep({ mode, onConfirm, onForgotPin, loading, error }
             : "Re-enter your PIN to confirm."
           : "Enter your 4-digit PIN to access your account."}
       </p>
+      {infoMessage && (
+        <div className="flex items-start gap-2 text-sm text-[#2D7A3E] bg-[#2D7A3E]/5 rounded-xl px-3 py-2 mb-4">
+          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{infoMessage}</span>
+        </div>
+      )}
       <div className="flex justify-center mb-6">
         <InputOTP
           maxLength={4}

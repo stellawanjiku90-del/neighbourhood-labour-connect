@@ -1,13 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
-  subscribeAuthState,
   sendPhoneCode,
   clearRecaptchaVerifier,
   getAuthInstance,
+  signOutFirebase,
 } from "@/lib/firebase";
 import { hashPin } from "@/lib/pin";
+import { useAuth } from "@/lib/AuthContext";
 import PhoneStep from "@/components/firebase/PhoneStep";
 import OtpStep from "@/components/firebase/OtpStep";
 import PinStep from "@/components/firebase/PinStep";
@@ -19,6 +20,7 @@ const LOGO_URL =
 
 export default function FirebaseAuth() {
   const navigate = useNavigate();
+  const { setPinSession } = useAuth();
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
@@ -29,58 +31,26 @@ export default function FirebaseAuth() {
   const [resendTimer, setResendTimer] = useState(0);
   const [isResettingPin, setIsResettingPin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const initialCheckDone = useRef(false);
 
-  // Check Firebase auth state on mount (runs once)
+  // On mount: if an active PIN session exists, go home. Otherwise clear any
+  // stale Firebase session so the phone-first flow starts from a clean state.
   useEffect(() => {
     let active = true;
-    let unsub = () => {};
-
-    subscribeAuthState(async (firebaseUser) => {
-      if (!active || initialCheckDone.current) return;
-      initialCheckDone.current = true;
-
-      if (firebaseUser) {
-        const userPhone = firebaseUser.phoneNumber;
-        setPhone(userPhone);
-        try {
-          const { data } = await base44.functions.invoke("getUserProfile", {
-            phone: userPhone,
-          });
-          const profile = data?.profile;
-          setUserProfile(profile);
-
-          if (profile?.profile_completed && profile?.pin_hash) {
-            if (sessionStorage.getItem("pin_verified") === "true") {
-              navigate("/");
-              return;
-            }
-            setStep("pin-login");
-          } else if (profile?.pin_hash) {
-            setStep("profile");
-          } else {
-            setStep("role");
-          }
-        } catch (e) {
-          setStep("role");
-        }
-      } else {
-        setStep("role");
+    (async () => {
+      if (sessionStorage.getItem("pin_verified") === "true") {
+        navigate("/");
+        return;
       }
+      try {
+        await signOutFirebase();
+      } catch (e) {
+        // ignore
+      }
+      if (!active) return;
       setCheckingAuth(false);
-    })
-      .then((u) => {
-        unsub = u || (() => {});
-      })
-      .catch(() => {
-        if (!active) return;
-        setStep("phone");
-        setCheckingAuth(false);
-      });
-
+    })();
     return () => {
       active = false;
-      unsub();
       clearRecaptchaVerifier();
     };
   }, []);
@@ -120,26 +90,38 @@ export default function FirebaseAuth() {
     );
   };
 
-  const sendCode = async () => {
+  // ─── Phone submit ──────────────────────────────────────────────
+  // Check if the number already has an account:
+  //   - Exists + PIN  → PIN login (no OTP sent)
+  //   - Not exists     → send OTP to begin registration
+  const handlePhoneSubmit = async () => {
     setError(null);
     const normalized = normalizePhone(phone);
     if (normalized.length < 10) {
       setError("Please enter a valid phone number with country code.");
       return;
     }
+    setPhone(normalized);
     setLoading(true);
     try {
-      const confirmation = await sendPhoneCode(normalized);
-      setConfirmationResult(confirmation);
-      setPhone(normalized);
-      setStep("otp");
-      setResendTimer(60);
+      const { data } = await base44.functions.invoke("getUserProfile", {
+        phone: normalized,
+      });
+      const profile = data?.profile;
+
+      if (profile && profile.pin_hash) {
+        // Returning user — log in with PIN, no OTP.
+        setUserProfile(profile);
+        setStep("pin-login");
+      } else {
+        // New number — verify via OTP, then choose role + set PIN.
+        const confirmation = await sendPhoneCode(normalized);
+        setConfirmationResult(confirmation);
+        setStep("otp");
+        setResendTimer(60);
+      }
     } catch (err) {
       handleAuthError(err);
-      // Do NOT clear the verifier on captcha-check-failed — that error is a
-      // server-side hostname validation issue, not a client-side reCAPTCHA
-      // failure. The verifier is still rendered and can be reused. Clearing
-      // it here causes "already rendered" on the next attempt.
     } finally {
       setLoading(false);
     }
@@ -151,21 +133,14 @@ export default function FirebaseAuth() {
     try {
       const result = await confirmationResult.confirm(code);
       const firebaseUser = result.user;
-      const userPhone = firebaseUser.phoneNumber;
-      setPhone(userPhone);
-
-      const { data } = await base44.functions.invoke("getUserProfile", {
-        phone: userPhone,
-      });
-      const profile = data?.profile;
-      setUserProfile(profile);
+      setPhone(firebaseUser.phoneNumber);
 
       if (isResettingPin) {
+        // PIN reset: set a new PIN.
         setStep("pin-setup");
-      } else if (profile?.pin_hash) {
-        setStep("pin-login");
       } else {
-        setStep("pin-setup");
+        // New registration: choose account type, then set PIN.
+        setStep("role");
       }
     } catch (err) {
       handleAuthError(err);
@@ -183,7 +158,6 @@ export default function FirebaseAuth() {
       setResendTimer(60);
     } catch (err) {
       handleAuthError(err);
-      // Verifier is reused — see comment in sendCode()
     } finally {
       setLoading(false);
     }
@@ -191,7 +165,7 @@ export default function FirebaseAuth() {
 
   const selectRole = (r) => {
     setRole(r);
-    setStep("phone");
+    setStep("pin-setup");
   };
 
   const setupPin = async (pin) => {
@@ -202,19 +176,26 @@ export default function FirebaseAuth() {
       const auth = await getAuthInstance();
       const firebaseUser = auth.currentUser;
 
-      const { data } = await base44.functions.invoke("saveUserProfile", {
-        phone,
-        firebase_uid: firebaseUser?.uid,
-        pin_hash: pinHash,
-        role,
-        profile_completed: false,
-      });
-      setUserProfile(data?.profile);
-
       if (isResettingPin) {
-        sessionStorage.setItem("pin_verified", "true");
+        // Reset PIN for an existing account (preserves all other profile data).
+        const { data } = await base44.functions.invoke("resetPin", {
+          phone,
+          pin_hash: pinHash,
+          firebase_uid: firebaseUser?.uid,
+        });
+        const profile = data?.profile;
+        setPinSession(profile);
         navigate("/");
       } else {
+        // New registration: save initial profile with PIN + role.
+        const { data } = await base44.functions.invoke("saveUserProfile", {
+          phone,
+          firebase_uid: firebaseUser?.uid,
+          pin_hash: pinHash,
+          role,
+          profile_completed: false,
+        });
+        setUserProfile(data?.profile);
         setStep("profile");
       }
     } catch (err) {
@@ -230,8 +211,14 @@ export default function FirebaseAuth() {
     try {
       const pinHash = await hashPin(pin);
       if (pinHash === userProfile?.pin_hash) {
-        sessionStorage.setItem("pin_verified", "true");
-        navigate("/");
+        if (userProfile?.profile_completed) {
+          setPinSession(userProfile);
+          navigate("/");
+        } else {
+          // Resume an incomplete registration at the profile step.
+          setRole(userProfile?.role || "customer");
+          setStep("profile");
+        }
       } else {
         setError("Incorrect PIN. Please try again.");
       }
@@ -253,7 +240,6 @@ export default function FirebaseAuth() {
       setResendTimer(60);
     } catch (err) {
       handleAuthError(err);
-      // Verifier is reused — see comment in sendCode()
     } finally {
       setLoading(false);
     }
@@ -276,9 +262,8 @@ export default function FirebaseAuth() {
       });
 
       if (data?.id_verified) {
-        sessionStorage.setItem("pin_verified", "true");
-        const finalRole = data?.role || role;
-        navigate(finalRole === "provider" ? "/become-provider" : "/post");
+        setPinSession(data?.profile);
+        navigate(role === "provider" ? "/become-provider" : "/");
       } else {
         setError(
           "ID verification failed. The names on your ID don't match the names you provided. Please check your details and try again."
@@ -319,7 +304,7 @@ export default function FirebaseAuth() {
             <PhoneStep
               phone={phone}
               setPhone={setPhone}
-              onSendCode={sendCode}
+              onSendCode={handlePhoneSubmit}
               loading={loading}
               error={error}
             />
@@ -355,6 +340,12 @@ export default function FirebaseAuth() {
               mode="login"
               onConfirm={loginWithPin}
               onForgotPin={forgotPin}
+              onBack={() => {
+                setStep("phone");
+                setError(null);
+                setUserProfile(null);
+              }}
+              infoMessage="This phone number is already registered. Please enter your PIN to continue."
               loading={loading}
               error={error}
             />
