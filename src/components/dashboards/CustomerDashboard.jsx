@@ -104,7 +104,8 @@ export default function CustomerDashboard() {
       </header>
 
       {/* Scrollable content */}
-      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4" style={{ paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))' }}>
+        <div className="max-w-2xl mx-auto w-full space-y-5">
         {/* Quick actions */}
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -225,6 +226,7 @@ export default function CustomerDashboard() {
             </div>
           )}
         </section>
+        </div>
       </div>
     </div>
   );

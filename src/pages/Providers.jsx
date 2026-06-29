@@ -103,8 +103,8 @@ export default function Providers() {
       </div>
 
       {/* Horizontal scroll */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3">
-        <div className="flex gap-3 pb-2 h-full">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
+        <div className="flex gap-3 pb-2 h-full max-w-2xl mx-auto w-full">
           {list.map((p) => (
             <div key={p.id} className="min-w-[180px] shrink-0">
               <ProviderCard provider={p} distance={p._dist} compact />

@@ -112,10 +112,10 @@
 
   .page-content {
     @apply flex-1 min-h-0 overflow-y-auto w-full max-w-2xl mx-auto;
-    padding-top: env(safe-area-inset-top, 16px);
-    padding-bottom: env(safe-area-inset-bottom, 16px);
-    padding-left: env(safe-area-inset-left, 16px);
-    padding-right: env(safe-area-inset-right, 16px);
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+    padding-right: calc(16px + env(safe-area-inset-right, 0px));
   }
   
   .page-content-full {
@@ -156,17 +156,25 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* IntaSend modal safe-area handling */
-  .intaSendModal, .intaSend-overlay, [class*="intaSend"] {
-    padding-top: env(safe-area-inset-top, 0px) !important;
-    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-    padding-left: env(safe-area-inset-left, 0px) !important;
-    padding-right: env(safe-area-inset-right, 0px) !important;
+  /* IntaSend modal safe-area handling — aggressive overrides */
+  .intaSendModal, .intaSend-overlay, [class*="intaSend"], .modal-overlay, .payment-modal {
+    padding-top: calc(20px + env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: calc(16px + env(safe-area-inset-left, 0px)) !important;
+    padding-right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+    max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px)) !important;
+    overflow-y: auto !important;
   }
 
-  /* Force safe-area padding on full-screen modals and overlays */
-  div[style*="position: fixed"][style*="inset"] {
-    padding-top: env(safe-area-inset-top, 0px) !important;
-    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  /* Force safe-area padding on all fixed/full-screen overlays */
+  div[style*="position: fixed"], div[style*="position:fixed"] {
+    padding-top: calc(20px + env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Ensure modal content is scrollable and doesn't extend beyond safe areas */
+  [role="dialog"], [aria-modal="true"] {
+    max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px)) !important;
+    overflow-y: auto !important;
   }
 }

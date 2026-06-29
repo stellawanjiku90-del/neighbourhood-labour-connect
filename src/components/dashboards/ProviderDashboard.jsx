@@ -242,8 +242,8 @@ export default function ProviderDashboard() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 md:px-8 py-2">
-        <div className="flex gap-2 pb-2 h-full max-w-2xl mx-auto w-full">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
+        <div className="flex gap-2 pb-2 h-full max-w-2xl mx-auto w-full" style={{ paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))' }}>
           {activeTab === "assigned" && assignedJobs.length === 0 && (
             <p className="text-xs text-muted-foreground text-center w-full py-8">No assigned jobs</p>
           )}

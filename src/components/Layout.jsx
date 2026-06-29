@@ -130,7 +130,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0 overflow-hidden flex flex-col md:pb-0" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'calc(4.25rem + env(safe-area-inset-bottom, 0px))' }}>
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col md:pb-0" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px))', paddingBottom: 'calc(4.25rem + env(safe-area-inset-bottom, 0px))' }}>
         <OfflineBanner />
         <OnboardingPermissions />
         {/* Back-arrow bar only on secondary pages */}
@@ -151,7 +151,7 @@ export default function Layout() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border flex z-40 px-1" style={{ paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))' }}>
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border flex z-40 px-1" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
         {nav.map(({ to, label, icon: Icon, plain }, i) => {
           const content = (
             <>

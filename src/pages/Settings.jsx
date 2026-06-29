@@ -75,7 +75,7 @@ export default function Settings() {
       <PageHeader title="Settings" subtitle="Manage your account" icon={User} />
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
-        <div className="max-w-xl mx-auto w-full space-y-5">
+        <div className="max-w-2xl mx-auto w-full space-y-5">
           {/* Setup reminders */}
           {needsProfileCompletion && (
             <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4 flex items-start gap-3 shadow-sm">

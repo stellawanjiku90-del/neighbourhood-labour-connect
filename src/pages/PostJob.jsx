@@ -77,13 +77,13 @@ export default function PostJob() {
   return (
     <div className="h-full flex flex-col overflow-hidden max-w-2xl mx-auto bg-background">
       {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between">
+      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
         <h1 className="text-lg font-semibold text-foreground">Post Request</h1>
         <Button onClick={() => navigate(-1)} variant="outline" className="h-9 text-sm rounded-lg px-4">Cancel</Button>
       </header>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-hidden px-4 py-3 flex flex-col gap-3">
+      <div className="flex-1 min-h-0 overflow-hidden px-4 py-3 flex flex-col gap-3" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
         {/* Category */}
         <div className="shrink-0">
           <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Category *</label>

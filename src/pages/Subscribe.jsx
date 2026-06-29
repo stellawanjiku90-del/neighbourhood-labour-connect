@@ -42,16 +42,29 @@ export default function Subscribe() {
 
   // ─── Apply safe-area padding to IntaSend modal when it appears ──────
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const modal = document.querySelector('.intaSendModal, [class*="intaSend"]') || 
-                    document.querySelector('div[style*="position: fixed"][style*="inset"]');
-      if (modal) {
-        modal.style.paddingTop = 'env(safe-area-inset-top, 20px)';
-        modal.style.paddingBottom = 'env(safe-area-inset-bottom, 20px)';
+    const applySafeArea = () => {
+      // Target IntaSend modal and any fixed overlay
+      const modals = document.querySelectorAll('.intaSendModal, [class*="intaSend"], div[style*="position: fixed"]');
+      modals.forEach((modal) => {
+        modal.style.paddingTop = 'calc(20px + env(safe-area-inset-top, 0px))';
+        modal.style.paddingBottom = 'calc(20px + env(safe-area-inset-bottom, 0px))';
+        modal.style.paddingLeft = 'calc(16px + env(safe-area-inset-left, 0px))';
+        modal.style.paddingRight = 'calc(16px + env(safe-area-inset-right, 0px))';
         modal.style.maxHeight = 'calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px))';
-      }
-    });
+        modal.style.overflowY = 'auto';
+        // Ensure close button is visible
+        const closeBtn = modal.querySelector('button[aria-label="Close"], button[class*="close"]');
+        if (closeBtn) {
+          closeBtn.style.marginTop = 'env(safe-area-inset-top, 0px)';
+          closeBtn.style.zIndex = '9999';
+        }
+      });
+    };
+    
+    const observer = new MutationObserver(applySafeArea);
     observer.observe(document.body, { childList: true, subtree: true });
+    // Apply immediately in case modal already exists
+    applySafeArea();
     return () => observer.disconnect();
   }, []);
 
