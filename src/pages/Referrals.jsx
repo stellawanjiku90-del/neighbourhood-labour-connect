@@ -50,8 +50,8 @@ export default function Referrals() {
   });
 
   return (
-    <div className="h-full overflow-y-auto px-4 md:px-8 py-6">
-      <div className="max-w-2xl mx-auto w-full">
+    <div className="h-full flex flex-col">
+      <div className="page-content pt-6">
       <h1 className="text-2xl font-extrabold text-foreground mb-1">Referral Program</h1>
       <p className="text-sm text-muted-foreground mb-6">
         Earn when your friends subscribe — up to 3 levels deep.
@@ -165,7 +165,7 @@ export default function Referrals() {
             No earnings yet. You earn when your referrals subscribe!
           </p>
         )}
-        </div>
+      </div>
       </div>
     </div>
   );

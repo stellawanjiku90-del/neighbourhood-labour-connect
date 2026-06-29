@@ -2,7 +2,7 @@
 // across ALL pages. Used by PageHeader and Layout back-arrow bar.
 export default function PageHeader({ title, subtitle, action, icon: Icon }) {
   return (
-    <header className="shrink-0 px-4 md:px-8 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 safe-area-top">
+    <header className="shrink-0 px-4 md:px-8 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex items-center justify-between gap-3 max-w-2xl mx-auto w-full">
         <div className="min-w-0 flex items-center gap-2.5">
           {Icon && (

@@ -45,8 +45,7 @@ export default function Messages() {
     <div className="h-full flex flex-col">
       <PageHeader title="Messages" subtitle="Chat with providers & customers" icon={MessageCircle} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8">
-        <div className="max-w-2xl mx-auto w-full">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content">
         {loading ? (
           <div className="flex justify-center pt-12">
             <div className="w-6 h-6 border-3 border-muted border-t-primary rounded-full animate-spin" />
@@ -96,7 +95,6 @@ export default function Messages() {
             })}
           </div>
         )}
-        </div>
       </div>
     </div>
   );

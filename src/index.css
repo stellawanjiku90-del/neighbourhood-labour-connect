@@ -111,7 +111,16 @@
   }
 
   .page-content {
-    @apply flex-1 min-h-0 overflow-y-auto w-full mx-auto max-w-2xl px-4 md:px-8;
+    @apply flex-1 min-h-0 overflow-y-auto w-full max-w-2xl mx-auto;
+    padding-top: env(safe-area-inset-top, 16px);
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    padding-left: env(safe-area-inset-left, 16px);
+    padding-right: env(safe-area-inset-right, 16px);
+  }
+  
+  .page-content-full {
+    @apply flex-1 min-h-0 overflow-y-auto w-full;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
   }
 
   /* Safe area insets for mobile devices — applied globally */

@@ -71,7 +71,7 @@ export default function CustomerDashboard() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Header: greeting + location */}
-      <header className="shrink-0 px-4 md:px-8 pt-3 pb-2 bg-background safe-area-top">
+      <header className="shrink-0 px-4 md:px-8 pt-3 pb-2 bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
         <div className="flex items-center justify-between gap-3 max-w-[1200px] mx-auto">
           <div className="flex items-center gap-2.5 min-w-0">
             <img src={LOGO_URL} alt="NLC" className="w-9 h-9 rounded-xl shrink-0" />
