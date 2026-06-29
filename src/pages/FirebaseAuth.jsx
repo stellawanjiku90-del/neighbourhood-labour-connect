@@ -31,6 +31,8 @@ export default function FirebaseAuth() {
   const [resendTimer, setResendTimer] = useState(0);
   const [isResettingPin, setIsResettingPin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  // Raw Firebase error for the debug panel (code + full object).
+  const [debugError, setDebugError] = useState(null);
 
   // On mount: if an active PIN session exists, go home — unless the profile
   // is incomplete, in which case resume at the profile step so the user can
@@ -90,6 +92,7 @@ export default function FirebaseAuth() {
 
   const handleAuthError = (err) => {
     console.error("[FirebaseAuth] Auth error:", err?.code, err?.message, err);
+    setDebugError(err);
     const map = {
       "auth/invalid-phone-number":
         "Please enter a valid phone number with country code (e.g. +254712345678).",
@@ -322,7 +325,7 @@ export default function FirebaseAuth() {
         <div className="w-full max-w-md">
           {step === "phone" && (
             <>
-              <AuthDebugPanel />
+              <AuthDebugPanel error={debugError} />
               <PhoneStep
               phone={phone}
               setPhone={setPhone}
