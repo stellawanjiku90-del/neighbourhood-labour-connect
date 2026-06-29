@@ -4,11 +4,12 @@ import { base44 } from "@/api/base44Client";
 import CategoryIcon from "@/components/CategoryIcon";
 import RateDialog from "@/components/RateDialog";
 import BidsDialog from "@/components/BidsDialog";
+import TrackProviderDialog from "@/components/TrackProviderDialog";
 import { getOrCreateConversation } from "@/lib/chat";
 import { useAuth } from "@/lib/AuthContext";
 import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
-import { Siren, MapPin, CheckCircle2, Users, MessageCircle } from "lucide-react";
+import { Siren, MapPin, CheckCircle2, Users, MessageCircle, Navigation } from "lucide-react";
 
 const STATUS_STYLE = {
   open: "bg-[#CFE0F0] text-[#5A6072]",
@@ -23,6 +24,7 @@ export default function MyJobs() {
   const [bidCounts, setBidCounts] = useState({});
   const [rating, setRating] = useState(null);
   const [bidsJob, setBidsJob] = useState(null);
+  const [trackJob, setTrackJob] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -115,20 +117,31 @@ export default function MyJobs() {
                 )}
 
                 {(job.status === "accepted" || job.status === "in_progress") && (
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      onClick={() => messageProvider(job)}
-                      variant="outline"
-                      className="flex-1 rounded-lg h-9 gap-1.5 text-sm"
-                    >
-                      <MessageCircle className="w-4 h-4" /> Message
-                    </Button>
-                    <Button
-                      onClick={() => complete(job)}
-                      className="flex-1 rounded-lg h-9 gap-1.5 text-sm bg-primary hover:bg-primary/90"
-                    >
-                      <CheckCircle2 className="w-4 h-4" /> Complete
-                    </Button>
+                  <div className="space-y-2 mt-3">
+                    {job.assigned_provider_id && (
+                      <Button
+                        onClick={() => setTrackJob(job)}
+                        variant="outline"
+                        className="w-full rounded-lg h-9 gap-1.5 text-sm border-[#2D7A3E]/30 text-[#2D7A3E]"
+                      >
+                        <Navigation className="w-4 h-4" /> Track location
+                      </Button>
+                    )}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => messageProvider(job)}
+                        variant="outline"
+                        className="flex-1 rounded-lg h-9 gap-1.5 text-sm"
+                      >
+                        <MessageCircle className="w-4 h-4" /> Message
+                      </Button>
+                      <Button
+                        onClick={() => complete(job)}
+                        className="flex-1 rounded-lg h-9 gap-1.5 text-sm bg-primary hover:bg-primary/90"
+                      >
+                        <CheckCircle2 className="w-4 h-4" /> Complete
+                      </Button>
+                    </div>
                   </div>
                 )}
 
@@ -151,6 +164,7 @@ export default function MyJobs() {
 
       {rating && <RateDialog open={!!rating} onOpenChange={(v) => !v && setRating(null)} request={rating} onDone={load} />}
       <BidsDialog open={!!bidsJob} onOpenChange={(v) => !v && setBidsJob(null)} job={bidsJob} onDone={load} />
+      <TrackProviderDialog open={!!trackJob} onOpenChange={(v) => !v && setTrackJob(null)} job={trackJob} />
     </div>
   );
 }

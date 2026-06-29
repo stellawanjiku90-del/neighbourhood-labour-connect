@@ -70,6 +70,34 @@ export default function ProviderDashboard() {
     load();
   }, []);
 
+  // Broadcast live location to customers tracking in-progress jobs.
+  // Updates every 30s while the provider has the dashboard open.
+  useEffect(() => {
+    const inProgress = assignedJobs.filter((j) => j.status === "in_progress");
+    if (inProgress.length === 0 || !navigator.geolocation) return;
+    const update = () => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          await Promise.all(
+            inProgress.map((j) =>
+              base44.entities.ServiceRequest.update(j.id, {
+                provider_lat: latitude,
+                provider_lng: longitude,
+                provider_loc_updated_at: new Date().toISOString(),
+              })
+            )
+          );
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    };
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, [assignedJobs]);
+
   const toggleAvailable = async () => {
     if (!provider) return;
     const updated = await base44.entities.ServiceProvider.update(provider.id, { available: !provider.available });

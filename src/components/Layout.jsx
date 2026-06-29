@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import NavigationArrows from "@/components/NavigationArrows";
 import OfflineBanner from "@/components/OfflineBanner";
+import OnboardingPermissions from "@/components/OnboardingPermissions";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
@@ -102,6 +103,7 @@ export default function Layout() {
 
       <main className="flex-1 min-w-0 overflow-hidden flex flex-col pt-[env(safe-area-inset-top)] pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
         <OfflineBanner />
+        <OnboardingPermissions />
         <div className="shrink-0 flex items-center px-3 h-11 border-b border-slate-100 bg-background/90 backdrop-blur">
           <NavigationArrows />
         </div>

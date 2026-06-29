@@ -55,6 +55,19 @@
     "customer_name": {
       "type": "string",
       "description": "Display name of the customer"
+    },
+    "provider_lat": {
+      "type": "number",
+      "description": "Live latitude of the assigned provider while en route"
+    },
+    "provider_lng": {
+      "type": "number",
+      "description": "Live longitude of the assigned provider while en route"
+    },
+    "provider_loc_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the provider last updated their live location"
     }
   },
   "required": [
