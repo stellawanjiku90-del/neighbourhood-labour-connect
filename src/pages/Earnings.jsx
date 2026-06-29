@@ -78,10 +78,10 @@ export default function Earnings() {
     <div className="h-full flex flex-col overflow-hidden">
       <PageHeader title="Earnings" subtitle="Jobs & referral income" icon={Wallet} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-4">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
         <div className="max-w-2xl mx-auto w-full space-y-5">
         {/* Total earnings hero */}
-        <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-5 text-primary-foreground">
+        <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-5 text-primary-foreground shadow-sm">
           <p className="text-sm opacity-90 mb-1">Total Earnings</p>
           <p className="text-4xl font-extrabold">${total.toFixed(2)}</p>
           <div className="flex gap-4 mt-3 text-xs opacity-90">
@@ -102,7 +102,7 @@ export default function Earnings() {
         </div>
 
         {/* Subscription status */}
-        <div className={`rounded-2xl p-3.5 flex items-center gap-3 ${data.subscription?.active ? "bg-accent" : "bg-muted"}`}>
+        <div className={`rounded-2xl p-3.5 flex items-center gap-3 border ${data.subscription?.active ? "bg-accent border-accent" : "bg-muted border-border"}`}>
           {data.subscription?.active ? (
             <Check className="w-5 h-5 text-primary shrink-0" />
           ) : (
@@ -119,7 +119,7 @@ export default function Earnings() {
         </div>
 
         {/* Referral code card */}
-        <div className="bg-card rounded-2xl border border-border p-4">
+        <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <Gift className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-foreground">Your referral code</h3>
@@ -168,7 +168,7 @@ export default function Earnings() {
         {/* Provider job stats */}
         {isProvider && (
           <section>
-            <h3 className="text-sm font-bold text-foreground mb-2">Job earnings</h3>
+            <h3 className="text-sm font-bold text-foreground mb-2.5">Job earnings</h3>
             <div className="grid grid-cols-3 gap-2.5">
               <StatCard icon={Wallet} label="Earned" value={`$${(data.provider.earnings || 0).toFixed(0)}`} />
               <StatCard icon={Briefcase} label="Completed" value={data.provider.completed_jobs || 0} />
@@ -179,7 +179,7 @@ export default function Earnings() {
 
         {/* Referral rate cards */}
         <section>
-          <h3 className="text-sm font-bold text-foreground mb-2">Commission rates</h3>
+          <h3 className="text-sm font-bold text-foreground mb-2.5">Commission rates</h3>
           <div className="grid grid-cols-3 gap-2.5">
             <RateCard level={1} rate="10%" amount={data.referral?.by_level?.[0] || 0} />
             <RateCard level={2} rate="5%" amount={data.referral?.by_level?.[1] || 0} />
@@ -189,12 +189,12 @@ export default function Earnings() {
 
         {/* Earnings history */}
         <section>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2.5">
             <h3 className="text-sm font-bold text-foreground">Earnings history</h3>
             <Link to="/referrals" className="text-xs font-semibold text-primary">Full report →</Link>
           </div>
           {history.length === 0 ? (
-            <div className="bg-card rounded-2xl border border-dashed border-border">
+            <div className="bg-card rounded-2xl border border-dashed border-border shadow-sm">
               <EmptyState
                 icon={TrendingUp}
                 title="No earnings yet"
@@ -204,7 +204,7 @@ export default function Earnings() {
               />
             </div>
           ) : (
-            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-sm">
               {history.slice(0, 12).map((e) => (
                 <div key={e.id} className="flex items-center gap-3 px-4 py-3">
                   <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
@@ -226,8 +226,8 @@ export default function Earnings() {
         {/* Withdrawal history */}
         {withdrawHistory.length > 0 && (
           <section>
-            <h3 className="text-sm font-bold text-foreground mb-2">Withdrawal history</h3>
-            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+            <h3 className="text-sm font-bold text-foreground mb-2.5">Withdrawal history</h3>
+            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-sm">
               {withdrawHistory.map((w) => {
                 const statusIcon = w.status === "completed" ? Check
                   : w.status === "failed" ? XCircle

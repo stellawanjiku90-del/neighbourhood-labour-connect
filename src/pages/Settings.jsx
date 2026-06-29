@@ -72,14 +72,13 @@ export default function Settings() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="shrink-0" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }} />
       <PageHeader title="Settings" subtitle="Manage your account" icon={User} />
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
-        <div className="w-full max-w-xl mx-auto space-y-5">
+        <div className="max-w-xl mx-auto w-full space-y-5">
           {/* Setup reminders */}
           {needsProfileCompletion && (
-            <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4 flex items-start gap-3">
+            <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
               <AlertCircle className="w-5 h-5 text-warning-soft-foreground shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-bold text-warning-soft-foreground">Complete Your Profile</p>
@@ -97,7 +96,7 @@ export default function Settings() {
           )}
 
           {needsSubscription && !needsProfileCompletion && (
-            <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4 flex items-start gap-3">
+            <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
               <AlertCircle className="w-5 h-5 text-warning-soft-foreground shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-bold text-warning-soft-foreground">Subscribe to Get Started</p>
@@ -115,7 +114,7 @@ export default function Settings() {
           )}
 
           {!needsProfileCompletion && !needsSubscription && (
-            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
+            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
               <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-bold text-primary">All Set!</p>
@@ -127,7 +126,7 @@ export default function Settings() {
           )}
 
           {/* Profile card */}
-          <div className="bg-card rounded-2xl p-4 border border-border flex items-center gap-3.5">
+          <div className="bg-card rounded-2xl p-4 border border-border flex items-center gap-3.5 shadow-sm">
             <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center text-accent-foreground font-extrabold text-xl shrink-0">
               {user?.full_name?.[0] || <User className="w-6 h-6" />}
             </div>
@@ -141,7 +140,7 @@ export default function Settings() {
           </div>
 
           {/* Notifications */}
-          <div className="bg-card rounded-2xl border border-border p-4">
+          <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
             <div className="flex items-center gap-2.5 mb-3">
               <Bell className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-bold text-foreground">Notifications</h3>
@@ -150,7 +149,7 @@ export default function Settings() {
           </div>
 
           {/* Account actions */}
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
             {[
               { icon: CreditCard, label: "Subscription & Billing", to: "/subscribe" },
               { icon: KeyRound, label: "Change PIN", onClick: () => setPinOpen(true) },

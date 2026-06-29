@@ -164,10 +164,10 @@ export default function ProviderDashboard() {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-background">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 px-4 md:px-8 py-2.5 border-b border-border bg-background safe-area-top">
-        <div className="flex items-center justify-between max-w-[1200px] mx-auto">
+      <header className="shrink-0 px-4 md:px-8 py-2.5 border-b border-border bg-background" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <div className="flex items-center justify-between max-w-2xl mx-auto w-full">
           <div className="flex items-center gap-2.5">
             <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />
             <h1 className="text-base font-semibold text-foreground">{firstName}</h1>
@@ -200,7 +200,7 @@ export default function ProviderDashboard() {
 
       {/* Stats */}
       <div className="shrink-0 px-4 md:px-8 py-2 bg-background">
-        <div className="grid grid-cols-3 gap-1.5 max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-3 gap-1.5 max-w-2xl mx-auto w-full">
           <div className="bg-card rounded-lg p-2 border border-border text-center">
             <Wallet className="w-3.5 h-3.5 text-[#2D7A3E] mx-auto mb-0.5" />
             <p className="text-base font-bold text-foreground">{provider.earnings || 0}</p>
@@ -221,7 +221,7 @@ export default function ProviderDashboard() {
 
       {/* Tabs */}
       <div className="shrink-0 px-4 md:px-8 py-1.5 border-t border-border bg-background">
-        <div className="flex gap-1.5 max-w-[1200px] mx-auto">
+        <div className="flex gap-1.5 max-w-2xl mx-auto w-full">
           <button
             onClick={() => setActiveTab("assigned")}
             className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
@@ -243,12 +243,12 @@ export default function ProviderDashboard() {
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-x-auto px-4 md:px-8 py-2">
-        <div className="flex gap-2 pb-2 h-full max-w-[1200px] mx-auto">
+        <div className="flex gap-2 pb-2 h-full max-w-2xl mx-auto w-full">
           {activeTab === "assigned" && assignedJobs.length === 0 && (
             <p className="text-xs text-muted-foreground text-center w-full py-8">No assigned jobs</p>
           )}
           {activeTab === "assigned" && assignedJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[180px] shrink-0 bg-[#C9E8D8] rounded-lg border border-[#2D7A3E]/20 p-2">
+            <div key={job.id} className="min-w-[180px] shrink-0 bg-[#C9E8D8] rounded-lg border border-[#2D7A3E]/20 p-2 shadow-sm">
               <div className="flex items-center gap-1 mb-1">
                 <span className="text-[10px] font-medium text-[#2D7A3E] bg-white/60 px-1.5 py-0.5 rounded-md truncate max-w-[100px]">
                   {job.category}
@@ -292,7 +292,7 @@ export default function ProviderDashboard() {
             <p className="text-xs text-muted-foreground text-center w-full py-8">No open jobs</p>
           )}
           {activeTab === "open" && openJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[180px] shrink-0 bg-card rounded-lg border border-border p-2">
+            <div key={job.id} className="min-w-[180px] shrink-0 bg-card rounded-lg border border-border p-2 shadow-sm">
               <div className="flex items-center gap-1 mb-1">
                 <span className="text-[10px] font-medium text-[#2D7A3E] bg-[#C9E8D8] px-1.5 py-0.5 rounded-md truncate max-w-[80px]">
                   {job.category}

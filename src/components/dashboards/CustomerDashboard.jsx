@@ -69,10 +69,10 @@ export default function CustomerDashboard() {
   const featuredCats = CATEGORIES.slice(0, 8);
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-background">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header: greeting + location */}
       <header className="shrink-0 px-4 md:px-8 pt-3 pb-2 bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
-        <div className="flex items-center justify-between gap-3 max-w-[1200px] mx-auto">
+        <div className="flex items-center justify-between gap-3 max-w-2xl mx-auto w-full">
           <div className="flex items-center gap-2.5 min-w-0">
             <img src={LOGO_URL} alt="NLC" className="w-9 h-9 rounded-xl shrink-0" />
             <div className="min-w-0">
@@ -94,7 +94,7 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Search */}
-        <div className="mt-3 max-w-[1200px] mx-auto">
+        <div className="mt-3 max-w-2xl mx-auto w-full">
           <CategorySearch
             value=""
             onChange={(v) => v && navigate(`/providers?category=${encodeURIComponent(v)}`)}
@@ -104,12 +104,12 @@ export default function CustomerDashboard() {
       </header>
 
       {/* Scrollable content */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 pb-6 space-y-5 max-w-[1200px] mx-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4 space-y-5">
         {/* Quick actions */}
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={goToPostJob}
-            className="rounded-2xl bg-primary text-primary-foreground p-4 text-left flex flex-col gap-1 active:scale-[0.98] transition-transform"
+            className="rounded-2xl bg-primary text-primary-foreground p-4 text-left flex flex-col gap-1 active:scale-[0.98] transition-transform shadow-sm"
           >
             <Plus className="w-5 h-5" />
             <span className="text-sm font-bold">Post a Job</span>
@@ -117,7 +117,7 @@ export default function CustomerDashboard() {
           </button>
           <button
             onClick={() => navigate("/providers")}
-            className="rounded-2xl bg-accent text-accent-foreground p-4 text-left flex flex-col gap-1 active:scale-[0.98] transition-transform"
+            className="rounded-2xl bg-accent text-accent-foreground p-4 text-left flex flex-col gap-1 active:scale-[0.98] transition-transform shadow-sm"
           >
             <Search className="w-5 h-5" />
             <span className="text-sm font-bold">Find Help</span>
@@ -128,7 +128,7 @@ export default function CustomerDashboard() {
         {/* Emergency banner */}
         <div
           onClick={() => goToPostJob()}
-          className="flex items-center gap-3 rounded-2xl bg-warning-soft border border-warning/20 p-3 active:scale-[0.99] transition-transform cursor-pointer"
+          className="flex items-center gap-3 rounded-2xl bg-warning-soft border border-warning/20 p-3 active:scale-[0.99] transition-transform cursor-pointer shadow-sm"
         >
           <span className="w-10 h-10 rounded-xl bg-warning text-warning-foreground flex items-center justify-center shrink-0">
             <Siren className="w-5 h-5" />
@@ -150,7 +150,7 @@ export default function CustomerDashboard() {
                 onClick={() => navigate(`/providers?category=${encodeURIComponent(c.name)}`)}
                 className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
               >
-                <span className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center">
+                <span className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center shadow-sm">
                   <CategoryIcon name={c.icon} className="w-6 h-6 text-primary" />
                 </span>
                 <span className="text-[10px] font-medium text-foreground text-center leading-tight line-clamp-2">
@@ -196,7 +196,7 @@ export default function CustomerDashboard() {
         <section>
           <SectionTitle>Recent job posts</SectionTitle>
           {openJobs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+            <div className="rounded-2xl border border-dashed border-border p-6 text-center bg-card shadow-sm">
               <p className="text-sm text-muted-foreground mb-3">No open jobs in your area yet.</p>
               <Button onClick={goToPostJob} variant="outline" className="rounded-xl">
                 <Plus className="w-4 h-4" /> Post the first job
@@ -207,7 +207,7 @@ export default function CustomerDashboard() {
               {openJobs.slice(0, 5).map((job) => {
                 const icon = CATEGORIES.find((c) => c.name === job.category)?.icon;
                 return (
-                  <div key={job.id} className="flex items-center gap-3 bg-card rounded-2xl border border-border p-3">
+                  <div key={job.id} className="flex items-center gap-3 bg-card rounded-2xl border border-border p-3 shadow-sm">
                     <span className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center shrink-0">
                       <CategoryIcon name={icon} className="w-5 h-5 text-accent-foreground" />
                     </span>

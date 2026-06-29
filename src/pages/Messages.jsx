@@ -42,28 +42,26 @@ export default function Messages() {
   const isCustomer = user?.role !== "provider";
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       <PageHeader title="Messages" subtitle="Chat with providers & customers" icon={MessageCircle} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto page-content">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
         {loading ? (
-          <div className="flex justify-center pt-12">
+          <div className="flex justify-center py-12">
             <div className="w-6 h-6 border-3 border-muted border-t-primary rounded-full animate-spin" />
           </div>
         ) : convos.length === 0 ? (
-          <div className="pt-4">
-            <EmptyState
-              icon={MessageCircle}
-              title="No conversations yet"
-              description={isCustomer
-                ? "Once a provider is matched to your job, you can chat with them here. Find a provider to get started."
-                : "When a customer accepts your offer, your conversation with them will appear here."}
-              actionLabel={isCustomer ? "Find help" : undefined}
-              to={isCustomer ? "/providers" : undefined}
-            />
-          </div>
+          <EmptyState
+            icon={MessageCircle}
+            title="No conversations yet"
+            description={isCustomer
+              ? "Once a provider is matched to your job, you can chat with them here. Find a provider to get started."
+              : "When a customer accepts your offer, your conversation with them will appear here."}
+            actionLabel={isCustomer ? "Find help" : undefined}
+            to={isCustomer ? "/providers" : undefined}
+          />
         ) : (
-          <div className="bg-card border-t border-border divide-y divide-border">
+          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
             {convos.map((c) => {
               const fromCustomer = c.customer_id === user?.id;
               const name = fromCustomer ? c.provider_name : c.customer_name;
