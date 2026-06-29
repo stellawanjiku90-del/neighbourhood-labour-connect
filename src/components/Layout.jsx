@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink, useLocation, useOutlet } from "react-router-dom";
-import { Home, Search, PlusCircle, Briefcase, MessageCircle, Settings, Shield, Gift, Wallet } from "lucide-react";
+import { Home, Search, Briefcase, MessageCircle, Settings, Shield, Gift, Wallet } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import NavigationArrows from "@/components/NavigationArrows";
@@ -11,7 +11,6 @@ const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f685
 const CUSTOMER_NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/providers", label: "Find Help", icon: Search },
-  { to: "/post", label: "Post Job", icon: PlusCircle },
   { to: "/jobs", label: "My Jobs", icon: Briefcase },
   { to: "/earnings", label: "Earnings", icon: Wallet },
   { to: "/messages", label: "Messages", icon: MessageCircle },
