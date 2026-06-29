@@ -53,36 +53,38 @@ export default function LandingPage() {
           </div>
 
           {/* Scrolling service photos — single continuous line */}
-          <div className="flex-1 min-h-0 flex flex-col justify-center my-2 md:my-3">
+          <div className="flex-1 min-h-0 flex flex-col justify-center my-3 md:my-4">
             <ServiceMarquee services={ALL_SERVICES} speed={55} />
           </div>
 
-          {/* Testimonials Section */}
-          <div className="shrink-0 mt-4 md:mt-6">
-            <div className="text-center mb-4">
-              <p className="font-display font-bold text-foreground text-sm md:text-base">Trusted by Thousands Across Africa</p>
+          {/* Testimonials Section - Single Moving Line */}
+          <div className="shrink-0 mt-8 md:mt-10 overflow-hidden">
+            <div className="text-center mb-2.5">
+              <p className="font-display font-bold text-foreground text-sm md:text-base">Trusted by Thousands</p>
               <p className="text-xs text-muted-foreground mt-1">Real stories from real users</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-5xl mx-auto">
-              {TESTIMONIALS.map((t, i) => (
-                <div key={i} className="bg-card rounded-2xl border border-border p-3.5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="w-3.5 h-3.5 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="text-xs text-foreground leading-snug line-clamp-4 mb-3">"{t.text}"</p>
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-[10px] font-bold text-primary">{t.name.charAt(0)}</span>
+            <div className="relative">
+              <div className="flex animate-marquee gap-3" style={{ animationDuration: '65s' }}>
+                {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
+                  <div key={i} className="bg-card rounded-xl border border-border p-3 shadow-sm flex-shrink-0 w-[260px]">
+                    <div className="flex items-center gap-1 mb-1.5">
+                      {[...Array(5)].map((_, j) => (
+                        <Star key={j} className="w-2.5 h-2.5 fill-primary text-primary" />
+                      ))}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-foreground truncate">{t.name}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{t.location}</p>
+                    <p className="text-[10px] text-foreground leading-snug line-clamp-3 mb-2">"{t.text}"</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-[8px] font-bold text-primary">{t.name.charAt(0)}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-semibold text-foreground truncate">{t.name}</p>
+                        <p className="text-[8px] text-muted-foreground truncate">{t.location}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
