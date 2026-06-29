@@ -6,20 +6,21 @@ import ServiceMarquee from "@/components/ServiceMarquee";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
+// Real, African-context photography — Black African people performing each service
 const ROW_1 = [
-  { label: "Hair Braiding", img: "https://images.unsplash.com/photo-1757866332840-230be07b786e?fm=jpg&q=80&w=600&auto=format&fit=crop" },
-  { label: "TV Mounting", img: "https://images.unsplash.com/photo-1521607630287-ee2e81ad3ced?fm=jpg&q=80&w=600&auto=format&fit=crop" },
-  { label: "Carpentry", img: "https://images.unsplash.com/photo-1505798577917-a65157d3320a?fm=jpg&q=80&w=600&auto=format&fit=crop" },
-  { label: "Home Cleaning", img: "https://images.unsplash.com/photo-1686178827149-6d55c72d81df?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Hair Braiding", img: "https://images.unsplash.com/photo-1702236240794-58dc4c6895e5?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Carpentry", img: "https://images.unsplash.com/photo-1687422810663-c316494f725a?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Home Cleaning", img: "https://images.unsplash.com/photo-1755076347857-43a39490f08c?fm=jpg&q=80&w=600&auto=format&fit=crop" },
   { label: "Electrical", img: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Wall Painting", img: "https://images.unsplash.com/photo-1688372199140-cade7ae820fe?fm=jpg&q=80&w=600&auto=format&fit=crop" },
 ];
 
 const ROW_2 = [
-  { label: "Massage Therapy", img: "https://plus.unsplash.com/premium_photo-1661729458610-3cba8e647031?fm=jpg&q=80&w=600&auto=format&fit=crop" },
-  { label: "Plumbing", img: "https://plus.unsplash.com/premium_photo-1661884973994-d7625e52631a?fm=jpg&q=80&w=600&auto=format&fit=crop" },
-  { label: "AC & HVAC", img: "https://plus.unsplash.com/premium_photo-1683134512538-7b390d0adc9e?fm=jpg&q=80&w=600&auto=format&fit=crop" },
-  { label: "Handyman", img: "https://images.unsplash.com/photo-1676311396794-f14881e9daaa?fm=jpg&q=80&w=600&auto=format&fit=crop" },
-  { label: "Floor Care", img: "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Massage & Spa", img: "https://images.unsplash.com/photo-1677682693087-711e24efaa69?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Salon & Beauty", img: "https://images.unsplash.com/photo-1702236242829-a34c39814f31?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Plumbing & Repairs", img: "https://images.unsplash.com/photo-1728167087497-23d18400d6b9?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Floor Care", img: "https://images.unsplash.com/photo-1758273238698-c98a45a8df9a?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Construction", img: "https://images.unsplash.com/photo-1740825961434-e9287638592b?fm=jpg&q=80&w=600&auto=format&fit=crop" },
 ];
 
 export default function LandingPage() {
