@@ -13,6 +13,7 @@ import OtpStep from "@/components/firebase/OtpStep";
 import PinStep from "@/components/firebase/PinStep";
 import ProfileSetupStep from "@/components/firebase/ProfileSetupStep";
 import RoleStep from "@/components/firebase/RoleStep";
+import AuthDebugPanel from "@/components/AuthDebugPanel";
 
 const LOGO_URL =
   "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -320,13 +321,16 @@ export default function FirebaseAuth() {
         <div className="flex items-start justify-center px-4 pt-2 pb-6">
         <div className="w-full max-w-md">
           {step === "phone" && (
-            <PhoneStep
+            <>
+              <AuthDebugPanel />
+              <PhoneStep
               phone={phone}
               setPhone={setPhone}
               onSendCode={handlePhoneSubmit}
               loading={loading}
               error={error}
             />
+            </>
           )}
           {step === "otp" && (
             <OtpStep
