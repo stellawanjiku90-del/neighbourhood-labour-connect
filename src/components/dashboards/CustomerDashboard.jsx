@@ -1,143 +1,225 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import CategorySearch from "@/components/CategorySearch";
+import CategoryIcon from "@/components/CategoryIcon";
 import ProviderCard from "@/components/ProviderCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
-import LegalLinks from "@/components/LegalLinks";
-import { Plus, Siren, Users } from "lucide-react";
+import { CATEGORIES, EMERGENCY_CATEGORIES, distanceKm } from "@/lib/categories";
+import { useGeoLocation } from "@/hooks/useGeoLocation";
+import { Plus, Siren, MapPin, Search, ChevronRight, Star, Loader2, Navigation } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
 export default function CustomerDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { detect } = useGeoLocation();
   const [top, setTop] = useState([]);
-  const [openJobs, setOpenJobs] = useState(0);
-  const [activeTab, setActiveTab] = useState("overview");
-
-  const refresh = async () => {
-    const [topData, jobsData] = await Promise.all([
-      base44.entities.ServiceProvider.filter({ available: true }, "-rating", 6),
-      base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 100),
-    ]);
-    setTop(topData);
-    setOpenJobs(jobsData.length);
-  };
-
-  useEffect(() => {
-    refresh();
-  }, []);
+  const [openJobs, setOpenJobs] = useState([]);
+  const [location, setLocation] = useState(null);
+  const [locating, setLocating] = useState(false);
 
   const firstName = user?.full_name?.split(" ")[0] || "there";
 
+  const refresh = useCallback(async () => {
+    const [topData, jobsData] = await Promise.all([
+      base44.entities.ServiceProvider.filter({ available: true }, "-rating", 12),
+      base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 30),
+    ]);
+    setTop(topData);
+    setOpenJobs(jobsData);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  // Try to resolve current location once for the header + proximity sort.
+  useEffect(() => {
+    let active = true;
+    setLocating(true);
+    detect().then((res) => {
+      if (active && res) setLocation(res);
+      if (active) setLocating(false);
+    });
+    return () => { active = false; };
+  }, [detect]);
+
+  const nearby = location?.lat != null
+    ? [...top]
+        .map((p) => ({ ...p, _dist: distanceKm(location.lat, location.lng, p.lat, p.lng) }))
+        .filter((p) => p._dist != null)
+        .sort((a, b) => a._dist - b._dist)
+        .slice(0, 6)
+    : top.slice(0, 6);
+
+  const emergencies = openJobs.filter((j) => j.emergency).slice(0, 4);
+  const featuredCats = CATEGORIES.slice(0, 8);
+
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
-      {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />
-            <h1 className="text-base font-semibold text-foreground">{firstName}</h1>
+      {/* Header: greeting + location */}
+      <header className="shrink-0 px-4 pt-3 pb-2 bg-background">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img src={LOGO_URL} alt="NLC" className="w-9 h-9 rounded-xl shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground leading-tight">Hello, {firstName}</p>
+              <button
+                onClick={() => { setLocating(true); detect().then((r) => { setLocation(r); setLocating(false); }); }}
+                className="flex items-center gap-1 text-sm font-bold text-foreground leading-tight truncate"
+              >
+                <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span className="truncate max-w-[160px]">
+                  {locating ? "Locating…" : location?.location_name || "Set location"}
+                </span>
+              </button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={() => navigate("/post")} className="rounded-lg h-8 w-8 p-0 bg-primary hover:bg-primary/90">
-              <Plus className="w-3.5 h-3.5" />
-            </Button>
-            <Button onClick={() => navigate("/providers")} variant="outline" className="rounded-lg h-8 w-8 p-0">
-              <Users className="w-3.5 h-3.5" />
-            </Button>
-          </div>
+          <Button onClick={() => navigate("/post")} className="rounded-xl h-10 px-4 shrink-0">
+            <Plus className="w-4 h-4" /> Post Job
+          </Button>
+        </div>
+
+        {/* Search */}
+        <div className="mt-3">
+          <CategorySearch
+            value=""
+            onChange={(v) => v && navigate(`/providers?category=${encodeURIComponent(v)}`)}
+            placeholder="What do you need help with?"
+          />
         </div>
       </header>
 
-      {/* Tabs */}
-      <div className="shrink-0 px-4 py-1.5 bg-background">
-        <div className="flex gap-1.5">
+      {/* Scrollable content */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6 space-y-5">
+        {/* Quick actions */}
+        <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => setActiveTab("overview")}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-              activeTab === "overview" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
-            }`}
+            onClick={() => navigate("/post")}
+            className="rounded-2xl bg-primary text-primary-foreground p-4 text-left flex flex-col gap-1 active:scale-[0.98] transition-transform"
           >
-            Overview
+            <Plus className="w-5 h-5" />
+            <span className="text-sm font-bold">Post a Job</span>
+            <span className="text-[11px] opacity-90">Get free quotes fast</span>
           </button>
           <button
-            onClick={() => setActiveTab("providers")}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-              activeTab === "providers" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
-            }`}
+            onClick={() => navigate("/providers")}
+            className="rounded-2xl bg-accent text-accent-foreground p-4 text-left flex flex-col gap-1 active:scale-[0.98] transition-transform"
           >
-            Providers
-          </button>
-          <button
-            onClick={() => navigate("/post?emergency=1")}
-            className="flex-1 text-xs font-medium py-1.5 rounded-md text-[#B36D25] bg-[#F5DCC8]/50 hover:bg-[#F5DCC8]/70 transition-colors"
-          >
-            <Siren className="w-3 h-3 inline mr-0.5" /> Emergency
+            <Search className="w-5 h-5" />
+            <span className="text-sm font-bold">Find Help</span>
+            <span className="text-[11px] opacity-80">Browse local pros</span>
           </button>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="flex-1 min-h-0 overflow-hidden px-4 py-2">
-        {activeTab === "overview" && (
-          <div className="h-full flex flex-col gap-2">
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-1.5">
-              <div className="bg-card rounded-lg p-2 border border-border text-center">
-                <p className="text-lg font-bold text-foreground">{top.length}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Providers</p>
-              </div>
-              <div className="bg-[#C9E8D8] rounded-lg p-2 text-center">
-                <p className="text-lg font-bold text-[#2D7A3E]">{openJobs}</p>
-                <p className="text-[10px] text-[#2D7A3E]/80 mt-0.5">Open jobs</p>
-              </div>
-              <Link to="/post?emergency=1" className="bg-[#F5DCC8] rounded-lg p-2 flex flex-col items-center justify-center">
-                <Siren className="w-4 h-4 text-[#B36D25]" />
-                <p className="text-[10px] font-semibold text-[#B36D25] mt-0.5">Urgent</p>
-              </Link>
-            </div>
-
-            {/* Search */}
-            <CategorySearch
-              value=""
-              onChange={(v) => v && navigate(`/providers?category=${encodeURIComponent(v)}`)}
-              placeholder="Search service…"
-            />
-
-            {/* Providers carousel */}
-            <div className="flex-1 min-h-0 overflow-x-auto -mx-4 px-4">
-              <div className="flex gap-2 pb-2 h-full">
-                {top.slice(0, 5).map((p) => (
-                  <div key={p.id} className="min-w-[170px] shrink-0">
-                    <ProviderCard provider={p} compact />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <LegalLinks />
+        {/* Emergency banner */}
+        <Link
+          to="/post?emergency=1"
+          className="flex items-center gap-3 rounded-2xl bg-warning-soft border border-warning/20 p-3 active:scale-[0.99] transition-transform"
+        >
+          <span className="w-10 h-10 rounded-xl bg-warning text-warning-foreground flex items-center justify-center shrink-0">
+            <Siren className="w-5 h-5" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-warning-soft-foreground">Emergency? Request now</p>
+            <p className="text-[11px] text-warning-soft-foreground/80">Electricians, plumbers & guards on call</p>
           </div>
-        )}
+          <ChevronRight className="w-4 h-4 text-warning-soft-foreground/60" />
+        </Link>
 
-        {activeTab === "providers" && (
-          <div className="h-full flex flex-col">
-            <h2 className="text-xs font-semibold text-foreground mb-2">Top Rated Providers</h2>
-            <div className="flex-1 min-h-0 overflow-x-auto -mx-4 px-4">
-              <div className="flex gap-2 pb-2 h-full">
-                {top.map((p) => (
-                  <div key={p.id} className="min-w-[170px] shrink-0">
-                    <ProviderCard provider={p} compact />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <LegalLinks />
+        {/* Featured categories */}
+        <section>
+          <SectionTitle>Browse categories</SectionTitle>
+          <div className="grid grid-cols-4 gap-2.5">
+            {featuredCats.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => navigate(`/providers?category=${encodeURIComponent(c.name)}`)}
+                className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+              >
+                <span className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center">
+                  <CategoryIcon name={c.icon} className="w-6 h-6 text-primary" />
+                </span>
+                <span className="text-[10px] font-medium text-foreground text-center leading-tight line-clamp-2">
+                  {c.name}
+                </span>
+              </button>
+            ))}
           </div>
-        )}
+        </section>
+
+        {/* Nearby providers */}
+        <section>
+          <div className="flex items-center justify-between mb-2">
+            <SectionTitle className="mb-0">Nearby providers</SectionTitle>
+            <Link to="/providers" className="text-xs font-semibold text-primary flex items-center gap-0.5">
+              See all <ChevronRight className="w-3 h-3" />
+            </Link>
+          </div>
+          {nearby.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">No providers available yet.</p>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+              {nearby.map((p) => (
+                <div key={p.id} className="min-w-[230px] shrink-0">
+                  <ProviderCard provider={p} distance={p._dist} />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Popular services (top-rated) */}
+        <section>
+          <SectionTitle>Top rated</SectionTitle>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {top.slice(0, 4).map((p) => (
+              <ProviderCard key={p.id} provider={p} distance={location?.lat != null ? distanceKm(location.lat, location.lng, p.lat, p.lng) : null} />
+            ))}
+          </div>
+        </section>
+
+        {/* Recent activity / open jobs */}
+        <section>
+          <SectionTitle>Recent job posts</SectionTitle>
+          {openJobs.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+              <p className="text-sm text-muted-foreground mb-3">No open jobs in your area yet.</p>
+              <Button onClick={() => navigate("/post")} variant="outline" className="rounded-xl">
+                <Plus className="w-4 h-4" /> Post the first job
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {openJobs.slice(0, 5).map((job) => {
+                const icon = CATEGORIES.find((c) => c.name === job.category)?.icon;
+                return (
+                  <div key={job.id} className="flex items-center gap-3 bg-card rounded-2xl border border-border p-3">
+                    <span className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center shrink-0">
+                      <CategoryIcon name={icon} className="w-5 h-5 text-accent-foreground" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-semibold text-foreground truncate">{job.title}</p>
+                        {job.emergency && <Siren className="w-3.5 h-3.5 text-warning shrink-0" />}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">{job.category}{job.location_name ? ` · ${job.location_name}` : ""}</p>
+                    </div>
+                    {job.budget != null && <p className="text-sm font-bold text-foreground shrink-0">KES {job.budget}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
+}
+
+function SectionTitle({ children, className = "" }) {
+  return <h2 className={`text-sm font-bold text-foreground mb-2 ${className}`}>{children}</h2>;
 }

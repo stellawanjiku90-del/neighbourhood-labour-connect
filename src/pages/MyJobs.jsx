@@ -9,7 +9,9 @@ import { getOrCreateConversation } from "@/lib/chat";
 import { useAuth } from "@/lib/AuthContext";
 import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
-import { Siren, MapPin, CheckCircle2, Users, MessageCircle, Navigation } from "lucide-react";
+import { Siren, MapPin, CheckCircle2, Users, MessageCircle, Navigation, Briefcase } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
+import EmptyState from "@/components/EmptyState";
 
 const STATUS_STYLE = {
   open: "bg-[#CFE0F0] text-[#5A6072]",
@@ -64,18 +66,26 @@ export default function MyJobs() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background max-w-3xl mx-auto">
       {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-foreground">My Jobs</h1>
-        <Button onClick={() => navigate("/post")} className="rounded-lg h-9 px-4 text-sm">
-          <Users className="w-4 h-4 mr-1" /> Post
-        </Button>
-      </header>
+      <PageHeader
+        title="My Jobs"
+        subtitle="Track your requests"
+        icon={Briefcase}
+        action={<Button onClick={() => navigate("/post")} className="rounded-xl h-9 px-4 text-sm"><Users className="w-4 h-4 mr-1" /> Post</Button>}
+      />
 
       {/* Horizontal scroll */}
       <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3">
         <div className="flex gap-3 pb-2 h-full">
           {jobs.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center w-full py-8">No requests yet. Post one to get started.</p>
+            <div className="w-full">
+              <EmptyState
+                icon={Briefcase}
+                title="No jobs yet"
+                description="Post a job to get free quotes from local providers near you."
+                actionLabel="Post a job"
+                onAction={() => navigate("/post")}
+              />
+            </div>
           )}
           {jobs.slice(0, 8).map((job) => {
             const icon = CATEGORIES.find((c) => c.name === job.category)?.icon;

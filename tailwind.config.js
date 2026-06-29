@@ -40,6 +40,12 @@ module.exports = {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
+  			warning: {
+  				DEFAULT: 'hsl(var(--warning))',
+  				foreground: 'hsl(var(--warning-foreground))',
+  				soft: 'hsl(var(--warning-soft))',
+  				'soft-foreground': 'hsl(var(--warning-soft-foreground))'
+  			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
@@ -69,28 +75,16 @@ module.exports = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
   			},
   			'marquee': {
-  				'0%': {
-  					transform: 'translateX(0)'
-  				},
-  				'100%': {
-  					transform: 'translateX(-50%)'
-  				}
+  				'0%': { transform: 'translateX(0)' },
+  				'100%': { transform: 'translateX(-50%)' }
   			}
   		},
   		animation: {

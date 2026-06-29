@@ -42,6 +42,7 @@ Deno.serve(async (req) => {
     const totalEarnings = +providerEarnings + referralTotal;
 
     return Response.json({
+      referral_code: profile.referral_code || null,
       provider: provider
         ? {
             name: provider.name,
