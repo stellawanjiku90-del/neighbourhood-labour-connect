@@ -10,7 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Star, Loader2, CheckCircle2, MessageCircle } from "lucide-react";
+import { Star, Loader2, CheckCircle2, MessageCircle, User } from "lucide-react";
 import { getOrCreateConversation } from "@/lib/chat";
 
 export default function BidsDialog({ open, onOpenChange, job, onDone }) {
@@ -150,6 +150,13 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
                     <p className="text-sm text-muted-foreground mt-2">{bid.message}</p>
                   )}
                   <div className="flex gap-2 mt-3">
+                    <Button
+                      onClick={() => navigate(`/provider/${bid.provider_id}`)}
+                      variant="outline"
+                      className="flex-1 h-10 rounded-xl bg-white"
+                    >
+                      <User className="w-4 h-4 mr-1" /> View Profile
+                    </Button>
                     <Button
                       onClick={() => message(bid)}
                       variant="outline"
