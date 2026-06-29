@@ -40,18 +40,7 @@ export default function LegalPage({ title, updated, children }) {
         </div>
       </main>
 
-      {/* Professional footer */}
-      <footer className="shrink-0 border-t border-border bg-background safe-area-bottom">
-        <div className="max-w-3xl mx-auto w-full px-4 md:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] md:text-xs">
-          <p className="text-muted-foreground">© {new Date().getFullYear()} Neighbourhood Labour Connect</p>
-          <nav className="flex items-center gap-4">
-            <Link to="/terms" className="font-semibold text-foreground hover:text-primary transition-colors">Terms</Link>
-            <Link to="/privacy" className="font-semibold text-foreground hover:text-primary transition-colors">Privacy</Link>
-            <Link to="/refund" className="font-semibold text-foreground hover:text-primary transition-colors">Refund</Link>
-            <a href="https://wa.me/254706692111" target="_blank" rel="noreferrer" className="font-semibold text-foreground hover:text-primary transition-colors">Contact</a>
-          </nav>
-        </div>
-      </footer>
+
     </SafeAreaPage>
   );
 }

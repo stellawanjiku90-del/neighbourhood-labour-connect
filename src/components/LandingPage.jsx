@@ -106,22 +106,24 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* Footer — tappable legal links */}
+      {/* Footer — tappable legal links (landing page only) */}
       <footer className="shrink-0 border-t border-border bg-background safe-area-bottom">
         <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-2">
           <div className="flex items-center justify-center md:justify-between gap-4 text-[11px] md:text-xs">
             <p className="text-muted-foreground hidden md:block">
               © {new Date().getFullYear()} Neighbourhood Labour Connect
             </p>
-            <Link to="/terms" className="inline-flex items-center font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-border hover:decoration-primary">
-              Terms of Service
-            </Link>
-            <Link to="/privacy" className="inline-flex items-center font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-border hover:decoration-primary">
-              Privacy Policy
-            </Link>
-            <Link to="/refund" className="inline-flex items-center font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-border hover:decoration-primary">
-              Refund Policy
-            </Link>
+            <div className="flex items-center gap-3 md:gap-4">
+              <Link to="/terms" className="font-semibold text-foreground hover:text-primary transition-colors">
+                Terms of Service
+              </Link>
+              <Link to="/privacy" className="font-semibold text-foreground hover:text-primary transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/refund" className="font-semibold text-foreground hover:text-primary transition-colors">
+                Refund Policy
+              </Link>
+            </div>
             <p className="text-muted-foreground md:hidden">
               © {new Date().getFullYear()}
             </p>
