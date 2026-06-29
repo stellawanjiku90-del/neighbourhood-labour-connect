@@ -7,6 +7,7 @@ import BidsDialog from "@/components/BidsDialog";
 import TrackProviderDialog from "@/components/TrackProviderDialog";
 import { getOrCreateConversation } from "@/lib/chat";
 import { useAuth } from "@/lib/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Siren, MapPin, CheckCircle2, Users, MessageCircle, Navigation, Briefcase } from "lucide-react";
@@ -29,13 +30,14 @@ export default function MyJobs() {
   const [trackJob, setTrackJob] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { active, loading: subLoading } = useSubscription();
 
   const load = async () => {
     const [jobList, allBids] = await Promise.all([
       base44.entities.ServiceRequest.list("-created_date", 100),
       base44.entities.JobBid.list("-created_date", 200),
     ]);
-    // Filter by role: customers see jobs they posted, providers see jobs assigned to them
+    // Filter by role: customers see jobs they posted, providers see jobs assigned to them + open board
     const filtered = user?.role === "customer"
       ? jobList.filter(j => j.customer_id === user.id)
       : jobList.filter(j => j.assigned_provider_id === user.id || j.status === "open");
@@ -48,8 +50,13 @@ export default function MyJobs() {
   };
 
   useEffect(() => {
+    // Providers need subscription to access job board (browse & bid)
+    if (user?.role === "provider" && !subLoading && !active) {
+      navigate("/subscribe");
+      return;
+    }
     load();
-  }, []);
+  }, [user?.role, active, subLoading]);
 
   const complete = async (job) => {
     await base44.entities.ServiceRequest.update(job.id, { status: "completed" });

@@ -6,6 +6,7 @@ import CategoryIcon from "@/components/CategoryIcon";
 import ProviderCard from "@/components/ProviderCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { CATEGORIES, EMERGENCY_CATEGORIES, distanceKm } from "@/lib/categories";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { Plus, Siren, MapPin, Search, ChevronRight, Star, Loader2, Navigation } from "lucide-react";
@@ -16,12 +17,21 @@ export default function CustomerDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { detect } = useGeoLocation();
+  const { active, loading: subLoading } = useSubscription();
   const [top, setTop] = useState([]);
   const [openJobs, setOpenJobs] = useState([]);
   const [location, setLocation] = useState(null);
   const [locating, setLocating] = useState(false);
 
   const firstName = user?.full_name?.split(" ")[0] || "there";
+
+  const goToPostJob = () => {
+    if (!subLoading && !active) {
+      navigate("/subscribe");
+    } else {
+      navigate("/post");
+    }
+  };
 
   const refresh = useCallback(async () => {
     const [topData, jobsData] = await Promise.all([
@@ -78,7 +88,7 @@ export default function CustomerDashboard() {
               </button>
             </div>
           </div>
-          <Button onClick={() => navigate("/post")} className="rounded-xl h-10 px-4 shrink-0">
+          <Button onClick={goToPostJob} className="rounded-xl h-10 px-4 shrink-0">
             <Plus className="w-4 h-4" /> Post Job
           </Button>
         </div>
@@ -98,7 +108,7 @@ export default function CustomerDashboard() {
         {/* Quick actions */}
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => navigate("/post")}
+            onClick={goToPostJob}
             className="rounded-2xl bg-primary text-primary-foreground p-4 text-left flex flex-col gap-1 active:scale-[0.98] transition-transform"
           >
             <Plus className="w-5 h-5" />
@@ -116,9 +126,9 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Emergency banner */}
-        <Link
-          to="/post?emergency=1"
-          className="flex items-center gap-3 rounded-2xl bg-warning-soft border border-warning/20 p-3 active:scale-[0.99] transition-transform"
+        <div
+          onClick={() => goToPostJob()}
+          className="flex items-center gap-3 rounded-2xl bg-warning-soft border border-warning/20 p-3 active:scale-[0.99] transition-transform cursor-pointer"
         >
           <span className="w-10 h-10 rounded-xl bg-warning text-warning-foreground flex items-center justify-center shrink-0">
             <Siren className="w-5 h-5" />
@@ -128,7 +138,7 @@ export default function CustomerDashboard() {
             <p className="text-[11px] text-warning-soft-foreground/80">Electricians, plumbers & guards on call</p>
           </div>
           <ChevronRight className="w-4 h-4 text-warning-soft-foreground/60" />
-        </Link>
+        </div>
 
         {/* Featured categories */}
         <section>
@@ -188,7 +198,7 @@ export default function CustomerDashboard() {
           {openJobs.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-6 text-center">
               <p className="text-sm text-muted-foreground mb-3">No open jobs in your area yet.</p>
-              <Button onClick={() => navigate("/post")} variant="outline" className="rounded-xl">
+              <Button onClick={goToPostJob} variant="outline" className="rounded-xl">
                 <Plus className="w-4 h-4" /> Post the first job
               </Button>
             </div>

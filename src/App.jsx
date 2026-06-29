@@ -90,8 +90,8 @@ const AuthenticatedApp = () => {
           <Route element={<RoleGuard allow={["customer"]} />}>
             <Route path="/providers" element={<Providers />} />
             <Route path="/post" element={<PostJob />} />
-            <Route path="/jobs" element={<MyJobs />} />
           </Route>
+          <Route path="/jobs" element={<MyJobs />} />
         </Route>
       </Route>
       <Route element={<FirebaseRouteGuard />}>

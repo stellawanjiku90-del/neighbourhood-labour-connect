@@ -22,9 +22,10 @@ const CUSTOMER_NAV = [
   { to: "/settings", label: "Profile", icon: SettingsIcon, plain: true },
 ];
 
-// Providers: their job board is the home dashboard, so only Home (labelled Home).
+// Providers: Jobs is their job board (browse & bid on open jobs).
 const PROVIDER_NAV = [
   { to: "/", label: "Home", icon: Home, end: true },
+  { to: "/jobs", label: "Jobs", icon: Briefcase, end: false },
   { to: "/messages", label: "Messages", icon: MessageCircle, end: false },
   { to: "/earnings", label: "Wallet", icon: Wallet, end: false },
   { to: "/settings", label: "Profile", icon: SettingsIcon, plain: true },

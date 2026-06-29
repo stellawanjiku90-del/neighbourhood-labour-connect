@@ -155,17 +155,13 @@ export default function ProviderDashboard() {
     );
   }
 
-  if (!subActive) {
-    return (
-      <SubscriptionPaywall
-        message={
-          <>
-            Subscribe for just <span className="font-bold text-foreground">$1/month</span> to go live, be visible to customers, and start receiving job notifications.
-          </>
-        }
-      />
-    );
-  }
+  const handleBid = (job) => {
+    if (!subActive) {
+      navigate("/subscribe");
+    } else {
+      setBidJob(job);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
@@ -176,14 +172,29 @@ export default function ProviderDashboard() {
             <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />
             <h1 className="text-base font-semibold text-foreground">{firstName}</h1>
           </div>
-          <button
-            onClick={toggleAvailable}
-            className={`text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors ${
-              provider.available ? "bg-[#C9E8D8] text-[#2D7A3E]" : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {provider.available ? "Available" : "Unavailable"}
-          </button>
+          <div className="flex items-center gap-2">
+            {!subActive && (
+              <button
+                onClick={() => navigate("/subscribe")}
+                className="text-xs font-semibold px-2.5 py-1.5 rounded-md bg-warning-soft text-warning-soft-foreground"
+              >
+                Subscribe to go live
+              </button>
+            )}
+            <button
+              onClick={toggleAvailable}
+              disabled={!subActive}
+              className={`text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors ${
+                !subActive
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : provider.available
+                  ? "bg-[#C9E8D8] text-[#2D7A3E]"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {provider.available ? "Available" : "Unavailable"}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -305,10 +316,15 @@ export default function ProviderDashboard() {
               )}
               {job.budget != null && <p className="text-xs font-bold text-foreground mb-1">KES {job.budget}</p>}
               <Button
-                onClick={() => setBidJob(job)}
-                className="w-full h-7 rounded bg-[#2D7A3E] text-[10px] hover:bg-[#2D7A3E]/90"
+                onClick={() => handleBid(job)}
+                disabled={!subActive}
+                className={`w-full h-7 rounded text-[10px] ${
+                  subActive
+                    ? "bg-[#2D7A3E] hover:bg-[#2D7A3E]/90"
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                }`}
               >
-                <Check className="w-2.5 h-2.5 mr-0.5" /> Offer
+                <Check className="w-2.5 h-2.5 mr-0.5" /> {subActive ? "Offer" : "Subscribe"}
               </Button>
             </div>
           ))}
