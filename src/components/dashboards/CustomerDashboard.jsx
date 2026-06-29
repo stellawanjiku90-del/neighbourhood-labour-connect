@@ -133,7 +133,7 @@ export default function CustomerDashboard() {
         {/* Featured categories */}
         <section>
           <SectionTitle>Browse categories</SectionTitle>
-          <div className="grid grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2.5">
             {featuredCats.map((c) => (
               <button
                 key={c.name}

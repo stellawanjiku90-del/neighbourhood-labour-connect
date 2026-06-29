@@ -51,9 +51,9 @@ const AuthenticatedApp = () => {
   if (PUBLIC_PATHS.includes(pathname)) {
     return (
       <Routes>
-        <Route path="/terms" element={<LegalPageWrapper><Terms /></LegalPageWrapper>} />
-        <Route path="/privacy" element={<LegalPageWrapper><Privacy /></LegalPageWrapper>} />
-        <Route path="/refund" element={<LegalPageWrapper><Refund /></LegalPageWrapper>} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/refund" element={<Refund />} />
       </Routes>
     );
   }
@@ -107,19 +107,6 @@ const AuthenticatedApp = () => {
     </Routes>
   );
 };
-
-// Public legal pages — rendered OUTSIDE AuthenticatedApp so they
-// are never blocked by auth redirects.
-function LegalPageWrapper({ children }) {
-  return (
-    <div className="h-[100dvh] bg-background overflow-hidden flex flex-col safe-area-inset">
-      <main className="flex-1 min-h-0 overflow-y-auto">
-        {children}
-      </main>
-    </div>
-  );
-}
-
 
 function useAutoTheme() {
   useEffect(() => {

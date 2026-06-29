@@ -14,6 +14,8 @@ import PinStep from "@/components/firebase/PinStep";
 import ProfileSetupStep from "@/components/firebase/ProfileSetupStep";
 import RoleStep from "@/components/firebase/RoleStep";
 import AuthDebugPanel from "@/components/AuthDebugPanel";
+import SafeAreaPage from "@/components/SafeAreaPage";
+import { ShieldCheck, HelpCircle } from "lucide-react";
 
 const LOGO_URL =
   "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -308,21 +310,25 @@ export default function FirebaseAuth() {
   }
 
   return (
-    <div className="h-[100dvh] bg-background overflow-hidden flex flex-col safe-area-inset">
-      <header className="flex items-center gap-2 px-4 md:px-6 h-14 md:h-16 shrink-0 safe-area-top">
+    <SafeAreaPage>
+      <header className="flex items-center justify-center gap-2 px-4 md:px-6 h-14 shrink-0 border-b border-border">
         <img
           src={LOGO_URL}
           alt="Neighbourhood Labour Connect"
-          className="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover"
+          className="w-8 h-8 rounded-xl object-cover"
         />
-        <span className="font-extrabold text-foreground text-sm md:text-base">
+        <span className="font-display font-extrabold text-foreground text-sm md:text-base">
           Neighbourhood Labour Connect
         </span>
       </header>
 
       <main className="flex-1 min-h-0 overflow-y-auto">
-        <div className="flex items-start justify-center px-4 pt-2 pb-6">
+        <div className="flex items-start justify-center px-4 pt-6 pb-6">
         <div className="w-full max-w-md">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground mb-4">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+            <span>Secure phone verification · Your data is protected</span>
+          </div>
           {step === "phone" && (
             <>
               <AuthDebugPanel error={debugError} />
@@ -387,11 +393,19 @@ export default function FirebaseAuth() {
         </div>
       </main>
 
-      <footer className="px-6 py-2 text-center safe-area-bottom">
-        <p className="text-xs text-muted-foreground">
+      <footer className="px-6 py-3 text-center safe-area-bottom border-t border-border space-y-1.5">
+        <a
+          href="https://wa.me/254706692111?text=Hi%20NLC%20Support%2C%20I%20need%20help%20signing%20in"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+        >
+          <HelpCircle className="w-3.5 h-3.5" /> Need help? Contact support
+        </a>
+        <p className="text-[11px] text-muted-foreground">
           © {new Date().getFullYear()} Neighbourhood Labour Connect
         </p>
       </footer>
-    </div>
+    </SafeAreaPage>
   );
 }

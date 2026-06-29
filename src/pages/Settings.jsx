@@ -14,8 +14,8 @@ import {
   AlertDialogCancel, AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import {
-  User, Bell, KeyRound, CreditCard, Gift, LogOut, Trash2,
-  ChevronRight, Shield, Loader2, Pencil, HelpCircle, MessageSquare, FileText, Info,
+  User, Bell, KeyRound, CreditCard, LogOut, Trash2,
+  ChevronRight, Shield, Loader2, HelpCircle, MessageSquare, FileText, Info,
 } from "lucide-react";
 
 export default function Settings() {
@@ -69,9 +69,7 @@ export default function Settings() {
     {
       group: "Account",
       items: [
-        { icon: Pencil, label: "Edit Profile", to: "/settings" },
-        { icon: Gift, label: "Refer & Earn", to: "/referrals" },
-        { icon: CreditCard, label: "Subscription & Payment", to: "/subscribe" },
+        { icon: CreditCard, label: "Subscription & Billing", to: "/subscribe" },
         { icon: KeyRound, label: "Change PIN", onClick: () => setPinOpen(true) },
         ...(user?.role === "admin" ? [{ icon: Shield, label: "Admin Panel", to: "/admin" }] : []),
       ],
