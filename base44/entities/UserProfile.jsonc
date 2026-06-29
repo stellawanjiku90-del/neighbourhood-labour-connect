@@ -14,10 +14,11 @@
       "type": "string",
       "enum": [
         "customer",
-        "provider"
+        "provider",
+        "admin"
       ],
       "default": "customer",
-      "description": "Whether the user registered as a customer or a service provider"
+      "description": "Whether the user registered as a customer, service provider, or admin"
     },
     "pin_hash": {
       "type": "string",
