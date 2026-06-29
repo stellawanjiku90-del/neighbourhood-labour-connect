@@ -81,6 +81,26 @@ export default function Subscribe() {
           firebase_uid: user?.id,
         });
         if (res.data?.active) {
+          // If this payment was triggered from "List as Provider", activate
+          // the provider's listing now and flag the dashboard to greet them.
+          const params = new URLSearchParams(window.location.search);
+          if (params.get("intent") === "provider" && user?.id) {
+            try {
+              const providers = await base44.entities.ServiceProvider.filter(
+                { firebase_uid: user.id },
+                null,
+                1
+              );
+              if (providers.length > 0) {
+                await base44.entities.ServiceProvider.update(providers[0].id, {
+                  available: true,
+                });
+              }
+              sessionStorage.setItem("provider_just_listed", "true");
+            } catch (e) {
+              // best-effort — head home regardless
+            }
+          }
           window.location.href = "/";
           return;
         }

@@ -23,6 +23,10 @@
     "phone": {
       "type": "string"
     },
+    "firebase_uid": {
+      "type": "string",
+      "description": "Firebase UID of the provider \u2014 links to UserProfile, Subscription and DeviceToken for nearby-job notifications"
+    },
     "location_name": {
       "type": "string",
       "description": "City / region label"

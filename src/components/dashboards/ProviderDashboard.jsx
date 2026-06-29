@@ -5,6 +5,7 @@ import BidDialog from "@/components/BidDialog";
 import { getOrCreateConversation } from "@/lib/chat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 import LegalLinks from "@/components/LegalLinks";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionPaywall from "@/components/SubscriptionPaywall";
@@ -50,6 +51,15 @@ export default function ProviderDashboard() {
 
   const phone = user?.phone;
   const { active: subActive, loading: subLoading } = useSubscription();
+  const { toast } = useToast();
+
+  // Greet providers who just finished listing + paying.
+  useEffect(() => {
+    if (sessionStorage.getItem("provider_just_listed") === "true") {
+      sessionStorage.removeItem("provider_just_listed");
+      toast({ title: "You're listed!", description: "Customers can now find you" });
+    }
+  }, []);
 
   const load = async () => {
     const [providers, jobs, acceptedJobs, inProgressJobs] = await Promise.all([

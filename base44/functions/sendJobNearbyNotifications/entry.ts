@@ -120,8 +120,11 @@ Deno.serve(async (req) => {
         .filter((s) => !s.period_end || new Date(s.period_end).getTime() > now)
         .map((s) => s.user_id)
     );
+    // Match providers to their subscription via firebase_uid (the link used by
+    // Subscription.user_id and DeviceToken.user_id). created_by_id is not the
+    // Firebase UID in this app, so it can't be used for matching.
     const eligible = nearby.filter(
-      (p) => p.created_by_id && subscribedIds.has(p.created_by_id)
+      (p) => p.firebase_uid && subscribedIds.has(p.firebase_uid)
     );
 
     if (eligible.length === 0) {
@@ -130,9 +133,9 @@ Deno.serve(async (req) => {
 
     const tokens = [];
     for (const p of eligible) {
-      if (!p.created_by_id) continue;
+      if (!p.firebase_uid) continue;
       const deviceTokens = await base44.asServiceRole.entities.DeviceToken.filter({
-        user_id: p.created_by_id,
+        user_id: p.firebase_uid,
       });
       for (const dt of deviceTokens) {
         if (dt.token && !tokens.includes(dt.token)) tokens.push(dt.token);
