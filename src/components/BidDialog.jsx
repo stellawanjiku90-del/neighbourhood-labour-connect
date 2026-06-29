@@ -43,6 +43,17 @@ export default function BidDialog({ open, onOpenChange, job, provider, onDone })
         message,
         status: "pending",
       });
+      // Notify the customer about the new offer (best-effort)
+      try {
+        await base44.functions.invoke("notifyCustomerOfBid", {
+          request_id: job.id,
+          provider_name: provider.name,
+          charge: Number(charge),
+          request_title: job.title,
+        });
+      } catch (_) {
+        // notification is best-effort; don't block the bid
+      }
       onDone?.();
       onOpenChange(false);
     } catch (e) {

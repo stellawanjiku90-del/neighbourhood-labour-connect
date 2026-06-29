@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import CategorySearch from "@/components/CategorySearch";
@@ -23,10 +23,6 @@ export default function BecomeProvider() {
   const [radius, setRadius] = useState([10]);
   const [loc, setLoc] = useState(null);
   const [saving, setSaving] = useState(false);
-
-  if (user?.role === "provider") {
-    return <Navigate to="/" replace />;
-  }
 
   const toggle = (n) =>
     setProfessions((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));
