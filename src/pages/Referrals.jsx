@@ -48,7 +48,7 @@ export default function Referrals() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="h-full overflow-y-auto max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-extrabold text-foreground mb-1">Referral Program</h1>
       <p className="text-sm text-muted-foreground mb-6">
         Earn when your friends subscribe — up to 3 levels deep.

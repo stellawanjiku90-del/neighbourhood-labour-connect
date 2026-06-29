@@ -41,7 +41,7 @@ export default function Earnings() {
   const isProvider = user?.role === "provider" && data.provider;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="h-full overflow-y-auto max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-extrabold text-foreground mb-1">Earnings</h1>
       <p className="text-sm text-muted-foreground mb-6">Track your job and referral earnings.</p>
 

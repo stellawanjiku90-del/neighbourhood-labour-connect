@@ -101,7 +101,7 @@ export default function Subscribe() {
   // ─── Active or just paid ───────────────────────────────────────
   if (active || paymentState === "success") {
     return (
-      <div className="max-w-md mx-auto px-4 py-8">
+      <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
         <div className="bg-white rounded-2xl border border-slate-100 p-6 text-center">
           <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-4">
             <Check className="w-7 h-7 text-[#2D7A3E]" />
@@ -125,7 +125,7 @@ export default function Subscribe() {
   // ─── Waiting for M-Pesa PIN ────────────────────────────────────
   if (paymentState === "pending") {
     return (
-      <div className="max-w-md mx-auto px-4 py-8">
+      <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
         <div className="bg-white rounded-2xl border border-slate-100 p-6 text-center">
           <div className="w-14 h-14 rounded-2xl bg-accent/60 flex items-center justify-center mx-auto mb-4">
             <Smartphone className="w-7 h-7 text-accent-foreground animate-pulse" />
@@ -150,7 +150,7 @@ export default function Subscribe() {
   // ─── Payment failed ─────────────────────────────────────────────
   if (paymentState === "failed") {
     return (
-      <div className="max-w-md mx-auto px-4 py-8">
+      <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
         <div className="bg-white rounded-2xl border border-slate-100 p-6 text-center">
           <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
             <X className="w-7 h-7 text-destructive" />
@@ -191,7 +191,7 @@ export default function Subscribe() {
 
   // ─── Idle: show subscription offer ─────────────────────────────
   return (
-    <div className="max-w-md mx-auto px-4 py-8">
+    <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
       <div className="bg-white rounded-2xl border border-slate-100 p-6">
         <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-4">
           <CreditCard className="w-7 h-7 text-secondary-foreground" />

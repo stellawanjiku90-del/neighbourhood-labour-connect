@@ -60,9 +60,9 @@ export default function MyJobs() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background max-w-3xl mx-auto safe-area-inset">
+    <div className="h-full flex flex-col overflow-hidden bg-background max-w-3xl mx-auto">
       {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between safe-area-top">
+      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between">
         <h1 className="text-lg font-semibold text-foreground">My Jobs</h1>
         <Button onClick={() => navigate("/post")} className="rounded-lg h-9 px-4 text-sm">
           <Users className="w-4 h-4 mr-1" /> Post

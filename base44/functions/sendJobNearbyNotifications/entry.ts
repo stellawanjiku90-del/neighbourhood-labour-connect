@@ -108,8 +108,28 @@ Deno.serve(async (req) => {
       return Response.json({ sent: 0, reason: "no nearby providers" });
     }
 
+    // Only notify providers with an active subscription
+    const subscriptions = await base44.asServiceRole.entities.Subscription.filter(
+      { status: "active" },
+      null,
+      500
+    );
+    const now = Date.now();
+    const subscribedIds = new Set(
+      subscriptions
+        .filter((s) => !s.period_end || new Date(s.period_end).getTime() > now)
+        .map((s) => s.user_id)
+    );
+    const eligible = nearby.filter(
+      (p) => p.created_by_id && subscribedIds.has(p.created_by_id)
+    );
+
+    if (eligible.length === 0) {
+      return Response.json({ sent: 0, reason: "no subscribed nearby providers" });
+    }
+
     const tokens = [];
-    for (const p of nearby) {
+    for (const p of eligible) {
       if (!p.created_by_id) continue;
       const deviceTokens = await base44.asServiceRole.entities.DeviceToken.filter({
         user_id: p.created_by_id,

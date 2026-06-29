@@ -26,7 +26,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto">
+    <div className="h-full flex flex-col overflow-hidden max-w-2xl mx-auto">
       {/* Compact header */}
       <header className="shrink-0 px-4 md:px-8 py-3 border-b border-slate-100 bg-background">
         <h1 className="text-lg font-extrabold text-foreground">Settings</h1>

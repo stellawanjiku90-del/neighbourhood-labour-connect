@@ -38,7 +38,7 @@ export default function AdminPanel() {
   if (!isAuthenticated || !user || user.role !== "admin") return null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
+    <div className="h-full overflow-y-auto max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
       <div className="flex items-center gap-2 mb-6">
         <Shield className="w-6 h-6 text-[#2D7A3E]" />
         <h1 className="text-2xl font-extrabold text-foreground">Admin Panel</h1>

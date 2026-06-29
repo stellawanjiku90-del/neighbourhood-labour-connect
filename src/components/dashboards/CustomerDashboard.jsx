@@ -33,9 +33,9 @@ export default function CustomerDashboard() {
   const firstName = user?.full_name?.split(" ")[0] || "there";
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background safe-area-inset">
+    <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background safe-area-top">
+      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />

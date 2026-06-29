@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Siren, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 
 export default function PostJob() {
   const navigate = useNavigate();
@@ -24,9 +26,14 @@ export default function PostJob() {
   const [emergency, setEmergency] = useState(params.get("emergency") === "1");
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const { active, loading: subLoading } = useSubscription();
 
   if (user?.role === "provider") {
     return <Navigate to="/" replace />;
+  }
+
+  if (!subLoading && !active) {
+    return <SubscriptionPaywall />;
   }
 
   const submit = async () => {
@@ -55,9 +62,9 @@ export default function PostJob() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden max-w-2xl mx-auto bg-background safe-area-inset">
+    <div className="h-full flex flex-col overflow-hidden max-w-2xl mx-auto bg-background">
       {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between safe-area-top">
+      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between">
         <h1 className="text-lg font-semibold text-foreground">Post Request</h1>
         <Button onClick={() => navigate(-1)} variant="outline" className="h-9 text-sm rounded-lg px-4">Cancel</Button>
       </header>

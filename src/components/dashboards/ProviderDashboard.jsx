@@ -6,6 +6,8 @@ import { getOrCreateConversation } from "@/lib/chat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import LegalLinks from "@/components/LegalLinks";
+import { useSubscription } from "@/hooks/useSubscription";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, CheckCircle2, MessageCircle } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -47,6 +49,7 @@ export default function ProviderDashboard() {
   const [activeTab, setActiveTab] = useState("open");
 
   const phone = user?.phone;
+  const { active: subActive, loading: subLoading } = useSubscription();
 
   const load = async () => {
     const [providers, jobs, acceptedJobs, inProgressJobs] = await Promise.all([
@@ -94,9 +97,9 @@ export default function ProviderDashboard() {
 
   const firstName = user?.full_name?.split(" ")[0] || "there";
 
-  if (loadingProvider) {
+  if (loadingProvider || subLoading) {
     return (
-      <div className="h-[100dvh] flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
       </div>
     );
@@ -104,7 +107,7 @@ export default function ProviderDashboard() {
 
   if (!provider) {
     return (
-      <div className="h-[100dvh] flex flex-col items-center justify-center px-8">
+      <div className="h-full flex flex-col items-center justify-center px-8">
         <Wrench className="w-12 h-12 text-[#2D7A3E] mb-3" />
         <h2 className="text-xl font-bold text-foreground mb-1">Become a Provider</h2>
         <p className="text-sm text-muted-foreground mb-4 text-center">Create your profile to receive jobs</p>
@@ -115,10 +118,22 @@ export default function ProviderDashboard() {
     );
   }
 
+  if (!subActive) {
+    return (
+      <SubscriptionPaywall
+        message={
+          <>
+            Subscribe for just <span className="font-bold text-foreground">$1/month</span> to go live, be visible to customers, and start receiving job notifications.
+          </>
+        }
+      />
+    );
+  }
+
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background safe-area-inset">
+    <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background safe-area-top">
+      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />

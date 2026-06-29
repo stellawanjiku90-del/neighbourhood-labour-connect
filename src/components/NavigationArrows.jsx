@@ -1,12 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default function NavigationArrows() {
   const navigate = useNavigate();
 
   const handleBack = () => navigate(-1);
-  const handleForward = () => navigate(1);
 
   return (
     <div className="flex items-center gap-1 shrink-0">
@@ -16,13 +15,6 @@ export default function NavigationArrows() {
         className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-      </button>
-      <button
-        onClick={handleForward}
-        aria-label="Go forward"
-        className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-      >
-        <ArrowRight className="w-4 h-4" />
       </button>
     </div>
   );
