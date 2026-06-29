@@ -8,15 +8,21 @@ export function useSubscription() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
     let active = true;
     setLoading(true);
     base44.functions
       .invoke("checkSubscription", { firebase_uid: user.id })
       .then((res) => {
-        if (active) setData(res.data);
+        if (active) {
+          setData(res.data || { active: false });
+        }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Subscription check failed:", err);
         if (active) setData({ active: false });
       })
       .finally(() => {
@@ -27,5 +33,5 @@ export function useSubscription() {
     };
   }, [user?.id]);
 
-  return { active: data?.active, periodEnd: data?.period_end, loading };
+  return { active: !!data?.active, periodEnd: data?.period_end, loading };
 }

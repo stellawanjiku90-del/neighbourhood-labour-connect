@@ -34,6 +34,7 @@ export default function PostJob() {
 
   // Check profile completion first
   if (!user?.profile_completed) {
+    console.log("PostJob: Blocking - profile not completed");
     return (
       <SubscriptionPaywall
         message={
@@ -45,11 +46,24 @@ export default function PostJob() {
     );
   }
 
+  // Check subscription - customers MUST have active subscription to post jobs
   if (!subLoading && !active) {
+    console.log("PostJob: Blocking - no active subscription");
     return <SubscriptionPaywall />;
   }
 
   const submit = async () => {
+    // Double-check subscription before allowing job post
+    if (!active) {
+      toast({ 
+        title: "Subscription required", 
+        description: "Please subscribe to post jobs", 
+        variant: "destructive" 
+      });
+      navigate("/subscribe");
+      return;
+    }
+
     if (!category || !title) {
       toast({ title: "Add category and title", variant: "destructive" });
       return;

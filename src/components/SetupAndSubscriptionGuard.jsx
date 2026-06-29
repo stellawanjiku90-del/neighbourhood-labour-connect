@@ -34,6 +34,7 @@ export default function SetupAndSubscriptionGuard({ requireSubscription = true }
 
   // Check subscription if required
   if (requireSubscription && !subLoading && !active) {
+    console.log("Subscription guard blocking access - no active subscription");
     return <Navigate to="/subscribe" replace />;
   }
 
