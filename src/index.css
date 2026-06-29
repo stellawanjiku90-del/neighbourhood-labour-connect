@@ -155,4 +155,18 @@
   /* Hide scrollbars on horizontal rails while keeping scroll */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* IntaSend modal safe-area handling */
+  .intaSendModal, .intaSend-overlay, [class*="intaSend"] {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    padding-left: env(safe-area-inset-left, 0px) !important;
+    padding-right: env(safe-area-inset-right, 0px) !important;
+  }
+
+  /* Force safe-area padding on full-screen modals and overlays */
+  div[style*="position: fixed"][style*="inset"] {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
 }

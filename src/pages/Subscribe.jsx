@@ -40,6 +40,21 @@ export default function Subscribe() {
     return () => clearInterval(t);
   }, []);
 
+  // ─── Apply safe-area padding to IntaSend modal when it appears ──────
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const modal = document.querySelector('.intaSendModal, [class*="intaSend"]') || 
+                    document.querySelector('div[style*="position: fixed"][style*="inset"]');
+      if (modal) {
+        modal.style.paddingTop = 'env(safe-area-inset-top, 20px)';
+        modal.style.paddingBottom = 'env(safe-area-inset-bottom, 20px)';
+        modal.style.maxHeight = 'calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px))';
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   // ─── Initialize the IntaSend SDK once the pay button is in the DOM ──
   useEffect(() => {
     if (!buttonEl) { initedRef.current = false; return; }
