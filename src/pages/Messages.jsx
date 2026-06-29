@@ -46,6 +46,7 @@ export default function Messages() {
       <PageHeader title="Messages" subtitle="Chat with providers & customers" icon={MessageCircle} />
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
+        <div className="max-w-2xl mx-auto w-full">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="w-6 h-6 border-3 border-muted border-t-primary rounded-full animate-spin" />
@@ -93,6 +94,7 @@ export default function Messages() {
             })}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

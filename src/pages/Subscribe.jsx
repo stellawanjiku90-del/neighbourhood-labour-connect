@@ -43,7 +43,6 @@ export default function Subscribe() {
   // ─── Apply safe-area padding to IntaSend modal when it appears ──────
   useEffect(() => {
     const applySafeArea = () => {
-      // Target IntaSend modal and any fixed overlay
       const modals = document.querySelectorAll('.intaSendModal, [class*="intaSend"], div[style*="position: fixed"]');
       modals.forEach((modal) => {
         modal.style.paddingTop = 'calc(20px + env(safe-area-inset-top, 0px))';
@@ -52,7 +51,6 @@ export default function Subscribe() {
         modal.style.paddingRight = 'calc(16px + env(safe-area-inset-right, 0px))';
         modal.style.maxHeight = 'calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px))';
         modal.style.overflowY = 'auto';
-        // Ensure close button is visible
         const closeBtn = modal.querySelector('button[aria-label="Close"], button[class*="close"]');
         if (closeBtn) {
           closeBtn.style.marginTop = 'env(safe-area-inset-top, 0px)';
@@ -63,7 +61,6 @@ export default function Subscribe() {
     
     const observer = new MutationObserver(applySafeArea);
     observer.observe(document.body, { childList: true, subtree: true });
-    // Apply immediately in case modal already exists
     applySafeArea();
     return () => observer.disconnect();
   }, []);
@@ -112,7 +109,7 @@ export default function Subscribe() {
   if (loading) {
     return (
       <div className="h-full flex flex-col">
-        <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background safe-area-top" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -124,8 +121,10 @@ export default function Subscribe() {
             <p className="text-[11px] text-muted-foreground">Loading…</p>
           </div>
         </header>
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        <div className="flex-1 min-h-0 overflow-y-auto page-content py-5" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
         </div>
       </div>
     );
@@ -134,7 +133,7 @@ export default function Subscribe() {
   if (active || paymentState === "success") {
     return (
       <div className="h-full flex flex-col">
-        <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background safe-area-top" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -146,24 +145,26 @@ export default function Subscribe() {
             <p className="text-[11px] text-muted-foreground">Payment confirmation</p>
           </div>
         </header>
-        <div className="flex-1 flex items-center justify-center page-content">
-          <div className="bg-card rounded-3xl border border-border p-6 text-center max-w-md mx-auto">
-            <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-3">
-              <Check className="w-7 h-7 text-primary" />
-            </div>
-            <h1 className="text-xl font-extrabold text-foreground mb-1">
-              {paymentState === "success" ? "Payment Successful!" : "Subscription Active"}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {paymentState === "success"
-                ? "Confirming your subscription…"
-                : `Your subscription runs until ${new Date(periodEnd).toLocaleDateString()}.`}
-            </p>
-            {paymentState === "success" && (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-3">
-                <Loader2 className="w-4 h-4 animate-spin" /> Activating…
+        <div className="flex-1 min-h-0 overflow-y-auto page-content py-5" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
+          <div className="flex items-center justify-center py-20">
+            <div className="bg-card rounded-3xl border border-border p-6 text-center max-w-md mx-auto">
+              <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-3">
+                <Check className="w-7 h-7 text-primary" />
               </div>
-            )}
+              <h1 className="text-xl font-extrabold text-foreground mb-1">
+                {paymentState === "success" ? "Payment Successful!" : "Subscription Active"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {paymentState === "success"
+                  ? "Confirming your subscription…"
+                  : `Your subscription runs until ${new Date(periodEnd).toLocaleDateString()}.`}
+              </p>
+              {paymentState === "success" && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-3">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Activating…
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -184,9 +185,9 @@ export default function Subscribe() {
   ];
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col">
       {/* Header with back button */}
-      <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background safe-area-top" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -200,9 +201,8 @@ export default function Subscribe() {
         <span className="text-sm font-bold text-primary">Ksh 130</span>
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto page-content py-5">
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-5" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
         <div className="bg-card rounded-3xl border border-border p-5 max-w-md mx-auto">
-
         {/* Benefits */}
         <div className="space-y-1.5 mb-4">
           {BENEFITS.map((b) => {
