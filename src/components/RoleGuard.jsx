@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 
 /**
@@ -7,10 +7,17 @@ import { useAuth } from "@/lib/AuthContext";
  * Otherwise redirects to the home dashboard (which is role-specific).
  */
 export default function RoleGuard({ allow }) {
-  const { user } = useAuth();
+  const { user, isLoadingAuth } = useAuth();
+  const location = useLocation();
 
-  if (!user || !allow.includes(user.role)) {
-    return <Navigate to="/" replace />;
+  if (isLoadingAuth) {
+    return null;
+  }
+
+  // Default to customer role if not set (matches UserProfile entity default)
+  const userRole = user?.role || "customer";
+  if (!user || !allow.includes(userRole)) {
+    return <Navigate to="/" replace state={{ from: location }} />;
   }
 
   return <Outlet />;
