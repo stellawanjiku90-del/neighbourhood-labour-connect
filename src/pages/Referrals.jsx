@@ -30,8 +30,10 @@ export default function Referrals() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const domain = "neighbourhoodlabourconnect.com";
+  const referralLink = `https://${domain}/firebase-auth?ref=${data?.referral_code || ""}&role=${user?.role || "customer"}`;
   const shareLink = `https://wa.me/?text=${encodeURIComponent(
-    `Join Neighbourhood Labour Connect! Use my referral code ${data?.referral_code || ""} when you sign up.`
+    `Join Neighbourhood Labour Connect! Use my referral code ${data?.referral_code || ""} to register: https://${domain}/firebase-auth?ref=${data?.referral_code || ""}`
   )}`;
 
   if (loading) {
@@ -74,14 +76,30 @@ export default function Referrals() {
             )}
           </button>
         </div>
-        <a
-          href={shareLink}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-4 inline-flex items-center gap-2 bg-white text-[#2D7A3E] rounded-xl px-4 py-2.5 text-sm font-semibold"
-        >
-          <Share2 className="w-4 h-4" /> Share on WhatsApp
-        </a>
+        <div className="space-y-3 mt-4">
+          <a
+            href={shareLink}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 bg-white text-[#2D7A3E] rounded-xl px-4 py-2.5 text-sm font-semibold"
+          >
+            <Share2 className="w-4 h-4" /> Share on WhatsApp
+          </a>
+          <div className="flex items-center gap-2 bg-white/20 rounded-xl p-2.5">
+            <p className="text-xs text-white/90 flex-1 truncate">{referralLink}</p>
+            <button
+              onClick={() => {
+                navigator.clipboard?.writeText(referralLink);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="flex items-center gap-1.5 bg-white/30 rounded-lg px-2.5 py-1.5 text-xs font-medium"
+            >
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Earnings rates */}

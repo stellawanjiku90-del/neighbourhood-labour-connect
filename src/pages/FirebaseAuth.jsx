@@ -28,6 +28,7 @@ export default function FirebaseAuth() {
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [role, setRole] = useState("");
+  const [referralCodeFromUrl, setReferralCodeFromUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [resendTimer, setResendTimer] = useState(0);
@@ -35,6 +36,17 @@ export default function FirebaseAuth() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   // Raw Firebase error for the debug panel (code + full object).
   const [debugError, setDebugError] = useState(null);
+
+  // Parse URL params for referral code and role on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    const roleParam = params.get("role");
+    if (ref) setReferralCodeFromUrl(ref.toUpperCase());
+    if (roleParam && ["customer", "provider", "admin"].includes(roleParam)) {
+      setRole(roleParam);
+    }
+  }, []);
 
   // On mount: if an active PIN session exists, go home — unless the profile
   // is incomplete, in which case resume at the profile step so the user can
@@ -387,6 +399,8 @@ export default function FirebaseAuth() {
               onSave={saveProfile}
               loading={loading}
               error={error}
+              referralCodeFromUrl={referralCodeFromUrl}
+              preselectedRole={role}
             />
           )}
         </div>

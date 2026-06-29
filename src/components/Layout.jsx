@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { NavLink, useLocation, useOutlet, useNavigate, Link } from "react-router-dom";
 import {
-  Home, Briefcase, MessageCircle, Wallet, MoreHorizontal, ArrowLeft,
-  Settings as SettingsIcon, LogOut, User, ChevronRight,
+  Home, Briefcase, MessageCircle, Wallet, ArrowLeft,
+  Settings as SettingsIcon, LogOut,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import OfflineBanner from "@/components/OfflineBanner";
 import OnboardingPermissions from "@/components/OnboardingPermissions";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -19,18 +18,20 @@ const CUSTOMER_NAV = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/jobs", label: "Jobs", icon: Briefcase, end: false },
   { to: "/messages", label: "Messages", icon: MessageCircle, end: false },
-  { to: "/earnings", label: "Earnings", icon: Wallet, end: false },
+  { to: "/earnings", label: "Wallet", icon: Wallet, end: false },
+  { to: "/settings", label: "Profile", icon: SettingsIcon, plain: true },
 ];
 
 // Providers: their job board is the home dashboard, so only Home (labelled Home).
 const PROVIDER_NAV = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/messages", label: "Messages", icon: MessageCircle, end: false },
-  { to: "/earnings", label: "Earnings", icon: Wallet, end: false },
+  { to: "/earnings", label: "Wallet", icon: Wallet, end: false },
+  { to: "/settings", label: "Profile", icon: SettingsIcon, plain: true },
 ];
 
 // Pages where the header back arrow IS appropriate (secondary destinations).
-const PRIMARY_PATHS = ["/", "/jobs", "/messages", "/earnings"];
+const PRIMARY_PATHS = ["/", "/jobs", "/messages", "/earnings", "/settings"];
 
 function AnimatedOutlet() {
   const location = useLocation();
@@ -51,56 +52,13 @@ function AnimatedOutlet() {
   );
 }
 
-// Compact Profile shortcut — a quick view that sends you to /settings for
-// the full account management (Profile, Notifications, Subscription, PIN,
-// Admin Panel, Delete Account). Nothing duplicates the Settings page.
-function MoreSheet({ open, onOpenChange, user, onLogout }) {
-  const navigate = useNavigate();
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl p-0 max-h-[85dvh] md:inset-x-auto md:inset-y-0 md:right-0 md:max-w-[460px] md:rounded-tl-xl">
-        <SheetHeader className="px-5 pt-4 pb-3 text-left border-b border-border">
-          <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-2xl bg-accent flex items-center justify-center text-accent-foreground font-extrabold text-lg shrink-0">
-              {user?.full_name?.[0] || <User className="w-5 h-5" />}
-            </span>
-            <div className="min-w-0">
-              <SheetTitle className="text-base font-extrabold truncate">{user?.full_name || "Your account"}</SheetTitle>
-              <p className="text-[11px] text-muted-foreground truncate">{user?.phone || user?.email}</p>
-            </div>
-          </div>
-        </SheetHeader>
-        <div className="px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3">
-          <Button
-            onClick={() => { onOpenChange(false); navigate("/settings"); }}
-            className="w-full rounded-2xl h-12 gap-2 text-sm font-semibold"
-          >
-            <SettingsIcon className="w-4 h-4" /> Go to Settings
-          </Button>
-          <button
-            onClick={() => { onOpenChange(false); onLogout(); }}
-            className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-warning-soft/40 text-warning-soft-foreground text-sm font-semibold hover:bg-warning-soft/60 transition-colors"
-          >
-            <LogOut className="w-4 h-4" /> Log out
-          </button>
-          <p className="text-center text-[11px] text-muted-foreground">
-            All account settings · Neighbourhood Labour Connect
-          </p>
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [moreOpen, setMoreOpen] = useState(false);
 
-  const baseNav = user?.role === "provider" ? PROVIDER_NAV : CUSTOMER_NAV;
-  const nav = [...baseNav, { more: true, label: "Profile", icon: MoreHorizontal }];
+  const nav = user?.role === "provider" ? PROVIDER_NAV : CUSTOMER_NAV;
 
   const showBack = !PRIMARY_PATHS.includes(pathname);
 
@@ -126,17 +84,8 @@ export default function Layout() {
           </span>
         </Link>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {nav.map(({ to, label, icon: Icon, more, plain }, i) =>
-            more ? (
-              <button
-                key="more"
-                onClick={() => setMoreOpen(true)}
-                className="w-full flex items-center gap-3 px-3 h-11 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors text-sm font-medium"
-              >
-                <Icon className="w-5 h-5 shrink-0" />
-                <span>{label}</span>
-              </button>
-            ) : plain ? (
+          {nav.map(({ to, label, icon: Icon, plain }, i) =>
+            plain ? (
               <button
                 key={i}
                 onClick={() => navigate(to)}
@@ -200,24 +149,13 @@ export default function Layout() {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border flex z-40 px-1 pb-[env(safe-area-inset-bottom)]">
-        {nav.map(({ to, label, icon: Icon, more, plain }, i) => {
+        {nav.map(({ to, label, icon: Icon, plain }, i) => {
           const content = (
             <>
               <Icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{label}</span>
             </>
           );
-          if (more) {
-            return (
-              <button
-                key="more"
-                onClick={() => setMoreOpen(true)}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-muted-foreground"
-              >
-                {content}
-              </button>
-            );
-          }
           if (plain) {
             return (
               <button
@@ -246,7 +184,6 @@ export default function Layout() {
         })}
       </nav>
 
-      <MoreSheet open={moreOpen} onOpenChange={setMoreOpen} user={user} onLogout={logout} />
     </div>
   );
 }

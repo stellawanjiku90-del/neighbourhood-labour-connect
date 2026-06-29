@@ -35,7 +35,11 @@ export default function MyJobs() {
       base44.entities.ServiceRequest.list("-created_date", 100),
       base44.entities.JobBid.list("-created_date", 200),
     ]);
-    setJobs(jobList);
+    // Filter by role: customers see jobs they posted, providers see jobs assigned to them
+    const filtered = user?.role === "customer"
+      ? jobList.filter(j => j.customer_id === user.id)
+      : jobList.filter(j => j.assigned_provider_id === user.id || j.status === "open");
+    setJobs(filtered);
     const counts = {};
     allBids.forEach((b) => {
       counts[b.request_id] = (counts[b.request_id] || 0) + 1;
@@ -67,10 +71,10 @@ export default function MyJobs() {
     <div className="h-full flex flex-col overflow-hidden bg-background max-w-3xl mx-auto">
       {/* Header */}
       <PageHeader
-        title="My Jobs"
-        subtitle="Track your requests"
+        title={user?.role === "customer" ? "My Jobs" : "Job Board"}
+        subtitle={user?.role === "customer" ? "Track your requests" : "Browse & bid on jobs"}
         icon={Briefcase}
-        action={<Button onClick={() => navigate("/post")} className="rounded-xl h-9 px-4 text-sm"><Users className="w-4 h-4 mr-1" /> Post</Button>}
+        action={user?.role === "customer" ? <Button onClick={() => navigate("/post")} className="rounded-xl h-9 px-4 text-sm"><Users className="w-4 h-4 mr-1" /> Post</Button> : null}
       />
 
       {/* Horizontal scroll */}
@@ -80,10 +84,10 @@ export default function MyJobs() {
             <div className="w-full">
               <EmptyState
                 icon={Briefcase}
-                title="No jobs yet"
-                description="Post a job to get free quotes from local providers near you."
-                actionLabel="Post a job"
-                onAction={() => navigate("/post")}
+                title={user?.role === "customer" ? "No jobs yet" : "No jobs available"}
+                description={user?.role === "customer" ? "Post a job to get free quotes from local providers near you." : "Check back later for new jobs in your area."}
+                actionLabel={user?.role === "customer" ? "Post a job" : undefined}
+                onAction={user?.role === "customer" ? () => navigate("/post") : undefined}
               />
             </div>
           )}

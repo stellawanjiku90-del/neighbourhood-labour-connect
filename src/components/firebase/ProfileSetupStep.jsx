@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 
-export default function ProfileSetupStep({ onSave, loading, error }) {
+export default function ProfileSetupStep({ onSave, loading, error, referralCodeFromUrl, preselectedRole }) {
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
   const [age, setAge] = useState("");
@@ -30,7 +30,7 @@ export default function ProfileSetupStep({ onSave, loading, error }) {
   const [lng, setLng] = useState(null);
   const [detectingLocation, setDetectingLocation] = useState(true);
   const [locationDenied, setLocationDenied] = useState(false);
-  const [referralCode, setReferralCode] = useState("");
+  const [referralCode, setReferralCode] = useState(referralCodeFromUrl || "");
 
   useEffect(() => {
     let active = true;

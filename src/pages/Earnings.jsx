@@ -64,8 +64,10 @@ export default function Earnings() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const domain = "neighbourhoodlabourconnect.com";
+  const referralLink = `https://${domain}/firebase-auth?ref=${referralCode || ""}&role=${user?.role || "customer"}`;
   const shareLink = `https://wa.me/?text=${encodeURIComponent(
-    `Join Neighbourhood Labour Connect! Use my referral code ${referralCode || ""} when you sign up.`
+    `Join Neighbourhood Labour Connect! Use my referral code ${referralCode || ""} to register as ${user?.role || "a member"}: https://${domain}/firebase-auth?ref=${referralCode || ""}`
   )}`;
 
   const withdrawLink = null;
@@ -132,14 +134,29 @@ export default function Earnings() {
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
-          <a
-            href={shareLink}
-            target="_blank"
-            rel="noreferrer"
-            className="w-full flex items-center justify-center gap-2 bg-accent text-accent-foreground rounded-xl py-2.5 text-sm font-bold"
-          >
-            <Share2 className="w-4 h-4" /> Share on WhatsApp
-          </a>
+          <div className="space-y-2">
+            <a
+              href={shareLink}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full flex items-center justify-center gap-2 bg-accent text-accent-foreground rounded-xl py-2.5 text-sm font-bold"
+            >
+              <Share2 className="w-4 h-4" /> Share on WhatsApp
+            </a>
+            <div className="flex items-center gap-2 bg-muted rounded-xl p-3">
+              <p className="text-xs text-muted-foreground flex-1 truncate">{referralLink}</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard?.writeText(referralLink);
+                  toast({ title: "Referral link copied" });
+                }}
+                disabled={!referralCode}
+                className="flex items-center gap-1.5 bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
+              >
+                <Copy className="w-3.5 h-3.5" /> Copy Link
+              </button>
+            </div>
+          </div>
           <p className="text-[11px] text-muted-foreground text-center mt-2">
             Earn 10% on direct referrals, 5% on level 2, 2% on level 3.
           </p>
