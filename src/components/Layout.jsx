@@ -22,10 +22,9 @@ const CUSTOMER_NAV = [
   { to: "/earnings", label: "Earnings", icon: Wallet, end: false },
 ];
 
-// Providers: their job board IS the home dashboard, so Jobs points home too.
+// Providers: their job board is the home dashboard, so only Home (labelled Home).
 const PROVIDER_NAV = [
   { to: "/", label: "Home", icon: Home, end: true },
-  { to: "/", label: "Jobs", icon: Briefcase, end: true, plain: true },
   { to: "/messages", label: "Messages", icon: MessageCircle, end: false },
   { to: "/earnings", label: "Earnings", icon: Wallet, end: false },
 ];
