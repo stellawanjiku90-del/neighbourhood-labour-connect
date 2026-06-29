@@ -2,22 +2,24 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, ShieldCheck, MapPin } from "lucide-react";
+import ServiceMarquee from "@/components/ServiceMarquee";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
-const SERVICES = [
-  {
-    label: "Hair Braiding",
-    img: "https://images.unsplash.com/photo-1757866332840-230be07b786e?fm=jpg&q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    label: "Massage Therapy",
-    img: "https://plus.unsplash.com/premium_photo-1661729458610-3cba8e647031?fm=jpg&q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    label: "TV Mounting",
-    img: "https://images.unsplash.com/photo-1521607630287-ee2e81ad3ced?fm=jpg&q=80&w=600&auto=format&fit=crop",
-  },
+const ROW_1 = [
+  { label: "Hair Braiding", img: "https://images.unsplash.com/photo-1757866332840-230be07b786e?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "TV Mounting", img: "https://images.unsplash.com/photo-1521607630287-ee2e81ad3ced?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Carpentry", img: "https://images.unsplash.com/photo-1505798577917-a65157d3320a?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Home Cleaning", img: "https://images.unsplash.com/photo-1686178827149-6d55c72d81df?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Electrical", img: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+];
+
+const ROW_2 = [
+  { label: "Massage Therapy", img: "https://plus.unsplash.com/premium_photo-1661729458610-3cba8e647031?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Plumbing", img: "https://plus.unsplash.com/premium_photo-1661884973994-d7625e52631a?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "AC & HVAC", img: "https://plus.unsplash.com/premium_photo-1683134512538-7b390d0adc9e?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Handyman", img: "https://images.unsplash.com/photo-1676311396794-f14881e9daaa?fm=jpg&q=80&w=600&auto=format&fit=crop" },
+  { label: "Floor Care", img: "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?fm=jpg&q=80&w=600&auto=format&fit=crop" },
 ];
 
 export default function LandingPage() {
@@ -49,27 +51,10 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Service photo grid — fills the flexible middle, never overflows */}
-          <div className="flex-1 min-h-0 grid grid-cols-3 gap-2 md:gap-4 my-2 md:my-4">
-            {SERVICES.map((s) => (
-              <div
-                key={s.label}
-                className="relative rounded-2xl overflow-hidden shadow-sm border border-slate-100 group min-h-0"
-              >
-                <img
-                  src={s.img}
-                  alt={s.label}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 inset-x-0 p-1.5 md:p-3">
-                  <span className="inline-block bg-white/95 text-foreground text-[10px] md:text-sm font-semibold px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
-                    {s.label}
-                  </span>
-                </div>
-              </div>
-            ))}
+          {/* Scrolling service photos — right-to-left marquee, no congestion */}
+          <div className="flex-1 min-h-0 flex flex-col justify-center gap-3 md:gap-4 my-2 md:my-4">
+            <ServiceMarquee services={ROW_1} speed={45} />
+            <ServiceMarquee services={ROW_2} speed={58} />
           </div>
 
           {/* CTAs + trust */}
