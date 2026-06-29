@@ -13,6 +13,7 @@ import PageTransition from '@/components/PageTransition';
 import FirebaseAuth from '@/pages/FirebaseAuth';
 import FirebaseRouteGuard from '@/components/FirebaseRouteGuard';
 import RoleGuard from '@/components/RoleGuard';
+import SetupAndSubscriptionGuard from '@/components/SetupAndSubscriptionGuard';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import OfflineErrorBoundary from '@/components/OfflineErrorBoundary';
 
@@ -89,7 +90,9 @@ const AuthenticatedApp = () => {
           <Route path="/subscribe" element={<Subscribe />} />
           <Route element={<RoleGuard allow={["customer"]} />}>
             <Route path="/providers" element={<Providers />} />
-            <Route path="/post" element={<PostJob />} />
+            <Route element={<SetupAndSubscriptionGuard requireSubscription={true} />}>
+              <Route path="/post" element={<PostJob />} />
+            </Route>
           </Route>
           <Route path="/jobs" element={<MyJobs />} />
         </Route>

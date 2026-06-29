@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 
 export default function BecomeProvider() {
   const navigate = useNavigate();
@@ -44,6 +45,19 @@ export default function BecomeProvider() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Check profile completion first
+  if (!user?.profile_completed) {
+    return (
+      <SubscriptionPaywall
+        message={
+          <>
+            Please complete your profile and verify your identity before becoming a provider. This helps build trust with customers.
+          </>
+        }
+      />
+    );
+  }
 
   const toggle = (n) =>
     setProfessions((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));

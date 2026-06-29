@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { hashPin } from "@/lib/pin";
 import { useAuth } from "@/lib/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 import PageHeader from "@/components/PageHeader";
 import {
@@ -15,18 +16,22 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   User, Bell, KeyRound, CreditCard, LogOut, Trash2,
-  ChevronRight, Shield, Loader2,
+  ChevronRight, Shield, Loader2, AlertCircle, CheckCircle2,
 } from "lucide-react";
 
 export default function Settings() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { active: subActive, loading: subLoading } = useSubscription();
   const [deleting, setDeleting] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [savingPin, setSavingPin] = useState(false);
+
+  const needsProfileCompletion = !user?.profile_completed;
+  const needsSubscription = !subLoading && !subActive;
 
   const deleteAccount = async () => {
     setDeleting(true);
@@ -71,6 +76,55 @@ export default function Settings() {
 
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 flex justify-center">
         <div className="w-full max-w-xl space-y-5">
+          {/* Setup reminders */}
+          {needsProfileCompletion && (
+            <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-warning-soft-foreground shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-warning-soft-foreground">Complete Your Profile</p>
+                <p className="text-xs text-warning-soft-foreground/80 mt-0.5">
+                  Finish setting up your profile to start posting or finding jobs. You need to verify your identity first.
+                </p>
+                <Button
+                  onClick={() => navigate("/firebase-auth")}
+                  className="mt-2 h-8 text-xs rounded-lg bg-warning text-warning-foreground hover:bg-warning/90"
+                >
+                  Complete Setup
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {needsSubscription && !needsProfileCompletion && (
+            <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-warning-soft-foreground shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-warning-soft-foreground">Subscribe to Get Started</p>
+                <p className="text-xs text-warning-soft-foreground/80 mt-0.5">
+                  Your profile is ready! Subscribe for just $1/month to start posting or finding jobs.
+                </p>
+                <Button
+                  onClick={() => navigate("/subscribe")}
+                  className="mt-2 h-8 text-xs rounded-lg bg-warning text-warning-foreground hover:bg-warning/90"
+                >
+                  Subscribe Now
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!needsProfileCompletion && !needsSubscription && (
+            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-primary">All Set!</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Your profile is complete and subscription is active. You're ready to go!
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Profile card */}
           <div className="bg-card rounded-2xl p-4 border border-border flex items-center gap-3.5">
             <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center text-accent-foreground font-extrabold text-xl shrink-0">

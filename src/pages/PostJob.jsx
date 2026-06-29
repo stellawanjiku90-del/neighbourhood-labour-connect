@@ -32,6 +32,19 @@ export default function PostJob() {
     return <Navigate to="/" replace />;
   }
 
+  // Check profile completion first
+  if (!user?.profile_completed) {
+    return (
+      <SubscriptionPaywall
+        message={
+          <>
+            Please complete your profile and verify your identity before posting jobs. This helps build trust in our community.
+          </>
+        }
+      />
+    );
+  }
+
   if (!subLoading && !active) {
     return <SubscriptionPaywall />;
   }
