@@ -41,6 +41,13 @@ Deno.serve(async (req) => {
     const providerEarnings = provider?.earnings || 0;
     const totalEarnings = +providerEarnings + referralTotal;
 
+    // Pending withdrawals
+    const pendingWithdrawals = await base44.asServiceRole.entities.WithdrawalRequest.filter(
+      { user_id: firebase_uid }, "-created_date", 50
+    );
+    const pendingAmount = pendingWithdrawals.reduce((s, w) => s + (w.amount || 0), 0);
+    const availableBalance = +(totalEarnings - pendingAmount).toFixed(2);
+
     return Response.json({
       referral_code: profile.referral_code || null,
       provider: provider
@@ -63,6 +70,16 @@ Deno.serve(async (req) => {
         period_end: activeSub?.period_end || null,
       },
       total_earnings: +totalEarnings.toFixed(2),
+      available_balance: availableBalance,
+      pending_withdrawals: pendingAmount,
+      withdrawal_history: pendingWithdrawals.map((w) => ({
+        id: w.id,
+        amount: w.amount || 0,
+        provider: w.provider || "M-PESA",
+        status: w.status || "pending",
+        tracking_id: w.tracking_id || null,
+        created_date: w.created_date,
+      })),
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

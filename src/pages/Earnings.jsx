@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import WithdrawDialog from "@/components/WithdrawDialog";
 import {
   Wallet, Gift, Star, Briefcase, Loader2, Check, Clock, Copy, Share2,
-  TrendingUp, ArrowDownToLine, Sparkles,
+  TrendingUp, ArrowDownToLine, Clock8, XCircle, SendHorizonal,
 } from "lucide-react";
 
 export default function Earnings() {
@@ -17,6 +18,7 @@ export default function Earnings() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -50,6 +52,9 @@ export default function Earnings() {
   const referralCode = data.referral_code || null;
   const history = data.referral?.history || [];
   const total = data.total_earnings || 0;
+  const available = data.available_balance ?? total;
+  const pendingWithdrawals = data.pending_withdrawals ?? 0;
+  const withdrawHistory = data.withdrawal_history || [];
 
   const copyCode = () => {
     if (!referralCode) return;
@@ -63,9 +68,7 @@ export default function Earnings() {
     `Join Neighbourhood Labour Connect! Use my referral code ${referralCode || ""} when you sign up.`
   )}`;
 
-  const withdrawLink = `https://wa.me/254706692111?text=${encodeURIComponent(
-    `Hi, I'd like to request a withdrawal of $${total.toFixed(2)} from my NLC earnings. My code is ${referralCode || "N/A"}.`
-  )}`;
+  const withdrawLink = null;
 
   return (
     <div className="h-full flex flex-col overflow-hidden max-w-2xl mx-auto w-full">
@@ -80,14 +83,17 @@ export default function Earnings() {
             {isProvider && <span>Jobs: ${(data.provider.earnings || 0).toFixed(2)}</span>}
             <span>Referrals: ${(data.referral?.total || 0).toFixed(2)}</span>
           </div>
-          <a
-            href={withdrawLink}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex items-center gap-2 bg-primary-foreground text-primary rounded-xl px-4 py-2.5 text-sm font-bold"
+          {pendingWithdrawals > 0 && (
+            <p className="mt-2 text-xs text-warning-soft-foreground bg-warning-soft/60 rounded-lg px-2.5 py-1 inline-block">
+              ${pendingWithdrawals.toFixed(2)} pending withdrawal
+            </p>
+          )}
+          <button
+            onClick={() => setWithdrawOpen(true)}
+            className="mt-3 w-full inline-flex items-center justify-center gap-2 bg-primary-foreground text-primary rounded-xl px-4 py-2.5 text-sm font-bold"
           >
-            <ArrowDownToLine className="w-4 h-4" /> Request Withdrawal
-          </a>
+            <ArrowDownToLine className="w-4 h-4" /> Withdraw ${available.toFixed(2)}
+          </button>
         </div>
 
         {/* Subscription status */}
@@ -196,7 +202,48 @@ export default function Earnings() {
             </div>
           )}
         </section>
+
+        {/* Withdrawal history */}
+        {withdrawHistory.length > 0 && (
+          <section>
+            <h3 className="text-sm font-bold text-foreground mb-2">Withdrawal history</h3>
+            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+              {withdrawHistory.map((w) => {
+                const statusIcon = w.status === "completed" ? Check
+                  : w.status === "failed" ? XCircle
+                  : Clock8;
+                const statusLabel = w.status === "failed" ? "Failed" : (w.status === "completed" ? "Sent" : "Processing");
+                return (
+                  <div key={w.id} className="flex items-center gap-3 px-4 py-3">
+                    <span className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                      <SendHorizonal className="w-5 h-5 text-foreground" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{w.provider || "M-PESA"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(w.created_date).toLocaleDateString()}
+                        {w.tracking_id && ` · Ref: ${w.tracking_id.substring(0, 12)}`}
+                      </p>
+                    </div>
+                    <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                      -${(w.amount || 0).toFixed(2)}
+                    </span>
+                    <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                      w.status === "completed" ? "bg-[#C9E8D8] text-[#2D7A3E]"
+                        : w.status === "failed" ? "bg-destructive/10 text-destructive"
+                        : "bg-accent text-accent-foreground"
+                    }`}>
+                      <SendHorizonal className="w-3 h-3" /> {statusLabel}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
+
+      <WithdrawDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} availableBalance={available} />
     </div>
   );
 }
