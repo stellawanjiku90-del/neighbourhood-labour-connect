@@ -186,19 +186,12 @@ export default function Subscribe() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header with back button */}
+      {/* Header */}
       <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
         <div className="flex-1">
           <h1 className="text-base font-bold text-foreground">Subscribe</h1>
           <p className="text-[11px] text-muted-foreground">Ksh 130 / month</p>
         </div>
-        <span className="text-sm font-bold text-primary">Ksh 130</span>
       </header>
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-5" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
