@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, Loader2, X, Smartphone, ShieldCheck, Eye, Search, Briefcase, Star } from "lucide-react";
+import { Check, Loader2, X, Smartphone, ShieldCheck, Eye, Search, Briefcase, Star, CreditCard, ArrowLeft } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
+import { useNavigate } from "react-router-dom";
 
 export default function Subscribe() {
+  const navigate = useNavigate();
   const { active, periodEnd, loading } = useSubscription();
   const { user } = useAuth();
   const [config, setConfig] = useState(null);
@@ -81,32 +83,60 @@ export default function Subscribe() {
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      <div className="h-full flex flex-col">
+        <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background safe-area-top" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <div className="flex-1">
+            <h1 className="text-base font-bold text-foreground">Subscribe</h1>
+            <p className="text-[11px] text-muted-foreground">Loading…</p>
+          </div>
+        </header>
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
       </div>
     );
   }
 
   if (active || paymentState === "success") {
     return (
-      <div className="h-full flex items-center justify-center page-content">
-        <div className="bg-card rounded-3xl border border-border p-6 text-center max-w-md mx-auto">
-          <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-3">
-            <Check className="w-7 h-7 text-primary" />
+      <div className="h-full flex flex-col">
+        <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background safe-area-top" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <div className="flex-1">
+            <h1 className="text-base font-bold text-foreground">Subscribe</h1>
+            <p className="text-[11px] text-muted-foreground">Payment confirmation</p>
           </div>
-          <h1 className="text-xl font-extrabold text-foreground mb-1">
-            {paymentState === "success" ? "Payment Successful!" : "Subscription Active"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {paymentState === "success"
-              ? "Confirming your subscription…"
-              : `Your subscription runs until ${new Date(periodEnd).toLocaleDateString()}.`}
-          </p>
-          {paymentState === "success" && (
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-3">
-              <Loader2 className="w-4 h-4 animate-spin" /> Activating…
+        </header>
+        <div className="flex-1 flex items-center justify-center page-content">
+          <div className="bg-card rounded-3xl border border-border p-6 text-center max-w-md mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-3">
+              <Check className="w-7 h-7 text-primary" />
             </div>
-          )}
+            <h1 className="text-xl font-extrabold text-foreground mb-1">
+              {paymentState === "success" ? "Payment Successful!" : "Subscription Active"}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {paymentState === "success"
+                ? "Confirming your subscription…"
+                : `Your subscription runs until ${new Date(periodEnd).toLocaleDateString()}.`}
+            </p>
+            {paymentState === "success" && (
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-3">
+                <Loader2 className="w-4 h-4 animate-spin" /> Activating…
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -126,16 +156,24 @@ export default function Subscribe() {
   ];
 
   return (
-    <div className="h-full overflow-y-auto page-content pt-6">
-      <div className="bg-card rounded-3xl border border-border p-5 max-w-md mx-auto">
-        {/* Heading */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-lg font-extrabold text-foreground">Subscribe</h1>
-            <p className="text-xs text-muted-foreground">Ksh 130 / month · auto-renewed monthly</p>
-          </div>
-          <span className="text-2xl font-extrabold text-primary">Ksh 130</span>
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Header with back button */}
+      <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background safe-area-top" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+        <div className="flex-1">
+          <h1 className="text-base font-bold text-foreground">Subscribe</h1>
+          <p className="text-[11px] text-muted-foreground">Ksh 130 / month</p>
         </div>
+        <span className="text-sm font-bold text-primary">Ksh 130</span>
+      </header>
+
+      <div className="flex-1 min-h-0 overflow-y-auto page-content py-5">
+        <div className="bg-card rounded-3xl border border-border p-5 max-w-md mx-auto">
 
         {/* Benefits */}
         <div className="space-y-1.5 mb-4">
@@ -191,6 +229,7 @@ export default function Subscribe() {
         <p className="text-[11px] text-muted-foreground text-center mt-2">
           You'll receive an M-Pesa prompt on your phone. Enter your PIN to confirm the payment.
         </p>
+        </div>
       </div>
     </div>
   );

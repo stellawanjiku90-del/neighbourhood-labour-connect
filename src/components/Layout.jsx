@@ -32,7 +32,7 @@ const PROVIDER_NAV = [
 ];
 
 // Pages where the header back arrow IS appropriate (secondary destinations).
-const PRIMARY_PATHS = ["/", "/jobs", "/messages", "/earnings", "/settings"];
+const PRIMARY_PATHS = ["/", "/jobs", "/messages", "/earnings", "/settings", "/subscribe"];
 
 function AnimatedOutlet() {
   const location = useLocation();
