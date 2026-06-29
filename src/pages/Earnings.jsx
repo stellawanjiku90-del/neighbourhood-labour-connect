@@ -41,9 +41,11 @@ export default function Earnings() {
   }
   if (!data) {
     return (
-      <div className="h-full max-w-2xl mx-auto w-full">
+      <div className="h-full flex flex-col">
         <PageHeader title="Earnings" icon={Wallet} />
-        <EmptyState icon={Wallet} title="Couldn't load earnings" description="Please check your connection and try again." />
+        <div className="flex-1 flex items-center justify-center page-content">
+          <EmptyState icon={Wallet} title="Couldn't load earnings" description="Please check your connection and try again." />
+        </div>
       </div>
     );
   }
@@ -73,10 +75,11 @@ export default function Earnings() {
   const withdrawLink = null;
 
   return (
-    <div className="h-full flex flex-col overflow-hidden max-w-2xl mx-auto w-full">
+    <div className="h-full flex flex-col overflow-hidden">
       <PageHeader title="Earnings" subtitle="Jobs & referral income" icon={Wallet} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-4">
+        <div className="max-w-2xl mx-auto w-full space-y-5">
         {/* Total earnings hero */}
         <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-5 text-primary-foreground">
           <p className="text-sm opacity-90 mb-1">Total Earnings</p>
@@ -258,6 +261,7 @@ export default function Earnings() {
             </div>
           </section>
         )}
+        </div>
       </div>
 
       <WithdrawDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} availableBalance={available} />

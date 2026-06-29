@@ -77,14 +77,14 @@ export default function Layout() {
   return (
     <div className="h-[100dvh] bg-background flex overflow-hidden">
       {/* Desktop sidebar — fixed width, native desktop feel */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-card border-r border-border h-full pt-[env(safe-area-inset-top)] z-30">
-        <Link to="/" className="flex items-center gap-3 px-5 h-16 shrink-0 border-b border-border">
+      <aside className="hidden md:flex flex-col w-72 shrink-0 bg-card border-r border-border h-full pt-safe-area-top z-30">
+        <Link to="/" className="flex items-center gap-3 px-6 h-16 shrink-0 border-b border-border">
           <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-9 h-9 rounded-xl object-cover shrink-0" />
           <span className="font-display font-extrabold text-foreground text-sm leading-tight">
             Neighbourhood<br />Labour Connect
           </span>
         </Link>
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
           {nav.map(({ to, label, icon: Icon, plain }, i) =>
             plain ? (
               <button
@@ -119,7 +119,7 @@ export default function Layout() {
             )
           )}
         </nav>
-        <div className="px-3 pb-4 shrink-0">
+        <div className="px-4 pb-5 shrink-0">
           <button
             onClick={() => logout()}
             className="w-full flex items-center gap-3 px-3 h-11 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors text-sm font-medium"
@@ -130,12 +130,12 @@ export default function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0 overflow-hidden flex flex-col pt-[env(safe-area-inset-top)] pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0">
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col pt-safe-area-top pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0">
         <OfflineBanner />
         <OnboardingPermissions />
         {/* Back-arrow bar only on secondary pages */}
         {showBack && (
-          <div className="md:hidden shrink-0 flex items-center px-2 h-11 border-b border-border bg-background/90 backdrop-blur">
+          <div className="md:hidden shrink-0 flex items-center px-2 h-11 border-b border-border bg-background/90 backdrop-blur safe-area-left safe-area-right">
             <button
               onClick={() => navigate(-1)}
               aria-label="Go back"
@@ -145,11 +145,13 @@ export default function Layout() {
             </button>
           </div>
         )}
-        <AnimatedOutlet />
+        <div className="flex-1 min-h-0 overflow-hidden w-full max-w-[1200px] mx-auto">
+          <AnimatedOutlet />
+        </div>
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border flex z-40 px-1 pb-[env(safe-area-inset-bottom)]">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border flex z-40 px-1 pb-safe-area-bottom">
         {nav.map(({ to, label, icon: Icon, plain }, i) => {
           const content = (
             <>

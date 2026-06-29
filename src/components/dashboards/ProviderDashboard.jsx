@@ -166,8 +166,8 @@ export default function ProviderDashboard() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Header */}
-      <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background">
-        <div className="flex items-center justify-between">
+      <header className="shrink-0 px-4 md:px-8 py-2.5 border-b border-border bg-background safe-area-top">
+        <div className="flex items-center justify-between max-w-[1200px] mx-auto">
           <div className="flex items-center gap-2.5">
             <img src={LOGO_URL} alt="Logo" className="w-7 h-7 rounded-lg" />
             <h1 className="text-base font-semibold text-foreground">{firstName}</h1>
@@ -199,8 +199,8 @@ export default function ProviderDashboard() {
       </header>
 
       {/* Stats */}
-      <div className="shrink-0 px-4 py-2 bg-background">
-        <div className="grid grid-cols-3 gap-1.5">
+      <div className="shrink-0 px-4 md:px-8 py-2 bg-background">
+        <div className="grid grid-cols-3 gap-1.5 max-w-[1200px] mx-auto">
           <div className="bg-card rounded-lg p-2 border border-border text-center">
             <Wallet className="w-3.5 h-3.5 text-[#2D7A3E] mx-auto mb-0.5" />
             <p className="text-base font-bold text-foreground">{provider.earnings || 0}</p>
@@ -220,8 +220,8 @@ export default function ProviderDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="shrink-0 px-4 py-1.5 border-t border-border bg-background">
-        <div className="flex gap-1.5">
+      <div className="shrink-0 px-4 md:px-8 py-1.5 border-t border-border bg-background">
+        <div className="flex gap-1.5 max-w-[1200px] mx-auto">
           <button
             onClick={() => setActiveTab("assigned")}
             className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
@@ -242,8 +242,8 @@ export default function ProviderDashboard() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-2">
-        <div className="flex gap-2 pb-2 h-full">
+      <div className="flex-1 min-h-0 overflow-x-auto px-4 md:px-8 py-2">
+        <div className="flex gap-2 pb-2 h-full max-w-[1200px] mx-auto">
           {activeTab === "assigned" && assignedJobs.length === 0 && (
             <p className="text-xs text-muted-foreground text-center w-full py-8">No assigned jobs</p>
           )}

@@ -71,8 +71,8 @@ export default function CustomerDashboard() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Header: greeting + location */}
-      <header className="shrink-0 px-4 pt-3 pb-2 bg-background">
-        <div className="flex items-center justify-between gap-3">
+      <header className="shrink-0 px-4 md:px-8 pt-3 pb-2 bg-background safe-area-top">
+        <div className="flex items-center justify-between gap-3 max-w-[1200px] mx-auto">
           <div className="flex items-center gap-2.5 min-w-0">
             <img src={LOGO_URL} alt="NLC" className="w-9 h-9 rounded-xl shrink-0" />
             <div className="min-w-0">
@@ -94,7 +94,7 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Search */}
-        <div className="mt-3">
+        <div className="mt-3 max-w-[1200px] mx-auto">
           <CategorySearch
             value=""
             onChange={(v) => v && navigate(`/providers?category=${encodeURIComponent(v)}`)}
@@ -104,7 +104,7 @@ export default function CustomerDashboard() {
       </header>
 
       {/* Scrollable content */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 pb-6 space-y-5 max-w-[1200px] mx-auto">
         {/* Quick actions */}
         <div className="grid grid-cols-2 gap-3">
           <button

@@ -81,7 +81,7 @@ export default function Subscribe() {
 
   if (loading) {
     return (
-      <div className="flex justify-center pt-12">
+      <div className="h-full flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -89,8 +89,8 @@ export default function Subscribe() {
 
   if (active || paymentState === "success") {
     return (
-      <div className="h-full overflow-y-auto max-w-xl mx-auto px-4 pt-6">
-        <div className="bg-card rounded-3xl border border-border p-6 text-center">
+      <div className="h-full flex items-center justify-center page-content">
+        <div className="bg-card rounded-3xl border border-border p-6 text-center max-w-md mx-auto">
           <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-3">
             <Check className="w-7 h-7 text-primary" />
           </div>
@@ -126,8 +126,8 @@ export default function Subscribe() {
   ];
 
   return (
-    <div className="h-full overflow-y-auto max-w-xl mx-auto px-4 pt-6">
-      <div className="bg-card rounded-3xl border border-border p-5">
+    <div className="h-full overflow-y-auto page-content pt-6">
+      <div className="bg-card rounded-3xl border border-border p-5 max-w-md mx-auto">
         {/* Heading */}
         <div className="flex items-center justify-between mb-3">
           <div>

@@ -30,8 +30,8 @@ export default function LandingPage() {
       <LogoHeader />
 
       {/* Main — fills remaining space, no scroll */}
-      <main className="flex-1 min-h-0 px-4 md:px-6 py-1">
-        <div className="max-w-5xl mx-auto h-full flex flex-col">
+      <main className="flex-1 min-h-0 px-4 md:px-8 py-1">
+        <div className="max-w-[1200px] mx-auto h-full flex flex-col">
           {/* Tagline — compact */}
           <div className="text-center shrink-0">
             <p className="font-display font-semibold text-primary text-xs md:text-lg">
@@ -68,7 +68,7 @@ export default function LandingPage() {
 
       {/* Footer — tappable legal links */}
       <footer className="shrink-0 border-t border-border bg-background safe-area-bottom">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-2">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-2">
           <div className="flex items-center justify-center md:justify-between gap-4 text-[11px] md:text-xs">
             <p className="text-muted-foreground hidden md:block">
               © {new Date().getFullYear()} Neighbourhood Labour Connect

@@ -1,9 +1,9 @@
-// Standardized page header. title (required), optional subtitle, optional
-// right-side action node. Keeps spacing/typography consistent across pages.
+// Standardized page header — enforces consistent height, spacing, typography
+// across ALL pages. Used by PageHeader and Layout back-arrow bar.
 export default function PageHeader({ title, subtitle, action, icon: Icon }) {
   return (
-    <header className="shrink-0 px-4 md:px-8 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="flex items-center justify-between gap-3">
+    <header className="shrink-0 px-4 md:px-8 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 safe-area-top">
+      <div className="flex items-center justify-between gap-3 max-w-2xl mx-auto w-full">
         <div className="min-w-0 flex items-center gap-2.5">
           {Icon && (
             <span className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0">
