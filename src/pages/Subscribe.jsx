@@ -8,10 +8,13 @@ export default function Subscribe() {
   const { active, periodEnd, loading } = useSubscription();
   const { user } = useAuth();
   const [config, setConfig] = useState(null);
-  const [sdkReady, setSdkReady] = useState(typeof window !== "undefined" && !!window.IntaSend);
+  const [sdkReady, setSdkReady] = useState(
+    typeof window !== "undefined" && !!window.IntaSend
+  );
   const [paymentState, setPaymentState] = useState("idle"); // idle | success | failed
   const [error, setError] = useState(null);
-  const intaSendRef = useRef(null);
+  const [buttonEl, setButtonEl] = useState(null);
+  const initedRef = useRef(false);
   const pollRef = useRef(null);
 
   // ─── Fetch the public IntaSend config (publishable key + live flag) ──
@@ -43,13 +46,19 @@ export default function Subscribe() {
     return () => clearInterval(t);
   }, []);
 
-  // ─── Initialize the IntaSend SDK once everything is ready ───────────
-  // Runs entirely in the browser, so requests originate from the user's
-  // IP (not the server's), avoiding the Cloudflare 1106 IP block on the
-  // backend-to-IntaSend path.
+  // ─── Initialize the IntaSend SDK once the pay button is in the DOM ──
+  // The SDK scans for `.intaSendPayButton` at construction time, so it must
+  // run AFTER the button is committed to the DOM. Runs entirely in the
+  // browser, so requests originate from the user's IP (not the server's),
+  // avoiding the Cloudflare 1106 IP block on the backend path.
   useEffect(() => {
-    if (!sdkReady || !config || !user || intaSendRef.current) return;
-    intaSendRef.current = new window.IntaSend({
+    if (!buttonEl) {
+      initedRef.current = false; // allow re-init if the button remounts
+      return;
+    }
+    if (!sdkReady || !config || initedRef.current) return;
+    initedRef.current = true;
+    new window.IntaSend({
       publicAPIKey: config.publishable_key,
       live: config.live,
     })
@@ -58,7 +67,7 @@ export default function Subscribe() {
         setError("Payment was not completed. Please try again.");
         setPaymentState("failed");
       });
-  }, [sdkReady, config, user]);
+  }, [sdkReady, config, buttonEl]);
 
   // ─── On success, poll the DB until the webhook activates the sub ────
   useEffect(() => {
@@ -125,30 +134,9 @@ export default function Subscribe() {
     );
   }
 
-  // ─── Payment failed ────────────────────────────────────────────────
-  if (paymentState === "failed") {
-    return (
-      <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-            <X className="w-7 h-7 text-destructive" />
-          </div>
-          <h1 className="text-xl font-extrabold text-foreground mb-1">
-            Payment Not Completed
-          </h1>
-          <p className="text-sm text-muted-foreground mb-3">{error}</p>
-          <button
-            onClick={() => setPaymentState("idle")}
-            className="w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332] text-white font-semibold"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Idle: show subscription offer ─────────────────────────────────
+  // ─── Idle or failed: offer card with the pay button ─────────────────
+  // The button is kept mounted across idle/failed transitions so the SDK's
+  // click handler survives (swapping the tree would unmount it).
   const phone = (user?.phone || "").replace("+", "");
   const nameParts = (user?.full_name || "Customer").split(" ");
   const firstName = nameParts[0] || "Customer";
@@ -181,7 +169,14 @@ export default function Subscribe() {
             sharing
           </li>
         </ul>
+        {paymentState === "failed" && (
+          <div className="mb-4 p-3 rounded-lg bg-destructive/10 flex items-center gap-2 text-sm text-destructive">
+            <X className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
         <button
+          ref={setButtonEl}
           className="intaSendPayButton w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332] text-white font-semibold flex items-center justify-center gap-2"
           data-amount="130"
           data-currency="KES"
