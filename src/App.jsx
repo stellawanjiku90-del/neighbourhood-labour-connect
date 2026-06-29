@@ -2,7 +2,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -39,9 +39,24 @@ const LoadingFallback = () => (
   </div>
 );
 
+const PUBLIC_PATHS = ["/terms", "/privacy", "/refund"];
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const isOnline = useOnlineStatus();
+  const { pathname } = useLocation();
+
+  // Public legal pages — render them immediately BEFORE any auth check,
+  // so they are never blocked by auth redirects or FirebaseRouteGuard.
+  if (PUBLIC_PATHS.includes(pathname)) {
+    return (
+      <Routes>
+        <Route path="/terms" element={<LegalPageWrapper><Terms /></LegalPageWrapper>} />
+        <Route path="/privacy" element={<LegalPageWrapper><Privacy /></LegalPageWrapper>} />
+        <Route path="/refund" element={<LegalPageWrapper><Refund /></LegalPageWrapper>} />
+      </Routes>
+    );
+  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -78,9 +93,6 @@ const AuthenticatedApp = () => {
             <Route path="/jobs" element={<MyJobs />} />
           </Route>
         </Route>
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/refund" element={<Refund />} />
       </Route>
       <Route element={<FirebaseRouteGuard />}>
         <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />
@@ -95,6 +107,18 @@ const AuthenticatedApp = () => {
     </Routes>
   );
 };
+
+// Public legal pages — rendered OUTSIDE AuthenticatedApp so they
+// are never blocked by auth redirects.
+function LegalPageWrapper({ children }) {
+  return (
+    <div className="h-[100dvh] bg-background overflow-hidden flex flex-col safe-area-inset">
+      <main className="flex-1 min-h-0 overflow-y-auto">
+        {children}
+      </main>
+    </div>
+  );
+}
 
 
 function useAutoTheme() {

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import ServiceMarquee from "@/components/ServiceMarquee";
+import LogoHeader from "@/components/LogoHeader";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
@@ -26,20 +27,7 @@ const ROW_2 = [
 export default function LandingPage() {
   return (
     <div className="h-[100dvh] w-full overflow-hidden bg-background flex flex-col safe-area-inset">
-      {/* Header — logo + app name on one row */}
-      <header className="shrink-0 bg-background/90 backdrop-blur safe-area-top px-4 py-2">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={LOGO_URL} alt="Neighbourhood Labour Connect logo" className="w-8 h-8 rounded-lg object-cover" />
-            <span className="font-display font-extrabold text-foreground text-sm md:text-lg tracking-tight">
-              Neighbourhood Labour Connect
-            </span>
-          </div>
-          <Link to="/firebase-auth" className="text-[11px] font-semibold text-primary underline underline-offset-2">
-            Sign In
-          </Link>
-        </div>
-      </header>
+      <LogoHeader />
 
       {/* Main — fills remaining space, no scroll */}
       <main className="flex-1 min-h-0 px-4 md:px-6 py-1">
