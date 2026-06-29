@@ -195,7 +195,7 @@ export default function Subscribe() {
       </header>
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-5" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
-        <div className="bg-card rounded-3xl border border-border p-5 max-w-md mx-auto">
+        <div className="bg-card rounded-3xl border border-border p-5 w-full max-w-md mx-auto md:mx-0">
         {/* Benefits */}
         <div className="space-y-1.5 mb-4">
           {BENEFITS.map((b) => {

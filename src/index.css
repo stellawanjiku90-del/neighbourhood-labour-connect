@@ -105,17 +105,24 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Unified layout system — consistent container widths */
+  /* Unified layout system — full width on desktop, constrained on mobile */
   .content-container {
-    @apply w-full max-w-[1200px] mx-auto px-4 md:px-8;
+    @apply w-full mx-auto px-4 md:px-8;
   }
 
   .page-content {
-    @apply flex-1 min-h-0 overflow-y-auto w-full max-w-2xl mx-auto;
+    @apply flex-1 min-h-0 overflow-y-auto w-full;
     padding-top: calc(16px + env(safe-area-inset-top, 0px));
     padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     padding-left: calc(16px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
+  }
+  
+  /* Mobile-only max-width constraint */
+  @media (max-width: 768px) {
+    .page-content {
+      max-width: 100%;
+    }
   }
   
   .page-content-full {

@@ -89,7 +89,7 @@ export default function PostJob() {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden max-w-2xl mx-auto bg-background">
+    <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Header */}
       <header className="shrink-0 px-4 py-2.5 border-b border-border bg-background flex items-center justify-between" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
         <h1 className="text-lg font-semibold text-foreground">Post Request</h1>

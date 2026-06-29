@@ -78,7 +78,7 @@ export default function MyJobs() {
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <header className="shrink-0 px-4 md:px-8 pt-3 pb-2 bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
-        <div className="flex items-center justify-between gap-3 max-w-2xl mx-auto w-full">
+        <div className="flex items-center justify-between gap-3 w-full">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground shrink-0">
               <Briefcase className="w-5 h-5" />

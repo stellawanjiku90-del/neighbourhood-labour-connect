@@ -145,7 +145,7 @@ export default function Layout() {
             </button>
           </div>
         )}
-        <div className="flex-1 min-h-0 overflow-hidden w-full max-w-[1200px] mx-auto">
+        <div className="flex-1 min-h-0 overflow-hidden w-full">
           <AnimatedOutlet />
         </div>
       </main>

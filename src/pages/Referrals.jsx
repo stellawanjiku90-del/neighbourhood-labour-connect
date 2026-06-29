@@ -51,7 +51,7 @@ export default function Referrals() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="page-content pt-6">
+      <div className="page-content py-4" style={{ paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))' }}>
       <h1 className="text-2xl font-extrabold text-foreground mb-1">Referral Program</h1>
       <p className="text-sm text-muted-foreground mb-6">
         Earn when your friends subscribe — up to 3 levels deep.

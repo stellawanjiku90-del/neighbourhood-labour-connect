@@ -79,7 +79,7 @@ export default function Earnings() {
       <PageHeader title="Earnings" subtitle="Jobs & referral income" icon={Wallet} />
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
-        <div className="max-w-2xl mx-auto w-full space-y-5">
+        <div className="w-full space-y-5">
         {/* Total earnings hero */}
         <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-5 text-primary-foreground shadow-sm">
           <p className="text-sm opacity-90 mb-1">Total Earnings</p>
