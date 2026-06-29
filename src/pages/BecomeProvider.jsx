@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useGeoLocation } from "@/hooks/useGeoLocation";
 import CategorySearch from "@/components/CategorySearch";
 import LocationPicker from "@/components/LocationPicker";
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,32 @@ export default function BecomeProvider() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { active: subActive, loading: subLoading } = useSubscription();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const { detect } = useGeoLocation();
+  const profile = user?.profile;
+  const [name, setName] = useState(
+    profile ? `${profile.first_name || ""} ${profile.surname || ""}`.trim() : ""
+  );
+  const [phone, setPhone] = useState(user?.phone || "");
   const [bio, setBio] = useState("");
   const [years, setYears] = useState("");
   const [professions, setProfessions] = useState([]);
   const [radius, setRadius] = useState([10]);
-  const [loc, setLoc] = useState(null);
+  const [loc, setLoc] = useState(
+    profile?.lat != null && profile?.lng != null
+      ? { lat: profile.lat, lng: profile.lng, location_name: profile.location_name }
+      : null
+  );
   const [saving, setSaving] = useState(false);
+
+  // Autofill base location from live location if the profile had none.
+  useEffect(() => {
+    if (!loc && navigator.geolocation) {
+      detect().then((res) => {
+        if (res) setLoc(res);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggle = (n) =>
     setProfessions((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));
