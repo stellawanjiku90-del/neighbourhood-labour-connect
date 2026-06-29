@@ -72,15 +72,15 @@ const AuthenticatedApp = () => {
           <Route path="/referrals" element={<Referrals />} />
           <Route path="/earnings" element={<Earnings />} />
           <Route path="/subscribe" element={<Subscribe />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/refund" element={<Refund />} />
           <Route element={<RoleGuard allow={["customer"]} />}>
             <Route path="/providers" element={<Providers />} />
             <Route path="/post" element={<PostJob />} />
             <Route path="/jobs" element={<MyJobs />} />
           </Route>
         </Route>
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/refund" element={<Refund />} />
       </Route>
       <Route element={<FirebaseRouteGuard />}>
         <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />

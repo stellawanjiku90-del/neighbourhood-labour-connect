@@ -135,10 +135,7 @@ export default function Layout() {
     return (
       <div className="h-[100dvh] bg-background overflow-hidden flex flex-col">
         <OfflineBanner />
-        <div className="shrink-0 flex items-center px-3 h-11 border-b border-border bg-background/90 backdrop-blur pt-[env(safe-area-inset-top)]">
-          <NavigationArrows />
-        </div>
-        <main className="min-w-0 flex-1 min-h-0 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+        <main className="min-w-0 flex-1 min-h-0 overflow-y-auto">
           <AnimatedOutlet />
         </main>
       </div>

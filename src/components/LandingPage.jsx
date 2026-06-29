@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, ShieldCheck, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ServiceMarquee from "@/components/ServiceMarquee";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -60,7 +60,7 @@ export default function LandingPage() {
             <ServiceMarquee services={ROW_2} speed={58} />
           </div>
 
-          {/* CTAs + trust */}
+          {/* CTAs */}
           <div className="shrink-0">
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Link to="/firebase-auth" className="w-full sm:w-auto">
@@ -73,18 +73,6 @@ export default function LandingPage() {
                   Sign In
                 </Button>
               </Link>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-2 text-[11px] md:text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-primary fill-primary" /> Rated providers
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Verified pros
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-primary" /> Near you
-              </span>
             </div>
           </div>
         </div>
