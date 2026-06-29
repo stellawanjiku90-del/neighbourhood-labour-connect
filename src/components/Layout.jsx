@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { NavLink, useLocation, useOutlet, useNavigate, Link } from "react-router-dom";
 import {
   Home, Briefcase, MessageCircle, Wallet, MoreHorizontal, ArrowLeft,
-  Settings, Shield, LogOut, ChevronRight, HelpCircle, MessageSquare,
-  FileText, Info, User,
+  Settings as SettingsIcon, LogOut, User, ChevronRight,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import OfflineBanner from "@/components/OfflineBanner";
 import OnboardingPermissions from "@/components/OnboardingPermissions";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
@@ -52,41 +52,15 @@ function AnimatedOutlet() {
   );
 }
 
-// "More" / Profile sheet — secondary destinations only.
-// Primary features (Earnings, Referrals which live in Earnings, Jobs, Messages)
-// are NOT repeated here so it never competes with primary navigation.
+// Compact Profile shortcut — a quick view that sends you to /settings for
+// the full account management (Profile, Notifications, Subscription, PIN,
+// Admin Panel, Delete Account). Nothing duplicates the Settings page.
 function MoreSheet({ open, onOpenChange, user, onLogout }) {
   const navigate = useNavigate();
-  const go = (path) => { onOpenChange(false); if (path) navigate(path); };
-
-  const groups = [
-    {
-      title: "Account",
-      items: [
-        { icon: Settings, label: "Settings", to: "/settings" },
-        ...(user?.role === "admin" ? [{ icon: Shield, label: "Admin Panel", to: "/admin" }] : []),
-      ],
-    },
-    {
-      title: "Support",
-      items: [
-        { icon: HelpCircle, label: "Help & Support", href: "https://wa.me/254706692111?text=Hi%20NLC%20Support%2C%20I%20have%20a%20question" },
-        { icon: MessageSquare, label: "Contact Us", href: "https://wa.me/254706692111" },
-      ],
-    },
-    {
-      title: "Legal",
-      items: [
-        { icon: FileText, label: "Terms of Service", to: "/terms" },
-        { icon: FileText, label: "Privacy Policy", to: "/privacy" },
-        { icon: FileText, label: "Refund Policy", to: "/refund" },
-      ],
-    },
-  ];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl p-0 max-h-[85dvh]">
+      <SheetContent side="bottom" className="rounded-t-3xl p-0 max-h-[85dvh] md:inset-x-auto md:inset-y-0 md:right-0 md:max-w-[460px] md:rounded-tl-xl">
         <SheetHeader className="px-5 pt-4 pb-3 text-left border-b border-border">
           <div className="flex items-center gap-3">
             <span className="w-11 h-11 rounded-2xl bg-accent flex items-center justify-center text-accent-foreground font-extrabold text-lg shrink-0">
@@ -98,44 +72,22 @@ function MoreSheet({ open, onOpenChange, user, onLogout }) {
             </div>
           </div>
         </SheetHeader>
-        <div className="px-3 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-4 overflow-y-auto">
-          {groups.map((g) => (
-            <div key={g.title}>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide px-2 mb-1.5">{g.title}</p>
-              <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                {g.items.map((item) => {
-                  const Icon = item.icon;
-                  const inner = (
-                    <>
-                      <span className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-accent-foreground" />
-                      </span>
-                      <span className="flex-1 text-sm font-medium text-foreground">{item.label}</span>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </>
-                  );
-                  const cls = "w-full flex items-center gap-3 px-4 h-14 border-b border-border last:border-0 hover:bg-muted transition-colors text-left";
-                  return item.href ? (
-                    <a key={item.label} href={item.href} target="_blank" rel="noreferrer" className={cls}>{inner}</a>
-                  ) : (
-                    <button key={item.label} onClick={() => go(item.to)} className={cls}>{inner}</button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-
-          <div className="px-2">
-            <button
-              onClick={() => { onOpenChange(false); onLogout(); }}
-              className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl border border-destructive/30 text-destructive text-sm font-semibold hover:bg-destructive/5 transition-colors"
-            >
-              <LogOut className="w-4 h-4" /> Log out
-            </button>
-            <p className="text-center text-[11px] text-muted-foreground mt-3">
-              Neighbourhood Labour Connect · v1.0
-            </p>
-          </div>
+        <div className="px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3">
+          <Button
+            onClick={() => { onOpenChange(false); navigate("/settings"); }}
+            className="w-full rounded-2xl h-12 gap-2 text-sm font-semibold"
+          >
+            <SettingsIcon className="w-4 h-4" /> Go to Settings
+          </Button>
+          <button
+            onClick={() => { onOpenChange(false); onLogout(); }}
+            className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-warning-soft/40 text-warning-soft-foreground text-sm font-semibold hover:bg-warning-soft/60 transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Log out
+          </button>
+          <p className="text-center text-[11px] text-muted-foreground">
+            All account settings · Neighbourhood Labour Connect
+          </p>
         </div>
       </SheetContent>
     </Sheet>
@@ -234,7 +186,7 @@ export default function Layout() {
         <OnboardingPermissions />
         {/* Back-arrow bar only on secondary pages */}
         {showBack && (
-          <div className="shrink-0 flex items-center px-2 h-11 border-b border-border bg-background/90 backdrop-blur">
+          <div className="md:hidden shrink-0 flex items-center px-2 h-11 border-b border-border bg-background/90 backdrop-blur">
             <button
               onClick={() => navigate(-1)}
               aria-label="Go back"
