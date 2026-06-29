@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, NavLink, useLocation, useOutlet, useNavigate } from "react-router-dom";
-import { Home, Briefcase, MessageCircle, Wallet, MoreHorizontal, Search, Gift, Settings, Shield, FileText, HelpCircle, LogOut, ChevronRight } from "lucide-react";
+import { Home, Briefcase, MessageCircle, Wallet, MoreHorizontal, Search, Gift, Settings, Shield, LogOut, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import NavigationArrows from "@/components/NavigationArrows";
@@ -59,14 +59,6 @@ function MoreSheet({ open, onOpenChange, role, onLogout }) {
         ...(role === "customer" ? [{ icon: Search, label: "Find Help", to: "/providers" }] : []),
         { icon: Gift, label: "Refer & Earn", to: "/referrals" },
         { icon: Settings, label: "Settings", to: "/settings" },
-      ],
-    },
-    {
-      items: [
-        { icon: FileText, label: "Terms of Service", to: "/terms" },
-        { icon: FileText, label: "Privacy Policy", to: "/privacy" },
-        { icon: FileText, label: "Refund Policy", to: "/refund" },
-        { icon: HelpCircle, label: "Support", to: null, href: "https://wa.me/254706692111" },
       ],
     },
   ];

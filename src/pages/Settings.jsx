@@ -14,8 +14,8 @@ import {
   AlertDialogCancel, AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import {
-  User, Bell, KeyRound, CreditCard, Gift, FileText, LifeBuoy, LogOut, Trash2,
-  ChevronRight, Shield, Loader2, Check,
+  User, Bell, KeyRound, CreditCard, Gift, LogOut, Trash2,
+  ChevronRight, Shield, Loader2,
 } from "lucide-react";
 
 export default function Settings() {
@@ -72,22 +72,12 @@ export default function Settings() {
         { icon: Gift, label: "Refer & Earn", to: "/referrals" },
         { icon: CreditCard, label: "Subscription & Payment", to: "/subscribe" },
         { icon: KeyRound, label: "Change PIN", onClick: () => setPinOpen(true) },
-      ],
-    },
-    {
-      group: "Legal & Support",
-      items: [
-        { icon: FileText, label: "Terms of Service", to: "/terms" },
-        { icon: FileText, label: "Privacy Policy", to: "/privacy" },
-        { icon: FileText, label: "Refund Policy", to: "/refund" },
-        { icon: LifeBuoy, label: "Support", href: "https://wa.me/254706692111" },
+        ...(user?.role === "admin" ? [{ icon: Shield, label: "Admin Panel", to: "/admin" }] : []),
       ],
     },
   ];
 
-  if (user?.role === "admin") {
-    menu[0].items.push({ icon: Shield, label: "Admin Panel", to: "/admin" });
-  }
+
 
   return (
     <div className="h-full flex flex-col overflow-hidden max-w-2xl mx-auto w-full">

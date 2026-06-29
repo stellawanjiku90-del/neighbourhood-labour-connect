@@ -6,7 +6,6 @@ import { getOrCreateConversation } from "@/lib/chat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import LegalLinks from "@/components/LegalLinks";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, CheckCircle2, MessageCircle } from "lucide-react";
@@ -315,8 +314,6 @@ export default function ProviderDashboard() {
           ))}
         </div>
       </div>
-
-      <LegalLinks />
 
       <BidDialog open={!!bidJob} onOpenChange={(v) => !v && setBidJob(null)} job={bidJob} provider={provider} onDone={load} />
     </div>
