@@ -13,22 +13,15 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) { setLoading(false); return; }
     const providers = user.phone
-      ? await base44.entities.ServiceProvider
-          .filter({ phone: user.phone }, "-created_date", 1)
-          .catch(() => [])
+      ? await base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1).catch(() => [])
       : [];
     const myProviderId = providers[0]?.id || null;
 
     const [asCustomer, asProvider] = await Promise.all([
       base44.entities.Conversation.filter({ customer_id: user.id }, "-updated_date", 50),
-      myProviderId
-        ? base44.entities.Conversation.filter({ provider_id: myProviderId }, "-updated_date", 50)
-        : Promise.resolve([]),
+      myProviderId ? base44.entities.Conversation.filter({ provider_id: myProviderId }, "-updated_date", 50) : Promise.resolve([]),
     ]);
 
     const seen = new Set();
@@ -52,23 +45,25 @@ export default function Messages() {
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
       <PageHeader title="Messages" subtitle="Chat with providers & customers" icon={MessageCircle} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-7 h-7 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <div className="flex justify-center pt-12">
+            <div className="w-6 h-6 border-3 border-muted border-t-primary rounded-full animate-spin" />
           </div>
         ) : convos.length === 0 ? (
-          <EmptyState
-            icon={MessageCircle}
-            title="No conversations yet"
-            description={isCustomer
-              ? "Once a provider is matched to your job, you can chat with them here. Find a provider to get started."
-              : "When a customer accepts your offer, your conversation with them will appear here."}
-            actionLabel={isCustomer ? "Find help" : undefined}
-            to={isCustomer ? "/providers" : undefined}
-          />
+          <div className="pt-4">
+            <EmptyState
+              icon={MessageCircle}
+              title="No conversations yet"
+              description={isCustomer
+                ? "Once a provider is matched to your job, you can chat with them here. Find a provider to get started."
+                : "When a customer accepts your offer, your conversation with them will appear here."}
+              actionLabel={isCustomer ? "Find help" : undefined}
+              to={isCustomer ? "/providers" : undefined}
+            />
+          </div>
         ) : (
-          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+          <div className="bg-card border-t border-border divide-y divide-border">
             {convos.map((c) => {
               const fromCustomer = c.customer_id === user?.id;
               const name = fromCustomer ? c.provider_name : c.customer_name;
@@ -77,12 +72,12 @@ export default function Messages() {
                 <Link
                   key={c.id}
                   to={`/chat/${c.id}`}
-                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors"
                 >
                   {photo ? (
-                    <img src={photo} alt={name} className="w-12 h-12 rounded-2xl object-cover shrink-0" />
+                    <img src={photo} alt={name} className="w-11 h-11 rounded-xl object-cover shrink-0" />
                   ) : (
-                    <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center font-bold text-accent-foreground shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center font-bold text-accent-foreground shrink-0">
                       {name?.[0]}
                     </div>
                   )}

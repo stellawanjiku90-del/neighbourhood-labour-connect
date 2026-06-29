@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { CreditCard, Check, Loader2, X, Smartphone } from "lucide-react";
+import { Check, Loader2, X, Smartphone, ShieldCheck, Eye, Search, Briefcase, Star } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
@@ -11,13 +11,13 @@ export default function Subscribe() {
   const [sdkReady, setSdkReady] = useState(
     typeof window !== "undefined" && !!window.IntaSend
   );
-  const [paymentState, setPaymentState] = useState("idle"); // idle | success | failed
+  const [paymentState, setPaymentState] = useState("idle");
   const [error, setError] = useState(null);
   const [buttonEl, setButtonEl] = useState(null);
   const initedRef = useRef(false);
   const pollRef = useRef(null);
 
-  // ─── Fetch the public IntaSend config (publishable key + live flag) ──
+  // ─── Fetch the public IntaSend config ──
   useEffect(() => {
     let cancelled = false;
     base44.functions
@@ -26,36 +26,21 @@ export default function Subscribe() {
         if (!cancelled) setConfig(res.data);
       })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   // ─── Wait for the IntaSend checkout SDK script to load ──────────────
   useEffect(() => {
-    if (window.IntaSend) {
-      setSdkReady(true);
-      return;
-    }
+    if (window.IntaSend) { setSdkReady(true); return; }
     const t = setInterval(() => {
-      if (window.IntaSend) {
-        setSdkReady(true);
-        clearInterval(t);
-      }
+      if (window.IntaSend) { setSdkReady(true); clearInterval(t); }
     }, 300);
     return () => clearInterval(t);
   }, []);
 
   // ─── Initialize the IntaSend SDK once the pay button is in the DOM ──
-  // The SDK scans for `.intaSendPayButton` at construction time, so it must
-  // run AFTER the button is committed to the DOM. Runs entirely in the
-  // browser, so requests originate from the user's IP (not the server's),
-  // avoiding the Cloudflare 1106 IP block on the backend path.
   useEffect(() => {
-    if (!buttonEl) {
-      initedRef.current = false; // allow re-init if the button remounts
-      return;
-    }
+    if (!buttonEl) { initedRef.current = false; return; }
     if (!sdkReady || !config || initedRef.current) return;
     initedRef.current = true;
     new window.IntaSend({
@@ -63,78 +48,51 @@ export default function Subscribe() {
       live: config.live,
     })
       .on("COMPLETE", () => setPaymentState("success"))
-      .on("FAILED", () => {
-        setError("Payment was not completed. Please try again.");
-        setPaymentState("failed");
-      });
+      .on("FAILED", () => { setError("Payment was not completed. Please try again."); setPaymentState("failed"); });
   }, [sdkReady, config, buttonEl]);
 
   // ─── On success, poll the DB until the webhook activates the sub ────
   useEffect(() => {
     if (paymentState !== "success") return;
     let attempts = 0;
-    const maxAttempts = 30; // ~60s
     const poll = async () => {
       attempts++;
       try {
-        const res = await base44.functions.invoke("checkSubscription", {
-          firebase_uid: user?.id,
-        });
+        const res = await base44.functions.invoke("checkSubscription", { firebase_uid: user?.id });
         if (res.data?.active) {
-          // If this payment was triggered from "List as Provider", activate
-          // the provider's listing now and flag the dashboard to greet them.
           const params = new URLSearchParams(window.location.search);
           if (params.get("intent") === "provider" && user?.id) {
             try {
-              const providers = await base44.entities.ServiceProvider.filter(
-                { firebase_uid: user.id },
-                null,
-                1
-              );
-              if (providers.length > 0) {
-                await base44.entities.ServiceProvider.update(providers[0].id, {
-                  available: true,
-                });
-              }
+              const providers = await base44.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1);
+              if (providers.length > 0) await base44.entities.ServiceProvider.update(providers[0].id, { available: true });
               sessionStorage.setItem("provider_just_listed", "true");
-            } catch (e) {
-              // best-effort — head home regardless
-            }
+            } catch { /* best-effort */ }
           }
           window.location.href = "/";
           return;
         }
-      } catch {
-        // ignore — keep polling
-      }
-      if (attempts >= maxAttempts) {
-        // Webhook may still be processing — head home; it activates shortly.
-        window.location.href = "/";
-        return;
-      }
+      } catch { /* ignore */ }
+      if (attempts >= 30) { window.location.href = "/"; return; }
       pollRef.current = setTimeout(poll, 2000);
     };
     pollRef.current = setTimeout(poll, 2000);
-    return () => {
-      if (pollRef.current) clearTimeout(pollRef.current);
-    };
+    return () => { if (pollRef.current) clearTimeout(pollRef.current); };
   }, [paymentState]);
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="flex justify-center pt-12">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  // ─── Active or just paid ───────────────────────────────────────────
   if (active || paymentState === "success") {
     return (
-      <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-4">
-            <Check className="w-7 h-7 text-[#2D7A3E]" />
+      <div className="h-full overflow-y-auto max-w-xl mx-auto px-4 pt-6">
+        <div className="bg-card rounded-3xl border border-border p-6 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-[#C9E8D8] flex items-center justify-center mx-auto mb-3">
+            <Check className="w-7 h-7 text-primary" />
           </div>
           <h1 className="text-xl font-extrabold text-foreground mb-1">
             {paymentState === "success" ? "Payment Successful!" : "Subscription Active"}
@@ -142,7 +100,7 @@ export default function Subscribe() {
           <p className="text-sm text-muted-foreground">
             {paymentState === "success"
               ? "Confirming your subscription…"
-              : `Your subscription is active until ${new Date(periodEnd).toLocaleDateString()}.`}
+              : `Your subscription runs until ${new Date(periodEnd).toLocaleDateString()}.`}
           </p>
           {paymentState === "success" && (
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-3">
@@ -154,50 +112,69 @@ export default function Subscribe() {
     );
   }
 
-  // ─── Idle or failed: offer card with the pay button ─────────────────
-  // The button is kept mounted across idle/failed transitions so the SDK's
-  // click handler survives (swapping the tree would unmount it).
   const phone = (user?.phone || "").replace("+", "");
   const nameParts = (user?.full_name || "Customer").split(" ");
   const firstName = nameParts[0] || "Customer";
   const lastName = nameParts.slice(1).join(" ") || "Customer";
 
+  const BENEFITS = [
+    { icon: Search, label: "Receive job notifications", desc: "Get alerted when new jobs match your skills" },
+    { icon: Eye, label: "Appear in search results", desc: "Customers find you when looking for help" },
+    { icon: ShieldCheck, label: "Verified provider badge", desc: "Build trust with verified status" },
+    { icon: Briefcase, label: "Unlimited applications", desc: "Apply to as many jobs as you like" },
+    { icon: Star, label: "Priority visibility", desc: "Featured higher in search rankings" },
+  ];
+
   return (
-    <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
-      <div className="bg-white rounded-2xl border border-slate-100 p-6">
-        <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-4">
-          <CreditCard className="w-7 h-7 text-secondary-foreground" />
+    <div className="h-full overflow-y-auto max-w-xl mx-auto px-4 pt-6">
+      <div className="bg-card rounded-3xl border border-border p-5">
+        {/* Heading */}
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-lg font-extrabold text-foreground">Subscribe</h1>
+            <p className="text-xs text-muted-foreground">Ksh 130 / month · auto-renewed monthly</p>
+          </div>
+          <span className="text-2xl font-extrabold text-primary">Ksh 130</span>
         </div>
-        <h1 className="text-xl font-extrabold text-foreground mb-2">
-          Monthly Subscription
-        </h1>
-        <div className="flex items-baseline gap-1 mb-4">
-          <span className="text-4xl font-extrabold text-foreground">Ksh 130</span>
-          <span className="text-muted-foreground">/month</span>
+
+        {/* Benefits */}
+        <div className="space-y-1.5 mb-4">
+          {BENEFITS.map((b) => {
+            const Icon = b.icon;
+            return (
+              <div key={b.label} className="flex items-start gap-3 bg-secondary/50 rounded-xl p-2.5">
+                <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-primary-foreground" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{b.label}</p>
+                  <p className="text-[11px] text-muted-foreground leading-snug">{b.desc}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <ul className="space-y-2 mb-6">
-          <li className="flex items-center gap-2 text-sm text-foreground">
-            <Check className="w-4 h-4 text-[#2D7A3E]" /> View service provider
-            profiles
-          </li>
-          <li className="flex items-center gap-2 text-sm text-foreground">
-            <Check className="w-4 h-4 text-[#2D7A3E]" /> Chat with providers and
-            customers
-          </li>
-          <li className="flex items-center gap-2 text-sm text-foreground">
-            <Check className="w-4 h-4 text-[#2D7A3E]" /> Unlock phone number
-            sharing
-          </li>
-        </ul>
+
+        {/* Payment */}
+        <div className="bg-muted rounded-2xl p-3 mb-4">
+          <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <Smartphone className="w-3.5 h-3.5" /> Secure M-Pesa payment
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Your subscription is activated automatically once the payment is confirmed.
+          </p>
+        </div>
+
         {paymentState === "failed" && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 flex items-center gap-2 text-sm text-destructive">
+          <div className="mb-3 p-2.5 rounded-lg bg-destructive/10 flex items-center gap-2 text-xs text-destructive">
             <X className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+            <span>{error || "Payment failed. Try again."}</span>
           </div>
         )}
+
         <button
           ref={setButtonEl}
-          className="intaSendPayButton w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332] text-white font-semibold flex items-center justify-center gap-2"
+          className="intaSendPayButton w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold flex items-center justify-center gap-2"
           data-amount="130"
           data-currency="KES"
           data-method="M-PESA"
@@ -211,8 +188,8 @@ export default function Subscribe() {
         >
           <Smartphone className="w-5 h-5" /> Pay Ksh 130 via M-Pesa
         </button>
-        <p className="text-xs text-muted-foreground text-center mt-3">
-          You'll receive an M-Pesa prompt on your phone to enter your PIN.
+        <p className="text-[11px] text-muted-foreground text-center mt-2">
+          You'll receive an M-Pesa prompt on your phone. Enter your PIN to confirm the payment.
         </p>
       </div>
     </div>

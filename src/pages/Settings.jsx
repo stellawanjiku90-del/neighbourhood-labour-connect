@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   User, Bell, KeyRound, CreditCard, Gift, LogOut, Trash2,
-  ChevronRight, Shield, Loader2,
+  ChevronRight, Shield, Loader2, Pencil, HelpCircle, MessageSquare, FileText, Info,
 } from "lucide-react";
 
 export default function Settings() {
@@ -69,10 +69,32 @@ export default function Settings() {
     {
       group: "Account",
       items: [
+        { icon: Pencil, label: "Edit Profile", to: "/settings" },
         { icon: Gift, label: "Refer & Earn", to: "/referrals" },
         { icon: CreditCard, label: "Subscription & Payment", to: "/subscribe" },
         { icon: KeyRound, label: "Change PIN", onClick: () => setPinOpen(true) },
         ...(user?.role === "admin" ? [{ icon: Shield, label: "Admin Panel", to: "/admin" }] : []),
+      ],
+    },
+    {
+      group: "Support",
+      items: [
+        { icon: HelpCircle, label: "Help & Support", href: "https://wa.me/254706692111?text=Hi%20NLC%20Support%2C%20I%20have%20a%20question%20about%20my%20account" },
+        { icon: MessageSquare, label: "Contact Us", href: "https://wa.me/254706692111" },
+      ],
+    },
+    {
+      group: "Legal",
+      items: [
+        { icon: FileText, label: "Terms of Service", to: "/terms" },
+        { icon: FileText, label: "Privacy Policy", to: "/privacy" },
+        { icon: FileText, label: "Refund Policy", to: "/refund" },
+      ],
+    },
+    {
+      group: "About",
+      items: [
+        { icon: Info, label: "About Neighbourhood Labour Connect", desc: "Connecting customers with trusted local service providers in Kenya. Version 1.0" },
       ],
     },
   ];
@@ -113,21 +135,27 @@ export default function Settings() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">{g.group}</p>
             <div className="bg-card rounded-2xl border border-border overflow-hidden">
               {g.items.map((item, i) => {
-                const Icon = item.icon;
+                const Ico = item.icon;
+                const hasDesc = !!item.desc;
                 const inner = (
                   <>
-                    <span className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0">
-                      <Icon className="w-5 h-5 text-accent-foreground" />
+                    <span className={`${hasDesc ? "self-start mt-2.5" : ""} w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0`}>
+                      <Ico className="w-5 h-5 text-accent-foreground" />
                     </span>
-                    <span className="flex-1 text-sm font-medium text-foreground">{item.label}</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-foreground">{item.label}</span>
+                      {item.desc && <p className="text-[11px] text-muted-foreground leading-snug">{item.desc}</p>}
+                    </div>
+                    {item.onClick || item.to || item.href ? <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" /> : null}
                   </>
                 );
-                const cls = `w-full flex items-center gap-3 px-4 h-14 ${i < g.items.length - 1 ? "border-b border-border" : ""} hover:bg-muted transition-colors text-left`;
+                const cls = `w-full flex items-center gap-3 px-4 ${hasDesc ? "py-3" : "h-14"} ${i < g.items.length - 1 ? "border-b border-border" : ""} hover:bg-muted transition-colors text-left`;
                 return item.href ? (
                   <a key={item.label} href={item.href} target="_blank" rel="noreferrer" className={cls}>{inner}</a>
                 ) : item.onClick ? (
                   <button key={item.label} onClick={item.onClick} className={cls}>{inner}</button>
+                ) : !item.to ? (
+                  <div key={item.label} className={cls}>{inner}</div>
                 ) : (
                   <button key={item.label} onClick={() => navigate(item.to)} className={cls}>{inner}</button>
                 );

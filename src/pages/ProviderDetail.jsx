@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import Stars from "@/components/Stars";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft, BadgeCheck, Phone, MessageCircle, MapPin, Award, Briefcase, Heart,
+  ArrowLeft, BadgeCheck, Phone, MessageCircle, MapPin, Award, Briefcase, Heart, CalendarClock,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { openConversation } from "@/lib/chat";
@@ -71,10 +71,11 @@ export default function ProviderDetail() {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mt-4">
+      <div className="grid grid-cols-2 gap-3 mt-4">
         <Stat icon={Briefcase} label="Jobs done" value={p.completed_jobs || 0} />
         <Stat icon={Award} label="Experience" value={`${p.years_experience || 0}y`} />
         <Stat icon={Heart} label="Reviews" value={p.reviews_count || 0} />
+        <Stat icon={CalendarClock} label="Member since" value={new Date(p.created_date || Date.now()).toLocaleDateString("en-US", { month: "short", year: "numeric" })} />
       </div>
 
       {p.bio && <p className="text-muted-foreground mt-4 leading-relaxed">{p.bio}</p>}

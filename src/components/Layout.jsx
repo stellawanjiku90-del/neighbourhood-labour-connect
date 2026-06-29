@@ -18,8 +18,9 @@ const CUSTOMER_NAV = [
   { to: "/earnings", label: "Earnings", icon: Wallet, end: false },
 ];
 
-// Providers: their job board IS the home dashboard, so Jobs points home too
+// Providers: their job board IS the home dashboard, so Jobs points home too.
 // (rendered as a plain button so it doesn't fight Home for the active state).
+// Profile tab replaces the old "More" entry — same sheet, new name.
 const PROVIDER_NAV = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/", label: "Jobs", icon: Briefcase, end: true, plain: true },
@@ -58,7 +59,8 @@ function MoreSheet({ open, onOpenChange, role, onLogout }) {
       items: [
         ...(role === "customer" ? [{ icon: Search, label: "Find Help", to: "/providers" }] : []),
         { icon: Gift, label: "Refer & Earn", to: "/referrals" },
-        { icon: Settings, label: "Settings", to: "/settings" },
+        { icon: Wallet, label: "Earnings", to: "/earnings" },
+        { icon: Settings, label: "Account & Settings", to: "/settings" },
       ],
     },
   ];
@@ -72,6 +74,7 @@ function MoreSheet({ open, onOpenChange, role, onLogout }) {
       <SheetContent side="bottom" className="rounded-t-3xl p-0">
         <SheetHeader className="px-5 pt-4 pb-2 text-left">
           <SheetTitle className="text-base font-extrabold">More</SheetTitle>
+          <p className="text-[11px] text-muted-foreground">Account, referrals, settings & more</p>
         </SheetHeader>
         <div className="px-3 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-4 overflow-y-auto">
           {groups.map((g, gi) => (
@@ -126,7 +129,7 @@ export default function Layout() {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const baseNav = user?.role === "provider" ? PROVIDER_NAV : CUSTOMER_NAV;
-  const nav = [...baseNav, { more: true, label: "More", icon: MoreHorizontal }];
+  const nav = [...baseNav, { more: true, label: "Profile", icon: MoreHorizontal }];
 
   if (!user) {
     return (
