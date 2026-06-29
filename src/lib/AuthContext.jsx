@@ -127,6 +127,10 @@ export const AuthProvider = ({ children }) => {
         setAppPublicSettings(publicSettings);
         setIsLoadingPublicSettings(false);
       } catch (appError) {
+        if (!navigator.onLine) {
+          setIsLoadingPublicSettings(false);
+          return;
+        }
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
           if (reason === "auth_required") {
@@ -148,6 +152,10 @@ export const AuthProvider = ({ children }) => {
         setIsLoadingPublicSettings(false);
       }
     } catch (error) {
+      if (!navigator.onLine) {
+        setIsLoadingPublicSettings(false);
+        return;
+      }
       setAuthError({
         type: "unknown",
         message: error.message || "An unexpected error occurred",

@@ -13,6 +13,8 @@ import PageTransition from '@/components/PageTransition';
 import FirebaseAuth from '@/pages/FirebaseAuth';
 import FirebaseRouteGuard from '@/components/FirebaseRouteGuard';
 import RoleGuard from '@/components/RoleGuard';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import OfflineErrorBoundary from '@/components/OfflineErrorBoundary';
 
 // Lazy-loaded routes for code splitting
 const Providers = lazy(() => import('@/pages/Providers'));
@@ -39,6 +41,7 @@ const LoadingFallback = () => (
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const isOnline = useOnlineStatus();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -48,7 +51,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
+  if (authError && isOnline) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
@@ -113,7 +116,9 @@ function App() {
         <Router>
           <ScrollToTop />
           <Suspense fallback={<LoadingFallback />}>
-            <AuthenticatedApp />
+            <OfflineErrorBoundary>
+              <AuthenticatedApp />
+            </OfflineErrorBoundary>
           </Suspense>
         </Router>
         <Toaster />
