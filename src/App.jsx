@@ -40,24 +40,9 @@ const LoadingFallback = () => (
   </div>
 );
 
-const PUBLIC_PATHS = ["/terms", "/privacy", "/refund"];
-
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const isOnline = useOnlineStatus();
-  const { pathname } = useLocation();
-
-  // Public legal pages — render them immediately BEFORE any auth check,
-  // so they are never blocked by auth redirects or FirebaseRouteGuard.
-  if (PUBLIC_PATHS.includes(pathname)) {
-    return (
-      <Routes>
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/refund" element={<Refund />} />
-      </Routes>
-    );
-  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -79,6 +64,10 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/firebase-auth" element={<FirebaseAuth />} />
+      {/* Public legal pages — accessible without auth */}
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/refund" element={<Refund />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route element={<FirebaseRouteGuard />}>
