@@ -75,20 +75,36 @@ export default function MyJobs() {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-background max-w-3xl mx-auto">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <PageHeader
-        title={user?.role === "customer" ? "My Jobs" : "Job Board"}
-        subtitle={user?.role === "customer" ? "Track your requests" : "Browse & bid on jobs"}
-        icon={Briefcase}
-        action={user?.role === "customer" ? <Button onClick={() => navigate("/post")} className="rounded-xl h-9 px-4 text-sm"><Users className="w-4 h-4 mr-1" /> Post</Button> : null}
-      />
+      <header className="shrink-0 px-4 md:px-8 pt-3 pb-2 bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
+        <div className="flex items-center justify-between gap-3 max-w-2xl mx-auto w-full">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground shrink-0">
+              <Briefcase className="w-5 h-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-foreground leading-tight">
+                {user?.role === "customer" ? "My Jobs" : "Job Board"}
+              </p>
+              <p className="text-xs text-muted-foreground leading-tight">
+                {user?.role === "customer" ? "Track your requests" : "Browse & bid on jobs"}
+              </p>
+            </div>
+          </div>
+          {user?.role === "customer" && (
+            <Button onClick={() => navigate("/post")} className="rounded-xl h-10 px-4 shrink-0">
+              <Users className="w-4 h-4" /> Post
+            </Button>
+          )}
+        </div>
+      </header>
 
       {/* Horizontal scroll */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3">
+      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
         <div className="flex gap-3 pb-2 h-full">
           {jobs.length === 0 && (
-            <div className="w-full">
+            <div className="flex-1 flex items-center justify-center">
               <EmptyState
                 icon={Briefcase}
                 title={user?.role === "customer" ? "No jobs yet" : "No jobs available"}
