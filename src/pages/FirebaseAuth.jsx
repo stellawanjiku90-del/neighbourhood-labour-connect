@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   sendPhoneCode,
-  clearRecaptchaVerifier,
   getAuthInstance,
   signOutFirebase,
 } from "@/lib/firebase";
@@ -72,7 +71,6 @@ export default function FirebaseAuth() {
     })();
     return () => {
       active = false;
-      clearRecaptchaVerifier();
     };
   }, []);
 

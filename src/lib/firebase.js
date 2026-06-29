@@ -125,6 +125,10 @@ function getRecaptchaContainer() {
 export async function getRecaptchaVerifier() {
   if (recaptchaVerifier) return recaptchaVerifier;
   const auth = await getAuthInstance();
+  // Fully tear down any stale verifier/widget and remove its container BEFORE
+  // creating a new one, so a previous render can never trigger
+  // "reCAPTCHA has already been rendered in this element".
+  clearRecaptchaVerifier();
   getRecaptchaContainer();
   recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier(
     "recaptcha-container",
