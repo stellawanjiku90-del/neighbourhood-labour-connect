@@ -7,88 +7,89 @@ import { base44 } from "@/api/base44Client";
 export default function Subscribe() {
   const { active, periodEnd, loading } = useSubscription();
   const { user } = useAuth();
-  const [paymentState, setPaymentState] = useState("idle"); // idle | pending | success | failed
-  const [invoiceId, setInvoiceId] = useState(null);
+  const [config, setConfig] = useState(null);
+  const [sdkReady, setSdkReady] = useState(typeof window !== "undefined" && !!window.IntaSend);
+  const [paymentState, setPaymentState] = useState("idle"); // idle | success | failed
   const [error, setError] = useState(null);
-  const [errorDetails, setErrorDetails] = useState(null);
-  const [phone, setPhone] = useState("");
+  const intaSendRef = useRef(null);
   const pollRef = useRef(null);
 
-  const startPayment = async () => {
-    setError(null);
-    setErrorDetails(null);
-    setPaymentState("pending");
-    try {
-      const res = await base44.functions.invoke("createMpesaPayment", {
-        firebase_uid: user?.id,
-      });
-      setInvoiceId(res.data.invoice_id);
-      setPhone(res.data.phone);
-    } catch (err) {
-      const intasendError = err.response?.data?.intasend_error;
-      setError(
-        err.response?.data?.error ||
-        err.message ||
-        "Failed to initiate payment. Please try again."
-      );
-      if (intasendError) {
-        setErrorDetails(intasendError);
-        console.error("[IntaSend] Payment initiation failed:", intasendError);
-      }
-      setPaymentState("failed");
-    }
-  };
-
-  // Poll for payment status while pending
+  // ─── Fetch the public IntaSend config (publishable key + live flag) ──
   useEffect(() => {
-    if (paymentState !== "pending" || !invoiceId) return;
-    let attempts = 0;
-    const maxAttempts = 40; // ~2 minutes at 3s intervals
+    let cancelled = false;
+    base44.functions
+      .invoke("getIntaSendConfig", {})
+      .then((res) => {
+        if (!cancelled) setConfig(res.data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
+  // ─── Wait for the IntaSend checkout SDK script to load ──────────────
+  useEffect(() => {
+    if (window.IntaSend) {
+      setSdkReady(true);
+      return;
+    }
+    const t = setInterval(() => {
+      if (window.IntaSend) {
+        setSdkReady(true);
+        clearInterval(t);
+      }
+    }, 300);
+    return () => clearInterval(t);
+  }, []);
+
+  // ─── Initialize the IntaSend SDK once everything is ready ───────────
+  // Runs entirely in the browser, so requests originate from the user's
+  // IP (not the server's), avoiding the Cloudflare 1106 IP block on the
+  // backend-to-IntaSend path.
+  useEffect(() => {
+    if (!sdkReady || !config || !user || intaSendRef.current) return;
+    intaSendRef.current = new window.IntaSend({
+      publicAPIKey: config.publishable_key,
+      live: config.live,
+    })
+      .on("COMPLETE", () => setPaymentState("success"))
+      .on("FAILED", () => {
+        setError("Payment was not completed. Please try again.");
+        setPaymentState("failed");
+      });
+  }, [sdkReady, config, user]);
+
+  // ─── On success, poll the DB until the webhook activates the sub ────
+  useEffect(() => {
+    if (paymentState !== "success") return;
+    let attempts = 0;
+    const maxAttempts = 30; // ~60s
     const poll = async () => {
       attempts++;
       try {
-        const res = await base44.functions.invoke("checkMpesaPayment", {
-          invoice_id: invoiceId,
+        const res = await base44.functions.invoke("checkSubscription", {
           firebase_uid: user?.id,
         });
-        const state = res.data.state;
-
-        if (state === "SUCCESS" || state === "COMPLETED") {
-          setPaymentState("success");
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2500);
+        if (res.data?.active) {
+          window.location.href = "/";
           return;
         }
-        if (state === "FAILED" || state === "CANCELLED") {
-          setError(res.data.reason || "Payment was not completed.");
-          setPaymentState("failed");
-          return;
-        }
-        if (attempts >= maxAttempts) {
-          setError(
-            "Payment confirmation timed out. If you completed the payment, your subscription will be activated shortly."
-          );
-          setPaymentState("failed");
-          return;
-        }
-        pollRef.current = setTimeout(poll, 3000);
-      } catch (err) {
-        if (attempts >= maxAttempts) {
-          setError("Payment confirmation timed out. Please try again.");
-          setPaymentState("failed");
-          return;
-        }
-        pollRef.current = setTimeout(poll, 3000);
+      } catch {
+        // ignore — keep polling
       }
+      if (attempts >= maxAttempts) {
+        // Webhook may still be processing — head home; it activates shortly.
+        window.location.href = "/";
+        return;
+      }
+      pollRef.current = setTimeout(poll, 2000);
     };
-
-    pollRef.current = setTimeout(poll, 3000);
+    pollRef.current = setTimeout(poll, 2000);
     return () => {
       if (pollRef.current) clearTimeout(pollRef.current);
     };
-  }, [paymentState, invoiceId]);
+  }, [paymentState]);
 
   if (loading) {
     return (
@@ -98,7 +99,7 @@ export default function Subscribe() {
     );
   }
 
-  // ─── Active or just paid ───────────────────────────────────────
+  // ─── Active or just paid ───────────────────────────────────────────
   if (active || paymentState === "success") {
     return (
       <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
@@ -111,43 +112,20 @@ export default function Subscribe() {
           </h1>
           <p className="text-sm text-muted-foreground">
             {paymentState === "success"
-              ? "Your subscription is now active. Redirecting…"
+              ? "Confirming your subscription…"
               : `Your subscription is active until ${new Date(periodEnd).toLocaleDateString()}.`}
           </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            You can view profiles and chat freely.
-          </p>
+          {paymentState === "success" && (
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-3">
+              <Loader2 className="w-4 h-4 animate-spin" /> Activating…
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // ─── Waiting for M-Pesa PIN ────────────────────────────────────
-  if (paymentState === "pending") {
-    return (
-      <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-accent/60 flex items-center justify-center mx-auto mb-4">
-            <Smartphone className="w-7 h-7 text-accent-foreground animate-pulse" />
-          </div>
-          <h1 className="text-xl font-extrabold text-foreground mb-1">
-            Check Your Phone
-          </h1>
-          <p className="text-sm text-muted-foreground mb-4">
-            We've sent an M-Pesa payment prompt to{" "}
-            <span className="font-semibold text-foreground">{phone}</span>. Enter
-            your M-Pesa PIN to complete the payment of Ksh 130.
-          </p>
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Waiting for confirmation…
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Payment failed ─────────────────────────────────────────────
+  // ─── Payment failed ────────────────────────────────────────────────
   if (paymentState === "failed") {
     return (
       <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
@@ -159,27 +137,8 @@ export default function Subscribe() {
             Payment Not Completed
           </h1>
           <p className="text-sm text-muted-foreground mb-3">{error}</p>
-          {errorDetails && (
-            <div className="bg-muted/50 rounded-lg p-3 mb-4 text-left space-y-1">
-              <p className="text-xs font-semibold text-foreground">
-                IntaSend Diagnostics
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Environment: <span className="font-medium text-foreground">{errorDetails.environment || "unknown"}</span>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                HTTP Status: <span className="font-medium text-foreground">{errorDetails.http_status}</span>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Endpoint: <span className="font-mono text-foreground break-all">{errorDetails.endpoint}</span>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Raw Response: <span className="font-mono text-foreground break-all">{errorDetails.raw_body}</span>
-              </p>
-            </div>
-          )}
           <button
-            onClick={startPayment}
+            onClick={() => setPaymentState("idle")}
             className="w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332] text-white font-semibold"
           >
             Try Again
@@ -189,7 +148,12 @@ export default function Subscribe() {
     );
   }
 
-  // ─── Idle: show subscription offer ─────────────────────────────
+  // ─── Idle: show subscription offer ─────────────────────────────────
+  const phone = (user?.phone || "").replace("+", "");
+  const nameParts = (user?.full_name || "Customer").split(" ");
+  const firstName = nameParts[0] || "Customer";
+  const lastName = nameParts.slice(1).join(" ") || "Customer";
+
   return (
     <div className="h-full overflow-y-auto max-w-md mx-auto px-4 py-8">
       <div className="bg-white rounded-2xl border border-slate-100 p-6">
@@ -218,8 +182,17 @@ export default function Subscribe() {
           </li>
         </ul>
         <button
-          onClick={startPayment}
-          className="w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332] text-white font-semibold flex items-center justify-center gap-2"
+          className="intaSendPayButton w-full h-12 rounded-xl bg-[#2D7A3E] hover:bg-[#246332] text-white font-semibold flex items-center justify-center gap-2"
+          data-amount="130"
+          data-currency="KES"
+          data-method="M-PESA"
+          data-phone-number={phone}
+          data-api-ref={`NLC|${user?.id || ""}`}
+          data-first-name={firstName}
+          data-last-name={lastName}
+          data-email={`${phone}@ncl.app`}
+          data-country="KE"
+          data-mobile-tarrif="BUSINESS-PAYS"
         >
           <Smartphone className="w-5 h-5" /> Pay Ksh 130 via M-Pesa
         </button>
