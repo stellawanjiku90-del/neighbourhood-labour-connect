@@ -79,8 +79,8 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/firebase-auth" element={<FirebaseAuth />} />
       <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
         <Route element={<FirebaseRouteGuard />}>
+          <Route path="/" element={<Home />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin" element={<AdminPanel />} />
