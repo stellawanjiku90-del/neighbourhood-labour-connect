@@ -13,7 +13,7 @@ function resolveBaseUrl(apiKey, publishableKey) {
     (publishableKey && publishableKey.includes("test"));
   return isTest
     ? "https://sandbox.intasend.com"
-    : "https://api.intasend.com";
+    : "https://payment.intasend.com";
 }
 
 Deno.serve(async (req) => {
