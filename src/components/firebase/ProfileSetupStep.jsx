@@ -1,28 +1,16 @@
 import { useState, useEffect } from "react";
-import { User, Upload, Loader2, AlertCircle, CreditCard, Check, X, MapPin, ArrowLeft } from "lucide-react";
+import { User, Upload, Loader2, AlertCircle, Check, MapPin, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 
-export default function ProfileSetupStep({ onSave, loading, error, referralCodeFromUrl, preselectedRole }) {
+export default function ProfileSetupStep({ onSave, loading, error, referralCodeFromUrl }) {
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
-  const [age, setAge] = useState("");
-  const [idType, setIdType] = useState("");
-  const [idNumber, setIdNumber] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState(null);
-  const [idPhoto, setIdPhoto] = useState(null);
-  const [idPhotoUrl, setIdPhotoUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [localError, setLocalError] = useState(null);
   const [locationName, setLocationName] = useState("");
@@ -106,22 +94,14 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
     }
   };
 
-  const handleIdPhotoChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setIdPhoto(file);
-      setIdPhotoUrl(URL.createObjectURL(file));
-    }
-  };
-
   const handleSave = async () => {
     setLocalError(null);
-    if (!firstName || !surname || !age || !idType || !idNumber) {
-      setLocalError("Please fill in all fields.");
+    if (!firstName || !surname) {
+      setLocalError("Please enter your first name and surname.");
       return;
     }
-    if (!profilePhoto || !idPhoto) {
-      setLocalError("Please upload both your profile photo and ID photo.");
+    if (!profilePhoto) {
+      setLocalError("Please upload your profile photo.");
       return;
     }
     if (!lat || !lng) {
@@ -132,16 +112,11 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
     setUploading(true);
     try {
       const profileUpload = await base44.integrations.Core.UploadFile({ file: profilePhoto });
-      const idUpload = await base44.integrations.Core.UploadFile({ file: idPhoto });
       setUploading(false);
       onSave({
         first_name: firstName,
         surname: surname,
-        age: parseInt(age, 10),
-        id_type: idType,
-        id_number: idNumber,
         profile_photo_url: profileUpload.file_url,
-        id_photo_url: idUpload.file_url,
         location_name: locationName,
         lat,
         lng,
@@ -149,7 +124,7 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
       });
     } catch (e) {
       setUploading(false);
-      setLocalError("Failed to upload photos. Please try again.");
+      setLocalError("Failed to upload photo. Please try again.");
     }
   };
 
@@ -165,7 +140,7 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
       </div>
       <h1 className="text-2xl font-extrabold text-foreground mb-2">Set Up Your Profile</h1>
       <p className="text-muted-foreground text-sm mb-4">
-        Complete your profile to start using Neighbourhood Labour Connect.
+        Add your photo and name to start using Neighbourhood Labour Connect.
       </p>
 
       <div className={`flex items-start gap-2 rounded-xl px-3 py-2.5 mb-6 ${locationDenied ? "bg-destructive/10" : "bg-accent/60"}`}>
@@ -247,80 +222,6 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
         </div>
       </div>
 
-      {/* Age */}
-      <div className="mb-4">
-        <Label className="mb-1.5 block">Age</Label>
-        <Input
-          type="number"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-          className="h-11 rounded-xl"
-          disabled={loading || uploading}
-        />
-      </div>
-
-      {/* ID Type */}
-      <div className="mb-4">
-        <Label className="mb-1.5 block">ID Type</Label>
-        <Select value={idType} onValueChange={setIdType} disabled={loading || uploading}>
-          <SelectTrigger className="h-11 rounded-xl">
-            <SelectValue placeholder="Select ID type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="National ID">National ID</SelectItem>
-            <SelectItem value="Passport">Passport</SelectItem>
-            <SelectItem value="Driver's License">Driver's License</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* ID Number */}
-      <div className="mb-4">
-        <Label className="mb-1.5 block">ID Number</Label>
-        <Input
-          value={idNumber}
-          onChange={(e) => setIdNumber(e.target.value)}
-          className="h-11 rounded-xl"
-          disabled={loading || uploading}
-        />
-      </div>
-
-      {/* ID Photo */}
-      <div className="mb-4">
-        <Label className="mb-1.5 block">ID Document Photo</Label>
-        <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center">
-          {idPhotoUrl ? (
-            <div className="relative inline-block">
-              <img src={idPhotoUrl} alt="ID" className="max-h-40 mx-auto rounded-xl" />
-              <button
-                onClick={() => {
-                  setIdPhoto(null);
-                  setIdPhotoUrl(null);
-                }}
-                className="absolute top-1 right-1 w-7 h-7 rounded-full bg-destructive text-white flex items-center justify-center text-xs"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <label className="flex flex-col items-center cursor-pointer py-4">
-              <CreditCard className="w-10 h-10 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">Tap to upload your ID photo</span>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleIdPhotoChange}
-                disabled={loading || uploading}
-              />
-            </label>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground mt-1.5">
-          We'll verify that the names on your ID match the names you provided.
-        </p>
-      </div>
-
       {/* Referral Code */}
       <div className="mb-4">
         <Label className="mb-1.5 block">Referral Code (optional)</Label>
@@ -354,11 +255,11 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
           </>
         ) : loading ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying & Saving…
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…
           </>
         ) : (
           <>
-            <Check className="w-4 h-4 mr-2" /> Verify & Save
+            <Check className="w-4 h-4 mr-2" /> Save Profile
           </>
         )}
       </Button>

@@ -295,17 +295,10 @@ export default function FirebaseAuth() {
         firebase_uid: firebaseUser?.uid,
         pin_hash: userProfile?.pin_hash,
         role,
-        verify_id: true,
       });
 
-      if (data?.id_verified) {
-        setPinSession(data?.profile);
-        window.location.href = role === "provider" ? "/become-provider" : "/";
-      } else {
-        setError(
-          "ID verification failed. The names on your ID don't match the names you provided. Please check your details and try again."
-        );
-      }
+      setPinSession(data?.profile);
+      window.location.href = role === "provider" ? "/become-provider" : "/";
     } catch (err) {
       setError(err.message || "Failed to save profile. Please try again.");
     } finally {
