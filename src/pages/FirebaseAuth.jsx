@@ -15,7 +15,7 @@ import ProfileSetupStep from "@/components/firebase/ProfileSetupStep";
 import RoleStep from "@/components/firebase/RoleStep";
 import AuthDebugPanel from "@/components/AuthDebugPanel";
 import SafeAreaPage from "@/components/SafeAreaPage";
-import { ShieldCheck, HelpCircle } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 const LOGO_URL =
   "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -408,14 +408,6 @@ export default function FirebaseAuth() {
       </main>
 
       <footer className="px-6 py-3 text-center safe-area-bottom border-t border-border space-y-1.5">
-        <a
-          href="https://wa.me/254706692111?text=Hi%20NLC%20Support%2C%20I%20need%20help%20signing%20in"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-        >
-          <HelpCircle className="w-3.5 h-3.5" /> Need help? Contact support
-        </a>
         <p className="text-[11px] text-muted-foreground">
           © {new Date().getFullYear()} Neighbourhood Labour Connect
         </p>

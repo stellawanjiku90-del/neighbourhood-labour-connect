@@ -105,7 +105,7 @@ export default function WithdrawDialog({ open, onOpenChange, availableBalance })
               <DialogDescription>
                 {result.success
                   ? `KES ${(result.amount_kes || 0).toLocaleString()} has been sent to ${result.phone}. Check your phone for the M-Pesa message.`
-                  : "The payout request did not go through. Please try again or contact support."}
+                  : "The payout request did not go through. Please try again."}
               </DialogDescription>
             </DialogHeader>
             <Button onClick={() => onOpenChange(false)} className="w-full rounded-xl h-11 mt-2">
