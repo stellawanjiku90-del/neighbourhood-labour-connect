@@ -18,6 +18,7 @@ export default function Subscribe() {
   const [buttonEl, setButtonEl] = useState(null);
   const initedRef = useRef(false);
   const pollRef = useRef(null);
+  const invoiceIdRef = useRef(null);
 
   // ─── Fetch the public IntaSend config ──
   useEffect(() => {
@@ -74,7 +75,17 @@ export default function Subscribe() {
       publicAPIKey: config.publishable_key,
       live: config.live,
     })
-      .on("COMPLETE", () => setPaymentState("success"))
+      .on("COMPLETE", (results) => {
+        // Capture the invoice id so we can actively verify + activate the
+        // payment ourselves, without depending on the IntaSend webhook.
+        invoiceIdRef.current =
+          results?.invoice?.invoice_id ||
+          results?.invoice_id ||
+          results?.id ||
+          results?.tracking_id ||
+          null;
+        setPaymentState("success");
+      })
       .on("FAILED", () => { setError("Payment was not completed. Please try again."); setPaymentState("failed"); });
   }, [sdkReady, config, buttonEl]);
 
@@ -82,20 +93,37 @@ export default function Subscribe() {
   useEffect(() => {
     if (paymentState !== "success") return;
     let attempts = 0;
+    const finishActivation = async () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("intent") === "provider" && user?.id) {
+        try {
+          const providers = await base44.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1);
+          if (providers.length > 0) await base44.entities.ServiceProvider.update(providers[0].id, { available: true });
+          sessionStorage.setItem("provider_just_listed", "true");
+        } catch { /* best-effort */ }
+      }
+      window.location.href = "/";
+    };
     const poll = async () => {
       attempts++;
       try {
-        const res = await base44.functions.invoke("checkSubscription", { firebase_uid: user?.id });
-        if (res.data?.active) {
-          const params = new URLSearchParams(window.location.search);
-          if (params.get("intent") === "provider" && user?.id) {
-            try {
-              const providers = await base44.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1);
-              if (providers.length > 0) await base44.entities.ServiceProvider.update(providers[0].id, { available: true });
-              sessionStorage.setItem("provider_just_listed", "true");
-            } catch { /* best-effort */ }
+        // Active verification — queries IntaSend directly and activates the
+        // subscription as soon as the payment is confirmed (no webhook needed).
+        if (invoiceIdRef.current) {
+          const res = await base44.functions.invoke("checkMpesaPayment", {
+            invoice_id: invoiceIdRef.current,
+            firebase_uid: user?.id,
+          });
+          const st = res.data?.state;
+          if (st === "SUCCESS" || st === "COMPLETED" || res.data?.activated || res.data?.already_active) {
+            await finishActivation();
+            return;
           }
-          window.location.href = "/";
+        }
+        // Fallback — the webhook may have already activated it.
+        const subRes = await base44.functions.invoke("checkSubscription", { firebase_uid: user?.id });
+        if (subRes.data?.active) {
+          await finishActivation();
           return;
         }
       } catch { /* ignore */ }
