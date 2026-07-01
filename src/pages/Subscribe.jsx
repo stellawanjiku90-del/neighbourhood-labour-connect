@@ -266,7 +266,7 @@ export default function Subscribe() {
         {/* Payment */}
         <div className="bg-muted rounded-2xl p-3 mb-4">
           <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-            <Smartphone className="w-3.5 h-3.5" /> Secure M-Pesa payment
+            <Smartphone className="w-3.5 h-3.5" /> Secure payment
           </p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
             Your subscription is activated automatically once the payment is confirmed.
@@ -285,7 +285,6 @@ export default function Subscribe() {
           className="intaSendPayButton w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold flex items-center justify-center gap-2"
           data-amount="130"
           data-currency="KES"
-          data-method="M-PESA"
           data-phone-number={phone}
           data-api-ref={`NLC|${user?.id || ""}`}
           data-first-name={firstName}
@@ -294,10 +293,10 @@ export default function Subscribe() {
           data-country="KE"
           data-mobile-tarrif="BUSINESS-PAYS"
         >
-          <Smartphone className="w-5 h-5" /> Pay $1 via M-Pesa
+          <Smartphone className="w-5 h-5" /> Pay $1
         </button>
         <p className="text-[11px] text-muted-foreground text-center mt-2">
-          You'll receive an M-Pesa prompt on your phone. Enter your PIN to confirm the payment.
+          Choose your preferred payment method and follow the prompts to confirm your payment.
         </p>
         </div>
       </div>
