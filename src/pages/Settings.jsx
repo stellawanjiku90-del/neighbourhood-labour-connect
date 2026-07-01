@@ -101,7 +101,7 @@ export default function Settings() {
               <div className="flex-1">
                 <p className="text-sm font-bold text-warning-soft-foreground">Subscribe to Get Started</p>
                 <p className="text-xs text-warning-soft-foreground/80 mt-0.5">
-                  Your profile is ready! Subscribe for just $1/month to start posting or finding jobs.
+                  Your profile is ready! Subscribe for just $1/month to start {user?.role === "provider" ? "getting jobs" : "posting jobs"}.
                 </p>
                 <Button
                   onClick={() => navigate("/subscribe")}
