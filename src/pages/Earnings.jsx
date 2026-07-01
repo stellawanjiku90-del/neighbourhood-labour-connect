@@ -34,8 +34,20 @@ export default function Earnings() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="h-full flex flex-col overflow-hidden">
+        <PageHeader title="Earnings" subtitle="Jobs & referral income" icon={Wallet} />
+        <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
+          <div className="w-full space-y-5">
+            <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-5 h-36 animate-pulse" />
+            <div className="bg-card rounded-2xl border border-border p-4 h-16 animate-pulse" />
+            <div className="bg-card rounded-2xl border border-border p-4 h-40 animate-pulse" />
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="bg-card rounded-2xl border border-border p-3 h-20 animate-pulse" />
+              <div className="bg-card rounded-2xl border border-border p-3 h-20 animate-pulse" />
+              <div className="bg-card rounded-2xl border border-border p-3 h-20 animate-pulse" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

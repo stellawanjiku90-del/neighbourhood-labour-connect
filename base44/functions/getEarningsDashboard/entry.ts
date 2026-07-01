@@ -6,13 +6,18 @@ Deno.serve(async (req) => {
     const { firebase_uid } = await req.json();
     if (!firebase_uid) return Response.json({ error: "firebase_uid required" }, { status: 400 });
 
-    const profiles = await base44.asServiceRole.entities.UserProfile.filter(
-      { firebase_uid }, null, 1
-    );
+    // Run all independent queries in parallel for faster response
+    const [profiles, earnings, subs, pendingWithdrawals] = await Promise.all([
+      base44.asServiceRole.entities.UserProfile.filter({ firebase_uid }, null, 1),
+      base44.asServiceRole.entities.ReferralEarning.filter({ earner_id: firebase_uid }, "-created_date", 100),
+      base44.asServiceRole.entities.Subscription.filter({ user_id: firebase_uid, status: "active" }, "-created_date", 1),
+      base44.asServiceRole.entities.WithdrawalRequest.filter({ user_id: firebase_uid }, "-created_date", 50),
+    ]);
+
     if (profiles.length === 0) return Response.json({ error: "Profile not found" }, { status: 404 });
     const profile = profiles[0];
 
-    // Provider earnings (linked by phone number)
+    // Provider earnings (linked by phone number — depends on profile)
     let provider = null;
     if (profile.phone) {
       const providers = await base44.asServiceRole.entities.ServiceProvider.filter(
@@ -20,31 +25,18 @@ Deno.serve(async (req) => {
       );
       provider = providers[0] || null;
     }
-
-    // Referral earnings
-    const earnings = await base44.asServiceRole.entities.ReferralEarning.filter(
-      { earner_id: firebase_uid }, "-created_date", 100
-    );
     const referralTotal = earnings.reduce((sum, e) => sum + (e.amount || 0), 0);
     const byLevel = [0, 0, 0];
     earnings.forEach((e) => {
       if (e.level >= 1 && e.level <= 3) byLevel[e.level - 1] += e.amount || 0;
     });
 
-    // Subscription status
-    const subs = await base44.asServiceRole.entities.Subscription.filter(
-      { user_id: firebase_uid, status: "active" }, "-created_date", 1
-    );
     const activeSub = subs[0];
     const subscriptionActive = !!(activeSub && new Date(activeSub.period_end) > new Date());
 
     const providerEarnings = provider?.earnings || 0;
     const totalEarnings = +providerEarnings + referralTotal;
 
-    // Pending withdrawals
-    const pendingWithdrawals = await base44.asServiceRole.entities.WithdrawalRequest.filter(
-      { user_id: firebase_uid }, "-created_date", 50
-    );
     const pendingAmount = pendingWithdrawals.reduce((s, w) => s + (w.amount || 0), 0);
     const availableBalance = +(totalEarnings - pendingAmount).toFixed(2);
 

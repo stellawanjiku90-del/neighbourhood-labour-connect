@@ -113,7 +113,11 @@ export default function Settings() {
             </div>
           )}
 
-          {!needsProfileCompletion && !needsSubscription && (
+          {!needsProfileCompletion && subLoading && (
+            <div className="bg-card rounded-2xl border border-border p-4 h-20 animate-pulse shadow-sm" />
+          )}
+
+          {!needsProfileCompletion && !needsSubscription && !subLoading && (
             <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
               <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
               <div className="flex-1">

@@ -108,7 +108,8 @@ Deno.serve(async (req) => {
       return Response.json({ sent: 0, reason: "no nearby providers" });
     }
 
-    // Only notify providers with an active subscription
+    // Check subscriptions to customize the message — but send to ALL nearby
+    // providers (including non-subscribed) to motivate them to subscribe.
     const subscriptions = await base44.asServiceRole.entities.Subscription.filter(
       { status: "active" },
       null,
@@ -120,45 +121,47 @@ Deno.serve(async (req) => {
         .filter((s) => !s.period_end || new Date(s.period_end).getTime() > now)
         .map((s) => s.user_id)
     );
-    // Match providers to their subscription via firebase_uid (the link used by
-    // Subscription.user_id and DeviceToken.user_id). created_by_id is not the
-    // Firebase UID in this app, so it can't be used for matching.
-    const eligible = nearby.filter(
-      (p) => p.firebase_uid && subscribedIds.has(p.firebase_uid)
+
+    // Fetch device tokens for ALL nearby providers in parallel
+    const tokenResults = await Promise.all(
+      nearby
+        .filter((p) => p.firebase_uid)
+        .map((p) =>
+          base44.asServiceRole.entities.DeviceToken.filter({
+            user_id: p.firebase_uid,
+          }).then((tokens) => ({ provider: p, tokens }))
+        )
     );
-
-    if (eligible.length === 0) {
-      return Response.json({ sent: 0, reason: "no subscribed nearby providers" });
-    }
-
-    const tokens = [];
-    for (const p of eligible) {
-      if (!p.firebase_uid) continue;
-      const deviceTokens = await base44.asServiceRole.entities.DeviceToken.filter({
-        user_id: p.firebase_uid,
-      });
-      for (const dt of deviceTokens) {
-        if (dt.token && !tokens.includes(dt.token)) tokens.push(dt.token);
-      }
-    }
-
-    if (tokens.length === 0) {
-      return Response.json({ sent: 0, reason: "no registered devices" });
-    }
 
     const serviceAccount = JSON.parse(Deno.env.get("FIREBASE_SERVICE_ACCOUNT"));
     const projectId = serviceAccount.project_id;
     const accessToken = await getAccessToken(serviceAccount);
 
     const title = job.emergency ? "🚨 Emergency job nearby" : "New job nearby";
-    const bodyText = job.title || "A customer posted a job near you";
+    const jobTitle = job.title || "A customer posted a job near you";
 
-    const results = await Promise.all(
-      tokens.map((t) => sendFcm(accessToken, projectId, t, title, bodyText))
-    );
+    const sendPromises = [];
+    for (const { provider, tokens } of tokenResults) {
+      if (!tokens.length) continue;
+      const isSubscribed = provider.firebase_uid && subscribedIds.has(provider.firebase_uid);
+      const bodyText = isSubscribed
+        ? jobTitle
+        : `${jobTitle} — Subscribe to view details and apply`;
+      for (const dt of tokens) {
+        if (dt.token) {
+          sendPromises.push(sendFcm(accessToken, projectId, dt.token, title, bodyText));
+        }
+      }
+    }
+
+    if (sendPromises.length === 0) {
+      return Response.json({ sent: 0, reason: "no registered devices" });
+    }
+
+    const results = await Promise.all(sendPromises);
     const sent = results.filter(Boolean).length;
 
-    return Response.json({ sent, total: tokens.length });
+    return Response.json({ sent, total: sendPromises.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
