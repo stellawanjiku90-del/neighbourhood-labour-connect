@@ -25,7 +25,22 @@ export default function Chat() {
     base44.entities.Message.filter({ conversation_id: id }, "created_date", 200).then(setMessages);
 
   useEffect(() => {
-    base44.entities.Conversation.get(id).then((c) => {
+    base44.entities.Conversation.get(id).then(async (c) => {
+      if (!c) { setConvo(false); return; }
+      // Guard: only participants can open a conversation
+      // Customers match customer_id (firebase_uid); providers match via their ServiceProvider record
+      if (me) {
+        if (me.role === "customer") {
+          if (c.customer_id !== me.id) { setConvo(false); return; }
+        } else if (me.role === "provider") {
+          if (c.customer_id === me.id) { setConvo(false); return; }
+          // Verify this provider owns the ServiceProvider record in the conversation
+          const myProv = me.phone
+            ? await base44.entities.ServiceProvider.filter({ phone: me.phone }, null, 1).catch(() => [])
+            : [];
+          if (!myProv[0] || myProv[0].id !== c.provider_id) { setConvo(false); return; }
+        }
+      }
       setConvo(c);
       setRevealed({ customer: !!c?.customer_revealed_number, provider: !!c?.provider_revealed_number });
     }).catch(() => setConvo(false));
@@ -34,7 +49,7 @@ export default function Chat() {
       if (event?.data?.conversation_id === id || event?.type === "delete") loadMessages();
     });
     return unsub;
-  }, [id]);
+  }, [id, me?.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

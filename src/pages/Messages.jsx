@@ -14,22 +14,24 @@ export default function Messages() {
 
   const load = async () => {
     if (!user) { setLoading(false); return; }
-    const providers = user.phone
-      ? await base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1).catch(() => [])
-      : [];
-    const myProviderId = providers[0]?.id || null;
 
-    const [asCustomer, asProvider] = await Promise.all([
-      base44.entities.Conversation.filter({ customer_id: user.id }, "-updated_date", 50),
-      myProviderId ? base44.entities.Conversation.filter({ provider_id: myProviderId }, "-updated_date", 50) : Promise.resolve([]),
-    ]);
+    let list = [];
+    if (user.role === "provider") {
+      // Providers only see conversations where they are the provider (chatting with customers)
+      const providers = user.phone
+        ? await base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1).catch(() => [])
+        : [];
+      const myProviderId = providers[0]?.id || null;
+      if (myProviderId) {
+        list = await base44.entities.Conversation.filter({ provider_id: myProviderId }, "-updated_date", 50);
+      }
+    } else {
+      // Customers only see conversations where they are the customer (chatting with providers)
+      list = await base44.entities.Conversation.filter({ customer_id: user.id }, "-updated_date", 50);
+    }
 
-    const seen = new Set();
-    const merged = [...asCustomer, ...asProvider]
-      .filter((c) => (seen.has(c.id) ? false : (seen.add(c.id), true)))
-      .sort((a, b) => new Date(b.updated_date) - new Date(a.updated_date));
-
-    setConvos(merged);
+    list.sort((a, b) => new Date(b.updated_date) - new Date(a.updated_date));
+    setConvos(list);
     setLoading(false);
   };
 
@@ -43,7 +45,11 @@ export default function Messages() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <PageHeader title="Messages" subtitle="Chat with providers & customers" icon={MessageCircle} />
+      <PageHeader
+        title="Messages"
+        subtitle={isCustomer ? "Chat with service providers" : "Chat with customers"}
+        icon={MessageCircle}
+      />
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
         <div className="w-full">
@@ -64,9 +70,8 @@ export default function Messages() {
         ) : (
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
             {convos.map((c) => {
-              const fromCustomer = c.customer_id === user?.id;
-              const name = fromCustomer ? c.provider_name : c.customer_name;
-              const photo = fromCustomer ? c.provider_photo : null;
+              const name = isCustomer ? c.provider_name : c.customer_name;
+              const photo = isCustomer ? c.provider_photo : null;
               return (
                 <Link
                   key={c.id}

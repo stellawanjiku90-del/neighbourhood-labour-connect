@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, Loader2, X, Smartphone, ShieldCheck, Eye, Search, Briefcase, Star, CreditCard, ArrowLeft } from "lucide-react";
+import { Check, Loader2, X, Smartphone, ShieldCheck, Eye, Search, Briefcase, Star, CreditCard, ArrowLeft, MessageCircle } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
@@ -199,18 +199,29 @@ export default function Subscribe() {
     );
   }
 
+  const isProvider = user?.role === "provider";
   const phone = (user?.phone || "").replace("+", "");
   const nameParts = (user?.full_name || "Customer").split(" ");
   const firstName = nameParts[0] || "Customer";
   const lastName = nameParts.slice(1).join(" ") || "Customer";
 
-  const BENEFITS = [
+  const PROVIDER_BENEFITS = [
     { icon: Search, label: "Receive job notifications", desc: "Get alerted when new jobs match your skills" },
     { icon: Eye, label: "Appear in search results", desc: "Customers find you when looking for help" },
     { icon: ShieldCheck, label: "Verified provider badge", desc: "Build trust with verified status" },
     { icon: Briefcase, label: "Unlimited applications", desc: "Apply to as many jobs as you like" },
     { icon: Star, label: "Priority visibility", desc: "Featured higher in search rankings" },
   ];
+
+  const CUSTOMER_BENEFITS = [
+    { icon: Briefcase, label: "Post unlimited jobs", desc: "Request help for any task, anytime" },
+    { icon: Search, label: "Browse all providers", desc: "Access the full directory of local pros" },
+    { icon: MessageCircle, label: "Direct messaging", desc: "Chat with providers and share phone numbers" },
+    { icon: ShieldCheck, label: "Verified pros only", desc: "Work with reviewed, rated professionals" },
+    { icon: Star, label: "Priority support", desc: "Get faster responses to your job posts" },
+  ];
+
+  const BENEFITS = isProvider ? PROVIDER_BENEFITS : CUSTOMER_BENEFITS;
 
   return (
     <div className="h-full flex flex-col">
@@ -224,6 +235,16 @@ export default function Subscribe() {
 
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-5" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
         <div className="bg-card rounded-3xl border border-border p-5 w-full max-w-md mx-auto md:mx-0">
+        <div className="mb-4">
+          <h2 className="text-lg font-extrabold text-foreground">
+            {isProvider ? "Provider plan" : "Customer plan"}
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {isProvider
+              ? "Unlock your provider dashboard and start earning"
+              : "Unlock job posting and connect with local professionals"}
+          </p>
+        </div>
         {/* Benefits */}
         <div className="space-y-1.5 mb-4">
           {BENEFITS.map((b) => {
