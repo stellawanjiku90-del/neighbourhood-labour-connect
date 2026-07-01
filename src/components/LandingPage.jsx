@@ -36,11 +36,11 @@ const TESTIMONIALS = [
 
 export default function LandingPage() {
   return (
-    <div className="h-[100dvh] w-full overflow-hidden bg-background flex flex-col safe-area-inset">
+    <div className="h-[100dvh] w-full bg-background flex flex-col safe-area-inset">
       <LogoHeader />
 
-      {/* Main — fills remaining space, no scroll */}
-      <main className="flex-1 min-h-0 px-4 md:px-8 py-1">
+      {/* Main — scrollable so the footer with legal links is always reachable */}
+      <main className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-1">
         <div className="max-w-[1200px] mx-auto h-full flex flex-col">
           {/* Tagline — compact */}
           <div className="text-center shrink-0">
