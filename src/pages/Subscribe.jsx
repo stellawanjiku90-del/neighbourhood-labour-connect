@@ -229,7 +229,7 @@ export default function Subscribe() {
       <header className="shrink-0 flex items-center gap-3 px-4 h-14 border-b border-border bg-background" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
         <div className="flex-1">
           <h1 className="text-base font-bold text-foreground">Subscribe</h1>
-          <p className="text-[11px] text-muted-foreground">Ksh 130 / month</p>
+          <p className="text-[11px] text-muted-foreground">1 USD / month</p>
         </div>
       </header>
 
@@ -294,7 +294,7 @@ export default function Subscribe() {
           data-country="KE"
           data-mobile-tarrif="BUSINESS-PAYS"
         >
-          <Smartphone className="w-5 h-5" /> Pay Ksh 130 via M-Pesa
+          <Smartphone className="w-5 h-5" /> Pay $1 via M-Pesa
         </button>
         <p className="text-[11px] text-muted-foreground text-center mt-2">
           You'll receive an M-Pesa prompt on your phone. Enter your PIN to confirm the payment.
