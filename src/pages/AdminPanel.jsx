@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Shield, Users, Wifi, DollarSign, Briefcase, Star, Loader2, MapPin, CheckCircle2 } from "lucide-react";
+import { Shield, Users, Wifi, DollarSign, Briefcase, Star, Loader2, MapPin, CheckCircle2, Bell } from "lucide-react";
 import SubscriptionManager from "@/components/admin/SubscriptionManager";
 
 export default function AdminPanel() {
@@ -12,6 +12,7 @@ export default function AdminPanel() {
   const [providers, setProviders] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [adminStats, setAdminStats] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -29,6 +30,10 @@ export default function AdminPanel() {
         setProviders(data.providers || []);
         setUsers(data.userProfiles || []);
         setStats(data.stats || {});
+        try {
+          const { data: monitoring } = await base44.functions.invoke("getAdminStats", {});
+          setAdminStats(monitoring);
+        } catch {}
       } catch (e) {
         console.error(e);
       } finally {
@@ -138,6 +143,72 @@ export default function AdminPanel() {
               <p className="text-muted-foreground text-sm px-5 py-8 text-center">No providers yet.</p>
             )}
           </div>
+
+          {/* Real-time monitoring */}
+          {adminStats && (
+            <>
+              <h2 className="text-lg font-bold text-foreground mb-3 mt-8">Real-Time Monitoring</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                <StatCard icon={Wifi} label="Online Now" value={adminStats.onlineUsersCount} colorClass="text-[#1A6FB0]" bgClass="bg-[#D6E8F5]" />
+                <StatCard icon={Briefcase} label="Online Providers" value={adminStats.onlineProvidersCount} colorClass="text-[#2D7A3E]" bgClass="bg-[#C9E8D8]" />
+                <StatCard icon={CheckCircle2} label="Active Subs" value={adminStats.activeSubscriptionsCount} colorClass="text-[#B36D25]" bgClass="bg-[#F5DCC8]" />
+                <StatCard icon={Bell} label="Notifs Sent" value={adminStats.notificationStats?.sent || 0} colorClass="text-[#6C5CE7]" bgClass="bg-[#E8E0F5]" />
+              </div>
+
+              <h3 className="text-sm font-bold text-foreground mb-2">Notification Delivery</h3>
+              <div className="bg-white rounded-2xl border border-slate-100 p-4 mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-muted-foreground">Delivery Rate</span>
+                  <span className="text-lg font-bold text-foreground">{adminStats.notificationStats?.deliveryRate || "100%"}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#C9E8D8] rounded-xl p-3">
+                    <p className="text-2xl font-bold text-[#2D7A3E]">{adminStats.notificationStats?.sent || 0}</p>
+                    <p className="text-xs text-[#2D7A3E] opacity-80">Delivered</p>
+                  </div>
+                  <div className="bg-[#F5DCC8] rounded-xl p-3">
+                    <p className="text-2xl font-bold text-[#B36D25]">{adminStats.notificationStats?.failed || 0}</p>
+                    <p className="text-xs text-[#B36D25] opacity-80">Failed</p>
+                  </div>
+                </div>
+              </div>
+
+              {adminStats.failedNotifications?.length > 0 && (
+                <>
+                  <h3 className="text-sm font-bold text-foreground mb-2">Recent Failed Notifications</h3>
+                  <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden mb-6">
+                    {adminStats.failedNotifications.map((n, i) => (
+                      <div key={i} className="px-4 py-2.5">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-foreground truncate">{n.title || n.type}</p>
+                          <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{n.user_name || "—"}</span>
+                        </div>
+                        <p className="text-xs text-destructive truncate">{n.error || "Unknown error"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {adminStats.onlineUsers?.length > 0 && (
+                <>
+                  <h3 className="text-sm font-bold text-foreground mb-2">Currently Online ({adminStats.onlineUsers.length})</h3>
+                  <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden mb-6">
+                    {adminStats.onlineUsers.slice(0, 20).map((u, i) => (
+                      <div key={i} className="flex items-center gap-2 px-4 py-2.5">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+                        <span className="text-sm font-medium text-foreground flex-1 truncate">{u.name || "—"}</span>
+                        <span className="text-[10px] text-muted-foreground">{u.role}</span>
+                        {u.provider_status && u.role === "provider" && (
+                          <span className="text-[10px] font-medium text-primary">{u.provider_status}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
 
           <SubscriptionManager />
         </>

@@ -6,18 +6,23 @@ import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
+import { usePresenceBatch } from "@/hooks/usePresence";
+import { PresenceDot } from "@/components/PresenceIndicator";
 
 export default function Messages() {
   const { user } = useAuth();
   const [convos, setConvos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [presenceIds, setPresenceIds] = useState([]);
+  const { presenceMap } = usePresenceBatch(presenceIds);
 
   const load = async () => {
     if (!user) { setLoading(false); return; }
 
     let list = [];
+    const isCust = user.role !== "provider";
+
     if (user.role === "provider") {
-      // Providers only see conversations where they are the provider (chatting with customers)
       const providers = user.phone
         ? await base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1).catch(() => [])
         : [];
@@ -26,11 +31,32 @@ export default function Messages() {
         list = await base44.entities.Conversation.filter({ provider_id: myProviderId }, "-updated_date", 50);
       }
     } else {
-      // Customers only see conversations where they are the customer (chatting with providers)
       list = await base44.entities.Conversation.filter({ customer_id: user.id }, "-updated_date", 50);
     }
 
     list.sort((a, b) => new Date(b.updated_date) - new Date(a.updated_date));
+
+    // Collect user IDs for presence lookup
+    let ids = [];
+    if (isCust) {
+      // Customers need provider firebase_uids — fetch from ServiceProvider
+      const providerIds = list.map((c) => c.provider_id).filter(Boolean);
+      const providers = await Promise.all(
+        providerIds.map((id) => base44.entities.ServiceProvider.get(id).catch(() => null))
+      );
+      const providerUidMap = {};
+      for (const p of providers) {
+        if (p && p.id && p.firebase_uid) providerUidMap[p.id] = p.firebase_uid;
+      }
+      list.forEach((c) => { c._presence_uid = providerUidMap[c.provider_id] || null; });
+      ids = Object.values(providerUidMap).filter(Boolean);
+    } else {
+      // Providers can use customer_id directly (it's the Firebase UID)
+      list.forEach((c) => { c._presence_uid = c.customer_id; });
+      ids = list.map((c) => c.customer_id).filter(Boolean);
+    }
+    setPresenceIds(ids);
+
     setConvos(list);
     setLoading(false);
   };
@@ -72,19 +98,25 @@ export default function Messages() {
             {convos.map((c) => {
               const name = isCustomer ? c.provider_name : c.customer_name;
               const photo = isCustomer ? c.provider_photo : null;
+              const presence = c._presence_uid ? presenceMap[c._presence_uid] : null;
               return (
                 <Link
                   key={c.id}
                   to={`/chat/${c.id}`}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors"
                 >
-                  {photo ? (
-                    <img src={photo} alt={name} className="w-11 h-11 rounded-xl object-cover shrink-0" />
-                  ) : (
-                    <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center font-bold text-accent-foreground shrink-0">
-                      {name?.[0]}
+                  <div className="relative shrink-0">
+                    {photo ? (
+                      <img src={photo} alt={name} className="w-11 h-11 rounded-xl object-cover" />
+                    ) : (
+                      <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center font-bold text-accent-foreground">
+                        {name?.[0]}
+                      </div>
+                    )}
+                    <div className="absolute -bottom-0.5 -right-0.5">
+                      <PresenceDot presence={presence} size="xs" />
                     </div>
-                  )}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-foreground truncate">{name}</p>
                     <p className="text-sm text-muted-foreground truncate">

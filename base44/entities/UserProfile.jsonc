@@ -84,6 +84,41 @@
     "referred_by": {
       "type": "string",
       "description": "Firebase UID of the user who referred them"
+    },
+    "notif_jobs": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive new job alerts (providers)"
+    },
+    "notif_messages": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive new message notifications"
+    },
+    "notif_bids": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive bid status updates (customers)"
+    },
+    "notif_subscription": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive subscription expiry reminders"
+    },
+    "notif_referrals": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive referral earnings notifications"
+    },
+    "notif_payments": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive payment and withdrawal notifications"
+    },
+    "notif_emergency": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive emergency job notifications"
     }
   },
   "required": [

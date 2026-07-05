@@ -3,7 +3,18 @@ import { Link } from "react-router-dom";
 import { BadgeCheck, MapPin, Sparkles } from "lucide-react";
 import Stars from "./Stars";
 
-export default function ProviderCard({ provider, distance, compact = false }) {
+function formatLastSeen(dateStr) {
+  if (!dateStr) return "Offline";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+export default function ProviderCard({ provider, distance, compact = false, presence }) {
   if (compact) {
     return (
       <Link
@@ -23,6 +34,12 @@ export default function ProviderCard({ provider, distance, compact = false }) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1">
               <h3 className="font-semibold text-xs text-foreground truncate">{provider.name}</h3>
+              {presence?.is_online && (
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                  presence.provider_status === "busy" ? "bg-amber-500" :
+                  "bg-green-500"
+                }`} />
+              )}
               {provider.verified && <BadgeCheck className="w-3 h-3 text-emerald-600 shrink-0" />}
             </div>
             <p className="text-[10px] text-muted-foreground truncate">{(provider.professions || []).slice(0, 2).join(" · ")}</p>
@@ -80,6 +97,17 @@ export default function ProviderCard({ provider, distance, compact = false }) {
               {provider.rating?.toFixed(1)} ({provider.reviews_count})
             </span>
           </div>
+          {presence?.is_online && presence?.provider_status === "available" && (
+            <p className="text-xs font-semibold text-green-600 dark:text-green-400 mt-1">Available Now</p>
+          )}
+          {presence?.is_online && presence?.provider_status === "busy" && (
+            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mt-1">Busy</p>
+          )}
+          {presence && !presence.is_online && presence.last_active && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Last seen {formatLastSeen(presence.last_active)}
+            </p>
+          )}
           <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
             {distance != null && (
               <span className="flex items-center gap-0.5">

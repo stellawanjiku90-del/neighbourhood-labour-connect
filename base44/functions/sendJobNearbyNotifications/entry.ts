@@ -80,7 +80,11 @@ async function sendFcm(accessToken, projectId, token, title, body) {
       }),
     }
   );
-  return res.ok;
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "Unknown FCM error");
+    return { ok: false, error: errText.substring(0, 300) };
+  }
+  return { ok: true };
 }
 
 Deno.serve(async (req) => {
@@ -122,6 +126,16 @@ Deno.serve(async (req) => {
         .map((s) => s.user_id)
     );
 
+    // Fetch UserProfiles for notification preference checking
+    const nearbyUids = new Set(nearby.filter((p) => p.firebase_uid).map((p) => p.firebase_uid));
+    const allProfiles = await base44.asServiceRole.entities.UserProfile.list(null, 500);
+    const profileMap = {};
+    for (const p of allProfiles) {
+      if (p.firebase_uid && nearbyUids.has(p.firebase_uid)) {
+        profileMap[p.firebase_uid] = p;
+      }
+    }
+
     // Fetch device tokens for ALL nearby providers in parallel
     const tokenResults = await Promise.all(
       nearby
@@ -137,31 +151,61 @@ Deno.serve(async (req) => {
     const projectId = serviceAccount.project_id;
     const accessToken = await getAccessToken(serviceAccount);
 
-    const title = job.emergency ? "🚨 Emergency job nearby" : "New job nearby";
+    const isEmergency = !!job.emergency;
+    const title = isEmergency ? "🚨 Emergency job nearby" : "New job nearby";
     const jobTitle = job.title || "A customer posted a job near you";
+    const notifType = isEmergency ? "emergency" : "job_alert";
+    const prefKey = isEmergency ? "notif_emergency" : "notif_jobs";
 
     const sendPromises = [];
     for (const { provider, tokens } of tokenResults) {
       if (!tokens.length) continue;
+
+      // Check notification preferences — skip if user has opted out
+      const profile = provider.firebase_uid ? profileMap[provider.firebase_uid] : null;
+      if (profile && profile[prefKey] === false) continue;
+
       const isSubscribed = provider.firebase_uid && subscribedIds.has(provider.firebase_uid);
       const bodyText = isSubscribed
         ? jobTitle
         : `${jobTitle} — Subscribe to view details and apply`;
       for (const dt of tokens) {
         if (dt.token) {
-          sendPromises.push(sendFcm(accessToken, projectId, dt.token, title, bodyText));
+          sendPromises.push(
+            sendFcm(accessToken, projectId, dt.token, title, bodyText).then((result) => ({
+              provider,
+              result,
+            }))
+          );
         }
       }
     }
 
     if (sendPromises.length === 0) {
-      return Response.json({ sent: 0, reason: "no registered devices" });
+      return Response.json({ sent: 0, reason: "no registered devices or all opted out" });
     }
 
     const results = await Promise.all(sendPromises);
-    const sent = results.filter(Boolean).length;
+    const sent = results.filter((r) => r.result.ok).length;
+    const failed = results.filter((r) => !r.result.ok).length;
 
-    return Response.json({ sent, total: sendPromises.length });
+    // Log notification delivery to NotificationLog
+    const logEntries = results.map((r) => ({
+      user_id: r.provider.firebase_uid,
+      user_name: r.provider.name,
+      type: notifType,
+      title: title,
+      body: r.result.ok ? "Delivered" : r.result.error,
+      status: r.result.ok ? "sent" : "failed",
+      error: r.result.ok ? null : r.result.error,
+      device_count: 1,
+    }));
+
+    if (logEntries.length > 0) {
+      await base44.asServiceRole.entities.NotificationLog.bulkCreate(logEntries).catch(() => {});
+    }
+
+    return Response.json({ sent, failed, total: sendPromises.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

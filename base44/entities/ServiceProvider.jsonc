@@ -45,6 +45,17 @@
       "type": "boolean",
       "default": true
     },
+    "availability_status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "available",
+        "busy",
+        "offline"
+      ],
+      "default": "offline",
+      "description": "Provider's current availability status shown to customers"
+    },
     "years_experience": {
       "type": "number",
       "default": 0

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { hashPin } from "@/lib/pin";
 import { useAuth } from "@/lib/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { Switch } from "@/components/ui/switch";
+import ProviderAvailabilityToggle from "@/components/ProviderAvailabilityToggle";
 import PushNotificationEnabler from "@/components/PushNotificationEnabler";
 import PageHeader from "@/components/PageHeader";
 import {
@@ -15,9 +17,19 @@ import {
   AlertDialogCancel, AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import {
-  User, Bell, KeyRound, CreditCard, LogOut, Trash2,
+  User, Bell, KeyRound, CreditCard, LogOut, Trash2, Briefcase,
   ChevronRight, Shield, Loader2, AlertCircle, CheckCircle2,
 } from "lucide-react";
+
+const NOTIF_CATEGORIES = [
+  { key: "notif_jobs", label: "Job Alerts", desc: "New jobs matching your skills", roles: ["provider"] },
+  { key: "notif_messages", label: "Messages", desc: "New chat messages", roles: ["customer", "provider"] },
+  { key: "notif_bids", label: "Bid Updates", desc: "When providers bid on your jobs", roles: ["customer"] },
+  { key: "notif_subscription", label: "Subscription Reminders", desc: "Renewal and expiry alerts", roles: ["customer", "provider"] },
+  { key: "notif_referrals", label: "Referral Earnings", desc: "When your referrals subscribe", roles: ["customer", "provider"] },
+  { key: "notif_payments", label: "Payments", desc: "Payment confirmations and withdrawals", roles: ["customer", "provider"] },
+  { key: "notif_emergency", label: "Emergency Alerts", desc: "Urgent job notifications", roles: ["customer", "provider"] },
+];
 
 export default function Settings() {
   const { user, logout } = useAuth();
@@ -29,6 +41,27 @@ export default function Settings() {
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [savingPin, setSavingPin] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState(null);
+  const [providerStatus, setProviderStatus] = useState(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    base44.functions.invoke("getUserProfile", { firebase_uid: user.id })
+      .then((res) => { if (res.data?.profile) setNotifPrefs(res.data.profile); else setNotifPrefs({}); })
+      .catch(() => setNotifPrefs({}));
+    if (user.role === "provider") {
+      base44.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1)
+        .then((providers) => { if (providers[0]) setProviderStatus(providers[0].availability_status || "offline"); })
+        .catch(() => {});
+    }
+  }, [user?.id]);
+
+  const toggleNotif = (key, value) => {
+    setNotifPrefs((prev) => ({ ...(prev || {}), [key]: value }));
+    base44.functions.invoke("saveUserProfile", { phone: user?.phone, [key]: value }).catch(() => {});
+  };
+
+  const userNotifCats = NOTIF_CATEGORIES.filter((c) => c.roles.includes(user?.role || "customer"));
 
   const needsProfileCompletion = !user?.profile_completed;
   const needsSubscription = !subLoading && !subActive;
@@ -143,6 +176,20 @@ export default function Settings() {
             </div>
           </div>
 
+          {/* Provider availability */}
+          {user?.role === "provider" && providerStatus && (
+            <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
+              <div className="flex items-center gap-2.5 mb-1">
+                <Briefcase className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-bold text-foreground">Availability Status</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Customers can see when you're available. Set your status to attract more jobs.
+              </p>
+              <ProviderAvailabilityToggle currentStatus={providerStatus} onUpdated={setProviderStatus} />
+            </div>
+          )}
+
           {/* Notifications */}
           <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
             <div className="flex items-center gap-2.5 mb-3">
@@ -150,6 +197,23 @@ export default function Settings() {
               <h3 className="text-sm font-bold text-foreground">Notifications</h3>
             </div>
             <PushNotificationEnabler />
+            {notifPrefs && (
+              <div className="mt-4 space-y-2.5 border-t border-border pt-3">
+                <p className="text-xs font-semibold text-muted-foreground">Notification Categories</p>
+                {userNotifCats.map((cat) => (
+                  <div key={cat.key} className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">{cat.label}</p>
+                      <p className="text-[11px] text-muted-foreground">{cat.desc}</p>
+                    </div>
+                    <Switch
+                      checked={notifPrefs[cat.key] !== false}
+                      onCheckedChange={(v) => toggleNotif(cat.key, v)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Account actions */}

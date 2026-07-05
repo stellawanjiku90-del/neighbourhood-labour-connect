@@ -1,0 +1,45 @@
+{
+  "name": "UserPresence",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Firebase UID of the user"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "provider",
+        "admin"
+      ],
+      "default": "customer"
+    },
+    "last_active": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last heartbeat timestamp"
+    },
+    "is_online": {
+      "type": "boolean",
+      "default": false
+    },
+    "provider_status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "available",
+        "busy",
+        "offline"
+      ],
+      "default": "offline",
+      "description": "Provider's manually-set availability status"
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

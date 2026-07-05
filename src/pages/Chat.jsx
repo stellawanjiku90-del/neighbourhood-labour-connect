@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Send, Phone } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useUserPresence } from "@/hooks/usePresence";
+import PresenceIndicator from "@/components/PresenceIndicator";
 import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 
 export default function Chat() {
@@ -19,7 +21,9 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const [revealed, setRevealed] = useState({ customer: false, provider: false });
   const [otherPhone, setOtherPhone] = useState(null);
+  const [otherPresenceUid, setOtherPresenceUid] = useState(null);
   const bottomRef = useRef(null);
+  const { presence: otherPresence } = useUserPresence(otherPresenceUid);
 
   const loadMessages = () =>
     base44.entities.Message.filter({ conversation_id: id }, "created_date", 200).then(setMessages);
@@ -43,6 +47,12 @@ export default function Chat() {
       }
       setConvo(c);
       setRevealed({ customer: !!c?.customer_revealed_number, provider: !!c?.provider_revealed_number });
+      if (me?.role === "customer" && c?.provider_id) {
+        const prov = await base44.entities.ServiceProvider.get(c.provider_id).catch(() => null);
+        if (prov?.firebase_uid) setOtherPresenceUid(prov.firebase_uid);
+      } else if (me?.role === "provider" && c?.customer_id) {
+        setOtherPresenceUid(c.customer_id);
+      }
     }).catch(() => setConvo(false));
     loadMessages();
     const unsub = base44.entities.Message.subscribe((event) => {
@@ -144,7 +154,10 @@ export default function Chat() {
                   {otherName?.[0]}
                 </div>
               )}
-              <p className="font-bold text-foreground">{otherName}</p>
+              <div className="min-w-0">
+                <p className="font-bold text-foreground truncate">{otherName}</p>
+                <PresenceIndicator presence={otherPresence} size="xs" showLabel={true} isProvider={isCustomer} />
+              </div>
             </>
           );
         })()}
