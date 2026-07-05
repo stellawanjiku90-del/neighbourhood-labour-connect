@@ -7,8 +7,9 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
-    const [onlineUsers, activeSubs, recentNotifications, failedNotifications, totalUsers] = await Promise.all([
+    const [onlineUsers, allPresence, activeSubs, recentNotifications, failedNotifications, totalUsers] = await Promise.all([
       base44.asServiceRole.entities.UserPresence.filter({ is_online: true }, '-last_active', 500),
+      base44.asServiceRole.entities.UserPresence.list('-last_active', 500),
       base44.asServiceRole.entities.Subscription.filter({ status: 'active' }, null, 1000),
       base44.asServiceRole.entities.NotificationLog.list('-created_date', 200),
       base44.asServiceRole.entities.NotificationLog.filter({ status: 'failed' }, '-created_date', 20),
@@ -54,6 +55,14 @@ Deno.serve(async (req) => {
       onlineUsers: onlineUsers.map(u => ({
         name: u.user_name,
         role: u.role,
+        provider_status: u.provider_status,
+        last_active: u.last_active
+      })),
+      allUsersPresence: allPresence.map(u => ({
+        user_id: u.user_id,
+        name: u.user_name,
+        role: u.role,
+        is_online: u.is_online,
         provider_status: u.provider_status,
         last_active: u.last_active
       }))

@@ -190,23 +190,38 @@ export default function AdminPanel() {
                 </>
               )}
 
-              {adminStats.onlineUsers?.length > 0 && (
-                <>
-                  <h3 className="text-sm font-bold text-foreground mb-2">Currently Online ({adminStats.onlineUsers.length})</h3>
-                  <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden mb-6">
-                    {adminStats.onlineUsers.slice(0, 20).map((u, i) => (
-                      <div key={i} className="flex items-center gap-2 px-4 py-2.5">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
-                        <span className="text-sm font-medium text-foreground flex-1 truncate">{u.name || "—"}</span>
-                        <span className="text-[10px] text-muted-foreground">{u.role}</span>
-                        {u.provider_status && u.role === "provider" && (
-                          <span className="text-[10px] font-medium text-primary">{u.provider_status}</span>
+              <h3 className="text-sm font-bold text-foreground mb-2">
+                User Presence ({adminStats.allUsersPresence?.length || 0} total · {adminStats.onlineUsersCount || 0} online)
+              </h3>
+              <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden mb-6">
+                {(adminStats.allUsersPresence || []).map((u, i) => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                    <span
+                      className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                        u.is_online ? "bg-green-500 animate-pulse" : "bg-red-500"
+                      }`}
+                      title={u.is_online ? "Online" : "Offline"}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{u.name || "—"}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {u.is_online ? (
+                          <span className="text-green-600 font-medium">Online now</span>
+                        ) : (
+                          <>Last seen {formatLastSeen(u.last_active)}</>
                         )}
-                      </div>
-                    ))}
+                        {u.provider_status && u.role === "provider" && (
+                          <span className="ml-1.5 text-primary font-medium">· {u.provider_status}</span>
+                        )}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{u.role}</span>
                   </div>
-                </>
-              )}
+                ))}
+                {(!adminStats.allUsersPresence || adminStats.allUsersPresence.length === 0) && (
+                  <p className="text-muted-foreground text-sm px-4 py-8 text-center">No presence data yet.</p>
+                )}
+              </div>
             </>
           )}
 
@@ -215,6 +230,18 @@ export default function AdminPanel() {
       )}
     </div>
   );
+}
+
+function formatLastSeen(iso) {
+  if (!iso) return "unknown";
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 function StatCard({ icon: Icon, label, value, colorClass, bgClass }) {
