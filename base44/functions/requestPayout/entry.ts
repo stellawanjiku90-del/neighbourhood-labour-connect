@@ -169,6 +169,25 @@ Deno.serve(async (req) => {
       error_message: approveRes.ok ? null : (approveData?.error || approveData?.detail || approveText),
     });
 
+    // ─── Mark earnings as paid to prevent double-spend ──────────
+    // Without this, pending ReferralEarning records remain "pending" and
+    // are re-counted on the next withdrawal request, allowing infinite
+    // replay of the same balance.
+    if (status === 'completed') {
+      await base44.asServiceRole.entities.ReferralEarning.updateMany(
+        { earner_id: firebase_uid, status: 'pending' },
+        { $set: { status: 'paid' } }
+      );
+      if (providers[0] && providerEarnings > 0) {
+        const fromProvider = Math.max(0, withdrawAmount - referralTotal);
+        if (fromProvider > 0) {
+          await base44.asServiceRole.entities.ServiceProvider.update(providers[0].id, {
+            earnings: Math.max(0, +(providerEarnings - fromProvider).toFixed(2))
+          });
+        }
+      }
+    }
+
     return Response.json({
       success: approveRes.ok,
       request_id: requestId,
