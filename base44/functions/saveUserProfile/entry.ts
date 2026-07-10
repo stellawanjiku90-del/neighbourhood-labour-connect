@@ -37,6 +37,38 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Phone is required" }, { status: 400 });
     }
 
+    // Never allow 'admin' role via this endpoint — prevents privilege escalation
+    if (role === 'admin') {
+      return Response.json({ error: "Invalid role" }, { status: 403 });
+    }
+
+    // Look up existing profile early — needed for ownership verification
+    const existing = await base44.asServiceRole.entities.UserProfile.filter({ phone });
+
+    // Try to authenticate the caller
+    let caller = null;
+    try { caller = await base44.auth.me(); } catch { caller = null; }
+
+    // An authenticated caller owns the profile if their id matches the
+    // firebase_uid in the request or the existing profile's firebase_uid
+    const isOwner = caller && (
+      (firebase_uid && caller.id === firebase_uid) ||
+      (existing.length > 0 && caller.id === existing[0].firebase_uid)
+    );
+
+    // For updates to existing profiles, unauthenticated callers cannot
+    // change sensitive fields (pin_hash, role, firebase_uid).
+    // This prevents account takeover and privilege escalation.
+    let effectivePinHash = pin_hash;
+    let effectiveRole = role;
+    let effectiveFirebaseUid = firebase_uid;
+
+    if (existing.length > 0 && !isOwner) {
+      effectivePinHash = undefined;
+      effectiveRole = undefined;
+      effectiveFirebaseUid = undefined;
+    }
+
     // ─── ID Verification via InvokeLLM ──────────────────────────
     let id_verified = false;
     let id_names_extracted = "";
@@ -97,11 +129,9 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ─── Build profile data — sensitive fields only when defined ──
     const profileData = {
       phone,
-      firebase_uid,
-      pin_hash,
-      role,
       first_name,
       surname,
       age,
@@ -116,13 +146,16 @@ Deno.serve(async (req) => {
       lng,
       profile_completed: data.profile_completed !== undefined ? data.profile_completed : true,
     };
-
-    const existing = await base44.asServiceRole.entities.UserProfile.filter({ phone });
+    // Only include sensitive fields when they have a value — prevents
+    // overwriting existing pin_hash/role/firebase_uid with undefined/null
+    if (effectiveFirebaseUid !== undefined) profileData.firebase_uid = effectiveFirebaseUid;
+    if (effectivePinHash !== undefined) profileData.pin_hash = effectivePinHash;
+    if (effectiveRole !== undefined) profileData.role = effectiveRole;
 
     const createReferralRecord = async (profile) => {
-      if (!referred_by || !referrerProfile || !firebase_uid) return;
+      if (!referred_by || !referrerProfile || !effectiveFirebaseUid) return;
       const existingRef = await base44.asServiceRole.entities.Referral.filter(
-        { referrer_id: referred_by, referred_id: firebase_uid },
+        { referrer_id: referred_by, referred_id: effectiveFirebaseUid },
         null,
         1
       );
@@ -132,7 +165,7 @@ Deno.serve(async (req) => {
         referrer_name:
           `${referrerProfile.first_name || ""} ${referrerProfile.surname || ""}`.trim() ||
           referrerProfile.phone,
-        referred_id: firebase_uid,
+        referred_id: effectiveFirebaseUid,
         referred_name: `${first_name || ""} ${surname || ""}`.trim() || phone,
         referred_phone: phone,
         referral_code_used: normalizedCode,
@@ -155,13 +188,16 @@ Deno.serve(async (req) => {
         profileData
       );
       await createReferralRecord(profile);
-      return Response.json({ profile, id_verified });
+      // Strip pin_hash from response — never expose to client
+      const { pin_hash: _removed, ...safeProfile } = profile;
+      return Response.json({ profile: safeProfile, id_verified });
     } else {
       profileData.referral_code = generateReferralCode();
       if (referred_by) profileData.referred_by = referred_by;
       const profile = await base44.asServiceRole.entities.UserProfile.create(profileData);
       await createReferralRecord(profile);
-      return Response.json({ profile, id_verified });
+      const { pin_hash: _removed, ...safeProfile } = profile;
+      return Response.json({ profile: safeProfile, id_verified });
     }
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
