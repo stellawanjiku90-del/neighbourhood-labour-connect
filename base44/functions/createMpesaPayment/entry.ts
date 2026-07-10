@@ -19,10 +19,14 @@ function resolveBaseUrl(apiKey, publishableKey) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { firebase_uid } = await req.json();
-    if (!firebase_uid) {
-      return Response.json({ error: "firebase_uid required" }, { status: 400 });
+
+    // Require authentication — prevents triggering STK push prompts on
+    // arbitrary victims' devices by supplying their firebase_uid.
+    const caller = await base44.auth.me();
+    if (!caller) {
+      return Response.json({ error: "Authentication required" }, { status: 401 });
     }
+    const firebase_uid = caller.id;
 
     // Fetch the user's profile to get their phone number and name
     const profiles = await base44.asServiceRole.entities.UserProfile.filter(
