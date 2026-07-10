@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [appPublicSettings, setAppPublicSettings] = useState(null);
+  const [pinVerified, setPinVerified] = useState(false);
 
   // ─── Check app public settings (for app configuration) ──────────
   useEffect(() => {
@@ -63,20 +64,44 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
       } else {
         // No Firebase session — restore a PIN session if one is active.
-        const pinVerified = sessionStorage.getItem("pin_verified") === "true";
+        // Validate against the server: even if sessionStorage was tampered
+        // with, we only trust the session if getUserProfile confirms the
+        // phone has a PIN set.
+        const pinFlag = sessionStorage.getItem("pin_verified") === "true";
         const storedProfile = sessionStorage.getItem("pin_session_profile");
-        if (pinVerified && storedProfile) {
+        if (pinFlag && storedProfile) {
           try {
             const profile = JSON.parse(storedProfile);
-            setUser(buildUserFromProfile(profile, profile?.firebase_uid));
-            setIsAuthenticated(true);
+            if (profile?.phone) {
+              const { data } = await base44.functions.invoke("getUserProfile", {
+                phone: profile.phone,
+              });
+              if (data?.profile?.has_pin) {
+                setUser(buildUserFromProfile(profile, profile?.firebase_uid));
+                setIsAuthenticated(true);
+                setPinVerified(true);
+              } else {
+                // Server did not confirm — discard the spoofed session.
+                sessionStorage.removeItem("pin_verified");
+                sessionStorage.removeItem("pin_session_profile");
+                setUser(null);
+                setIsAuthenticated(false);
+                setPinVerified(false);
+              }
+            } else {
+              setUser(null);
+              setIsAuthenticated(false);
+              setPinVerified(false);
+            }
           } catch (e) {
             setUser(null);
             setIsAuthenticated(false);
+            setPinVerified(false);
           }
         } else {
           setUser(null);
           setIsAuthenticated(false);
+          setPinVerified(false);
         }
       }
       setIsLoadingAuth(false);
@@ -104,6 +129,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem("pin_session_profile", JSON.stringify(profile));
     setUser(buildUserFromProfile(profile, profile?.firebase_uid));
     setIsAuthenticated(true);
+    setPinVerified(true);
   };
 
   const checkAppState = async () => {
@@ -167,6 +193,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
+    setPinVerified(false);
     sessionStorage.removeItem("pin_verified");
     sessionStorage.removeItem("pin_session_profile");
     try {
@@ -196,6 +223,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         navigateToLogin,
         setPinSession,
+        pinVerified,
       }}
     >
       {children}
