@@ -146,7 +146,7 @@ export default function FirebaseAuth() {
       });
       const profile = data?.profile;
 
-      if (profile && profile.pin_hash) {
+      if (profile && profile.has_pin) {
         // Returning user — log in with PIN, no OTP.
         setUserProfile(profile);
         setStep("pin-login");
@@ -247,20 +247,25 @@ export default function FirebaseAuth() {
     setLoading(true);
     try {
       const pinHash = await hashPin(pin);
-      if (pinHash === userProfile?.pin_hash) {
-        if (userProfile?.profile_completed) {
-          setPinSession(userProfile);
+      const { data } = await base44.functions.invoke("loginWithPin", {
+        phone,
+        pin_hash: pinHash,
+      });
+      const profile = data?.profile;
+      if (profile) {
+        if (profile.profile_completed) {
+          setPinSession(profile);
           window.location.href = "/";
         } else {
           // Resume an incomplete registration at the profile step.
-          setRole(userProfile?.role || "customer");
+          setRole(profile?.role || "customer");
           setStep("profile");
         }
       } else {
         setError("Incorrect PIN. Please try again.");
       }
     } catch (err) {
-      setError(err.message || "Failed to verify PIN. Please try again.");
+      setError(err.response?.data?.error || err.message || "Failed to verify PIN. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -24,9 +24,7 @@ export default function AdminPanel() {
 
     (async () => {
       try {
-        const { data } = await base44.functions.invoke("getAdminData", {
-          firebase_uid: user.id,
-        });
+        const { data } = await base44.functions.invoke("getAdminData", {});
         setProviders(data.providers || []);
         setUsers(data.userProfiles || []);
         setStats(data.stats || {});
