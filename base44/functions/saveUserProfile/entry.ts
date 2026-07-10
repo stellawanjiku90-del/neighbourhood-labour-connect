@@ -57,6 +57,16 @@ Deno.serve(async (req) => {
     // never trust the client-supplied value.
     const verifiedFirebaseUid = caller.id;
 
+    // Validate that the input phone matches the Firebase-verified phone number.
+    // This prevents an authenticated attacker from squatting on a victim's
+    // phone number by supplying it in the request body.
+    const normalizePhone = (p) => (p || '').replace(/[^\d]/g, '');
+    const callerPhone = normalizePhone(caller.phone);
+    const inputPhone = normalizePhone(phone);
+    if (callerPhone && inputPhone !== callerPhone) {
+      return Response.json({ error: "Phone number does not match your verified number" }, { status: 403 });
+    }
+
     // For existing profiles, verify the caller is the true owner.
     // Reject all non-owner updates to existing records.
     if (existing.length > 0 && existing[0].firebase_uid !== verifiedFirebaseUid) {
