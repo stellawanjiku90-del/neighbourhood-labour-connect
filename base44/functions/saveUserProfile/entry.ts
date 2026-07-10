@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import bcrypt from "npm:bcryptjs@2.4.3";
 
 // Generate a unique referral code like "NLC-AB3X9K"
 function generateReferralCode() {
@@ -17,7 +18,7 @@ Deno.serve(async (req) => {
     const {
       phone,
       firebase_uid,
-      pin_hash,
+      pin,
       role,
       first_name,
       surname,
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
     }
 
     // Sensitive fields are always derived from the verified caller.
-    const effectivePinHash = pin_hash;
+    const effectivePinHash = pin !== undefined ? await bcrypt.hash(pin, await bcrypt.genSalt(10)) : undefined;
     const effectiveRole = role;
     const effectiveFirebaseUid = verifiedFirebaseUid;
 
