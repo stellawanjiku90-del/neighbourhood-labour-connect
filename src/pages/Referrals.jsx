@@ -13,7 +13,7 @@ export default function Referrals() {
     if (!user?.id) return;
     setLoading(true);
     base44.functions
-      .invoke("getReferralDashboard", { firebase_uid: user.id })
+      .invoke("getReferralDashboard", {})
       .then((res) => setData(res.data))
       .catch(() => setData(null))
       .finally(() => setLoading(false));
