@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
       lng,
       verify_id,
       referral_code_used,
+      profile_completed,
     } = data;
 
     if (!phone) {
@@ -45,29 +46,27 @@ Deno.serve(async (req) => {
     // Look up existing profile early — needed for ownership verification
     const existing = await base44.asServiceRole.entities.UserProfile.filter({ phone });
 
-    // Try to authenticate the caller
-    let caller = null;
-    try { caller = await base44.auth.me(); } catch { caller = null; }
-
-    // An authenticated caller owns the profile if their id matches the
-    // firebase_uid in the request or the existing profile's firebase_uid
-    const isOwner = caller && (
-      (firebase_uid && caller.id === firebase_uid) ||
-      (existing.length > 0 && caller.id === existing[0].firebase_uid)
-    );
-
-    // For updates to existing profiles, unauthenticated callers cannot
-    // change sensitive fields (pin_hash, role, firebase_uid).
-    // This prevents account takeover and privilege escalation.
-    let effectivePinHash = pin_hash;
-    let effectiveRole = role;
-    let effectiveFirebaseUid = firebase_uid;
-
-    if (existing.length > 0 && !isOwner) {
-      effectivePinHash = undefined;
-      effectiveRole = undefined;
-      effectiveFirebaseUid = undefined;
+    // Require authentication — prevents unauthenticated profile creation,
+    // account takeover, and credential squatting on arbitrary phone numbers.
+    const caller = await base44.auth.me();
+    if (!caller) {
+      return Response.json({ error: "Authentication required" }, { status: 401 });
     }
+
+    // The caller's authenticated ID is the source of truth for firebase_uid —
+    // never trust the client-supplied value.
+    const verifiedFirebaseUid = caller.id;
+
+    // For existing profiles, verify the caller is the true owner.
+    // Reject all non-owner updates to existing records.
+    if (existing.length > 0 && existing[0].firebase_uid !== verifiedFirebaseUid) {
+      return Response.json({ error: "You can only edit your own profile" }, { status: 403 });
+    }
+
+    // Sensitive fields are always derived from the verified caller.
+    const effectivePinHash = pin_hash;
+    const effectiveRole = role;
+    const effectiveFirebaseUid = verifiedFirebaseUid;
 
     // ─── ID Verification via InvokeLLM ──────────────────────────
     let id_verified = false;
@@ -144,7 +143,7 @@ Deno.serve(async (req) => {
       location_name,
       lat,
       lng,
-      profile_completed: data.profile_completed !== undefined ? data.profile_completed : true,
+      profile_completed: profile_completed !== undefined ? profile_completed : true,
     };
     // Only include sensitive fields when they have a value — prevents
     // overwriting existing pin_hash/role/firebase_uid with undefined/null
