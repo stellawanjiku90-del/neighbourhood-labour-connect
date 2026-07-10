@@ -10,9 +10,12 @@ Deno.serve(async (req) => {
     const forwarded = req.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0].trim() : null;
 
-    // Forward the client IP to ipapi.co so it geolocates the user, not the server
-    const url = ip ? `https://ipapi.co/${ip}/json/` : 'https://ipapi.co/json/';
-    const response = await fetch(url);
+    // Require a client IP — never call the bare /json/ endpoint, which would
+    // geolocate the server's datacenter and disclose its location.
+    if (!ip) {
+      return Response.json({ error: 'Could not determine client IP' }, { status: 400 });
+    }
+    const response = await fetch(`https://ipapi.co/${ip}/json/`);
     const text = await response.text();
     let data;
     try { data = JSON.parse(text); } catch {
