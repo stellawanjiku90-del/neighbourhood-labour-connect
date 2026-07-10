@@ -77,10 +77,40 @@ Deno.serve(async (req) => {
     });
     const requestId = request.id;
 
+    // ─── Lock earnings BEFORE the external API call ──────────────
+    // Transition pending referral earnings to 'processing' immediately so
+    // concurrent payout requests cannot re-count the same balance. The
+    // balance check above already subtracts 'processing' withdrawals, so
+    // the WithdrawalRequest itself also serves as a lock. This closes the
+    // TOCTOU window between reading available balance and debiting it.
+    await base44.asServiceRole.entities.ReferralEarning.updateMany(
+      { earner_id: firebase_uid, status: 'pending' },
+      { $set: { status: 'processing' } }
+    );
+    let providerEarningsLocked = 0;
+    if (providers[0] && providerEarnings > 0) {
+      const fromProvider = Math.max(0, withdrawAmount - referralTotal);
+      if (fromProvider > 0) {
+        providerEarningsLocked = Math.min(fromProvider, providerEarnings);
+        await base44.asServiceRole.entities.ServiceProvider.update(providers[0].id, {
+          earnings: Math.max(0, +(providerEarnings - providerEarningsLocked).toFixed(2))
+        });
+      }
+    }
+
     // ─── IntaSend Send Money: Initiate ─────────────────────────────
     const apiKey = Deno.env.get('INTASEND_API_KEY');
     const publishableKey = Deno.env.get('INTASEND_PUBLISHABLE_KEY');
     if (!apiKey || !publishableKey) {
+      await base44.asServiceRole.entities.ReferralEarning.updateMany(
+        { earner_id: firebase_uid, status: 'processing' },
+        { $set: { status: 'pending' } }
+      );
+      if (providers[0] && providerEarningsLocked > 0) {
+        await base44.asServiceRole.entities.ServiceProvider.update(providers[0].id, {
+          earnings: +(providerEarnings).toFixed(2)
+        });
+      }
       await base44.asServiceRole.entities.WithdrawalRequest.update(requestId, {
         status: 'failed',
         error_message: 'Payment gateway not configured',
@@ -122,6 +152,15 @@ Deno.serve(async (req) => {
     try { initData = JSON.parse(initText); } catch { initData = null; }
 
     if (!initRes.ok) {
+      await base44.asServiceRole.entities.ReferralEarning.updateMany(
+        { earner_id: firebase_uid, status: 'processing' },
+        { $set: { status: 'pending' } }
+      );
+      if (providers[0] && providerEarningsLocked > 0) {
+        await base44.asServiceRole.entities.ServiceProvider.update(providers[0].id, {
+          earnings: +(providerEarnings).toFixed(2)
+        });
+      }
       await base44.asServiceRole.entities.WithdrawalRequest.update(requestId, {
         status: 'failed',
         error_message: `IntaSend initiate failed: ${initData?.error || initData?.detail || initText}`,
@@ -169,22 +208,23 @@ Deno.serve(async (req) => {
       error_message: approveRes.ok ? null : (approveData?.error || approveData?.detail || approveText),
     });
 
-    // ─── Mark earnings as paid to prevent double-spend ──────────
-    // Without this, pending ReferralEarning records remain "pending" and
-    // are re-counted on the next withdrawal request, allowing infinite
-    // replay of the same balance.
+    // ─── Finalize locked earnings based on payout result ─────────
     if (status === 'completed') {
+      // Success: finalize locked earnings as 'paid'
       await base44.asServiceRole.entities.ReferralEarning.updateMany(
-        { earner_id: firebase_uid, status: 'pending' },
+        { earner_id: firebase_uid, status: 'processing' },
         { $set: { status: 'paid' } }
       );
-      if (providers[0] && providerEarnings > 0) {
-        const fromProvider = Math.max(0, withdrawAmount - referralTotal);
-        if (fromProvider > 0) {
-          await base44.asServiceRole.entities.ServiceProvider.update(providers[0].id, {
-            earnings: Math.max(0, +(providerEarnings - fromProvider).toFixed(2))
-          });
-        }
+    } else {
+      // Failure: revert locked earnings back to 'pending'
+      await base44.asServiceRole.entities.ReferralEarning.updateMany(
+        { earner_id: firebase_uid, status: 'processing' },
+        { $set: { status: 'pending' } }
+      );
+      if (providers[0] && providerEarningsLocked > 0) {
+        await base44.asServiceRole.entities.ServiceProvider.update(providers[0].id, {
+          earnings: +(providerEarnings).toFixed(2)
+        });
       }
     }
 
