@@ -6,20 +6,21 @@ const LEVEL_RATES = [0.10, 0.05, 0.02]; // Level 1 = 10%, Level 2 = 5%, Level 3 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    if (user.role !== "admin") return Response.json({ error: "Forbidden — admin only" }, { status: 403 });
-
-    const { target_user_id } = await req.json();
+    const { target_user_id, admin_firebase_uid } = await req.json();
     if (!target_user_id) return Response.json({ error: "target_user_id required" }, { status: 400 });
+    if (!admin_firebase_uid) return Response.json({ error: "admin_firebase_uid required" }, { status: 400 });
 
-    // Resolve admin display name from their UserProfile
+    // Verify the caller is an admin via their UserProfile
     const callerProfiles = await base44.asServiceRole.entities.UserProfile.filter(
-      { firebase_uid: user.id }, null, 1
+      { firebase_uid: admin_firebase_uid }, null, 1
     );
-    const adminName = callerProfiles.length > 0
-      ? `${callerProfiles[0].first_name || ""} ${callerProfiles[0].surname || ""}`.trim() || callerProfiles[0].phone
-      : user.full_name || user.email || user.id;
+    if (callerProfiles.length === 0) {
+      return Response.json({ error: "Profile not found" }, { status: 404 });
+    }
+    if (callerProfiles[0].role !== "admin") {
+      return Response.json({ error: "Forbidden — admin only" }, { status: 403 });
+    }
+    const adminName = `${callerProfiles[0].first_name || ""} ${callerProfiles[0].surname || ""}`.trim() || callerProfiles[0].phone;
 
     // Look up the subscriber's UserProfile by firebase_uid
     const profiles = await base44.asServiceRole.entities.UserProfile.filter(

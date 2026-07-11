@@ -77,26 +77,9 @@ async function sendFcm(accessToken, projectId, token, title, body) {
   return res.ok;
 }
 
-const SCHEDULER_SECRET = "nlc-sched-7k3m9p2x8f";
-
-async function isAuthorized(base44, req) {
-  try {
-    const user = await base44.auth.me();
-    if (user && user.role === "admin") return true;
-  } catch { /* not authenticated */ }
-  try {
-    const body = await req.json();
-    if (body && body.scheduler_secret === SCHEDULER_SECRET) return true;
-  } catch { /* no body */ }
-  return false;
-}
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    if (!await isAuthorized(base44, req)) {
-      return Response.json({ error: "Forbidden — admin or scheduler only" }, { status: 403 });
-    }
 
     // Identify users with active subscriptions
     const activeSubs = await base44.asServiceRole.entities.Subscription.filter(
