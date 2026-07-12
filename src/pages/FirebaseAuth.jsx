@@ -6,7 +6,6 @@ import {
   getAuthInstance,
   signOutFirebase,
 } from "@/lib/firebase";
-import { hashPin } from "@/lib/pin";
 import { useAuth } from "@/lib/AuthContext";
 import PhoneStep from "@/components/firebase/PhoneStep";
 import OtpStep from "@/components/firebase/OtpStep";
@@ -22,7 +21,7 @@ const LOGO_URL =
 
 export default function FirebaseAuth() {
   const navigate = useNavigate();
-  const { setPinSession } = useAuth();
+  const { setPinSession, pinVerified } = useAuth();
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
@@ -55,7 +54,9 @@ export default function FirebaseAuth() {
   useEffect(() => {
     let active = true;
     (async () => {
-      if (sessionStorage.getItem("pin_verified") === "true") {
+      // Use the server-validated pinVerified flag from AuthContext instead
+      // of reading sessionStorage directly — prevents session spoofing.
+      if (pinVerified) {
         const stored = sessionStorage.getItem("pin_session_profile");
         if (stored) {
           try {
@@ -89,7 +90,7 @@ export default function FirebaseAuth() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [pinVerified]);
 
   // Resend countdown
   useEffect(() => {
@@ -146,7 +147,7 @@ export default function FirebaseAuth() {
       });
       const profile = data?.profile;
 
-      if (profile && profile.pin_hash) {
+      if (profile && profile.has_pin) {
         // Returning user — log in with PIN, no OTP.
         setUserProfile(profile);
         setStep("pin-login");
@@ -209,7 +210,6 @@ export default function FirebaseAuth() {
     setError(null);
     setLoading(true);
     try {
-      const pinHash = await hashPin(pin);
       const auth = await getAuthInstance();
       const firebaseUser = auth.currentUser;
 
@@ -217,7 +217,7 @@ export default function FirebaseAuth() {
         // Reset PIN for an existing account (preserves all other profile data).
         const { data } = await base44.functions.invoke("resetPin", {
           phone,
-          pin_hash: pinHash,
+          pin,
           firebase_uid: firebaseUser?.uid,
         });
         const profile = data?.profile;
@@ -228,7 +228,7 @@ export default function FirebaseAuth() {
         const { data } = await base44.functions.invoke("saveUserProfile", {
           phone,
           firebase_uid: firebaseUser?.uid,
-          pin_hash: pinHash,
+          pin,
           role,
           profile_completed: false,
         });
@@ -246,21 +246,25 @@ export default function FirebaseAuth() {
     setError(null);
     setLoading(true);
     try {
-      const pinHash = await hashPin(pin);
-      if (pinHash === userProfile?.pin_hash) {
-        if (userProfile?.profile_completed) {
-          setPinSession(userProfile);
+      const { data } = await base44.functions.invoke("loginWithPin", {
+        phone,
+        pin,
+      });
+      const profile = data?.profile;
+      if (profile) {
+        if (profile.profile_completed) {
+          setPinSession(profile);
           window.location.href = "/";
         } else {
           // Resume an incomplete registration at the profile step.
-          setRole(userProfile?.role || "customer");
+          setRole(profile?.role || "customer");
           setStep("profile");
         }
       } else {
         setError("Incorrect PIN. Please try again.");
       }
     } catch (err) {
-      setError(err.message || "Failed to verify PIN. Please try again.");
+      setError(err.response?.data?.error || err.message || "Failed to verify PIN. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -293,7 +297,6 @@ export default function FirebaseAuth() {
         ...profileData,
         phone,
         firebase_uid: firebaseUser?.uid,
-        pin_hash: userProfile?.pin_hash,
         role,
       });
 

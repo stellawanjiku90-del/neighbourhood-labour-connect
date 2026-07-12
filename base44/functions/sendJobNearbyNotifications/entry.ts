@@ -90,10 +90,38 @@ async function sendFcm(accessToken, projectId, token, title, body) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
-    const job = body.data || body;
 
-    if (!job || job.lat == null || job.lng == null) {
+    // ─── Authentication required ─────────────────────────────────
+    // Prevents anonymous attackers from spoofing job payloads and
+    // spamming push notifications to all registered providers.
+    const caller = await base44.auth.me();
+    if (!caller) {
+      return Response.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const requestId = body?.data?.id || body?.id || body?.request_id;
+
+    if (!requestId) {
+      return Response.json({ error: "request_id is required" }, { status: 400 });
+    }
+
+    // ─── Fetch the actual job from the database ──────────────────
+    // Never trust client-supplied job data (coordinates, title, etc.)
+    // — use the authoritative record from the DB.
+    let job;
+    try {
+      job = await base44.asServiceRole.entities.ServiceRequest.get(requestId);
+    } catch {
+      return Response.json({ error: "Service request not found" }, { status: 404 });
+    }
+
+    // ─── Authorization: only the job owner or an admin ───────────
+    if (job.customer_id !== caller.id && caller.role !== "admin") {
+      return Response.json({ error: "You can only notify for your own job requests" }, { status: 403 });
+    }
+
+    if (job.lat == null || job.lng == null) {
       return Response.json({ sent: 0, reason: "no coordinates" });
     }
 

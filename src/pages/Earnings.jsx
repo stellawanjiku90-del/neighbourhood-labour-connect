@@ -25,7 +25,7 @@ export default function Earnings() {
     let active = true;
     setLoading(true);
     base44.functions
-      .invoke("getEarningsDashboard", { firebase_uid: user.id })
+      .invoke("getEarningsDashboard", {})
       .then((res) => { if (active) setData(res.data); })
       .catch(() => {})
       .finally(() => { if (active) setLoading(false); });
