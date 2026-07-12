@@ -26,10 +26,14 @@ Deno.serve(async (req) => {
       return Response.json({ profile: safeProfile });
     }
 
-    // Unauthenticated caller (login flow) — return only whether a PIN is set.
-    // Do not expose phone, firebase_uid, role, or any other profile data.
+    // Unauthenticated caller (login flow) — return minimal info only.
+    // Enough for the login flow to proceed without exposing sensitive data.
     return Response.json({
       profile: {
+        phone: profile.phone,
+        firebase_uid: profile.firebase_uid,
+        role: profile.role || "customer",
+        profile_completed: profile.profile_completed || false,
         has_pin: !!profile.pin_hash,
       }
     });

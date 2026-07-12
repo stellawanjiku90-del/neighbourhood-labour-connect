@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import bcrypt from "npm:bcryptjs@2.4.3";
 
 Deno.serve(async (req) => {
   try {
@@ -7,10 +6,10 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: "Unauthorized — OTP verification required" }, { status: 401 });
 
-    const { phone, pin } = await req.json();
+    const { phone, pin_hash } = await req.json();
 
-    if (!phone || !pin) {
-      return Response.json({ error: "Phone and pin are required" }, { status: 400 });
+    if (!phone || !pin_hash) {
+      return Response.json({ error: "Phone and pin_hash are required" }, { status: 400 });
     }
 
     // Look up the caller's profile by their authenticated firebase_uid
@@ -26,14 +25,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Phone number does not match your account" }, { status: 403 });
     }
 
-    // Hash the PIN server-side with bcrypt before storing
-    const salt = await bcrypt.genSalt(10);
-    const pinHash = await bcrypt.hash(pin, salt);
-
     // Only update the PIN — all other profile fields are preserved
     const profile = await base44.asServiceRole.entities.UserProfile.update(
       callerProfiles[0].id,
-      { pin_hash: pinHash }
+      { pin_hash }
     );
 
     // Strip pin_hash from the response
