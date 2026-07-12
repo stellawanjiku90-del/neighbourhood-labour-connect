@@ -34,7 +34,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (webhookSecret && !verified) {
+    if (!webhookSecret) {
+      return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
+    }
+    if (!verified) {
       return Response.json({ error: "Invalid challenge" }, { status: 403 });
     }
 

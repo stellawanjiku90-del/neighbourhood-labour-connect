@@ -24,6 +24,16 @@
       "type": "string",
       "description": "SHA-256 hash of the user's 4-digit login PIN"
     },
+    "failed_pin_attempts": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of consecutive failed PIN login attempts"
+    },
+    "locked_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp until which the account is locked due to too many failed PIN attempts"
+    },
     "first_name": {
       "type": "string"
     },

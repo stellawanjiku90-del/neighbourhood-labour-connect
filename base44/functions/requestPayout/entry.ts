@@ -10,6 +10,10 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { provider: pProvider } = await req.json();
+
+    // Validate the payout provider against an allowlist
+    const ALLOWED_PROVIDERS = ['M-PESA', 'AIRTEL', 'EQUITEL', 'intasend'];
+    const provider = ALLOWED_PROVIDERS.includes(pProvider) ? pProvider : 'M-PESA';
     const firebase_uid = user.id;
 
     // ─── Fetch the user's profile ─────────────────────────────────
@@ -21,13 +25,9 @@ Deno.serve(async (req) => {
     }
     const profile = profiles[0];
 
-    // ─── Also fetch their subscription to find the payment phone ───
-    const subs = await base44.asServiceRole.entities.Subscription.filter(
-      { user_id: firebase_uid, status: 'active' }, '-created_date', 1
-    );
-    const phone = pProvider === 'intasend'
-      ? (profile.phone.replace('+', ''))          // use their registered phone
-      : (subs[0]?.user_phone?.replace('+', '') || profile.phone.replace('+', ''));
+    // Destination phone is ALWAYS the authenticated user's own registered
+    // phone — never from client input — preventing payout diversion.
+    const phone = profile.phone.replace('+', '');
 
     if (!phone) {
       return Response.json({ error: 'No phone number available for payout' }, { status: 400 });
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
       user_id: firebase_uid,
       user_name: fullName,
       user_phone: profile.phone,
-      provider: pProvider || 'M-PESA',
+      provider,
       amount: withdrawAmount,
       amount_kes: amountKes,
       status: 'processing',
