@@ -74,6 +74,13 @@ export default function Chat() {
     setRevealed({ customer: !!updated.customer_revealed_number, provider: !!updated.provider_revealed_number });
   };
 
+  // My phone, and whether the other party has also revealed
+  const myPhone = me?.phone;
+  const isCustomer = me?.id === convo?.customer_id;
+  const iRevealed = isCustomer ? revealed.customer : revealed.provider;
+  const otherRevealed = isCustomer ? revealed.provider : revealed.customer;
+  const bothRevealed = revealed.customer && revealed.provider;
+
   // Fetch the other party's phone once they have consented to share (otherRevealed)
   useEffect(() => {
     if (!otherRevealed || !convo || !me) return;
@@ -88,13 +95,6 @@ export default function Chat() {
       }
     })();
   }, [otherRevealed]);
-
-  // My phone, and whether the other party has also revealed
-  const myPhone = me?.phone;
-  const isCustomer = me?.id === convo?.customer_id;
-  const iRevealed = isCustomer ? revealed.customer : revealed.provider;
-  const otherRevealed = isCustomer ? revealed.provider : revealed.customer;
-  const bothRevealed = revealed.customer && revealed.provider;
 
   const send = async (e) => {
     e.preventDefault();

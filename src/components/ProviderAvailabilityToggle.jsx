@@ -20,7 +20,9 @@ export default function ProviderAvailabilityToggle({ currentStatus, onUpdated })
     setSaving(true);
     setSavedStatus(null);
     try {
-      await base44.functions.invoke("setProviderAvailability", { status: newStatus });
+      const storedProfile = sessionStorage.getItem("pin_session_profile");
+      const profile = storedProfile ? JSON.parse(storedProfile) : {};
+      await base44.functions.invoke("setProviderAvailability", { status: newStatus, firebase_uid: profile.firebase_uid });
       setSavedStatus(newStatus);
       if (onUpdated) onUpdated(newStatus);
       setTimeout(() => setSavedStatus(null), 2000);
