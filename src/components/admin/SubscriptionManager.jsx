@@ -13,7 +13,9 @@ export default function SubscriptionManager() {
 
   const load = async () => {
     try {
-      const { data } = await base44.functions.invoke("getAdminData", {});
+      const { data } = await base44.functions.invoke("getAdminData", {
+        firebase_uid: user?.id,
+      });
       setUsers(data.userProfiles || []);
       setSubs(data.subscriptions || []);
     } catch (e) {
@@ -40,6 +42,7 @@ export default function SubscriptionManager() {
     try {
       await base44.functions.invoke("activateSubscription", {
         target_user_id: firebaseUid,
+        admin_firebase_uid: user?.id,
       });
       await load();
     } catch (e) {

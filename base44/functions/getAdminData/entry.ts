@@ -3,9 +3,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    if (user.role !== "admin") return Response.json({ error: "Forbidden — admin only" }, { status: 403 });
+    const { firebase_uid } = await req.json();
+    if (!firebase_uid) {
+      return Response.json({ error: "firebase_uid required" }, { status: 400 });
+    }
+
+    // Verify the caller is an admin via their UserProfile
+    const callerProfiles = await base44.asServiceRole.entities.UserProfile.filter(
+      { firebase_uid }, null, 1
+    );
+    if (callerProfiles.length === 0) {
+      return Response.json({ error: "Profile not found" }, { status: 404 });
+    }
+    if (callerProfiles[0].role !== "admin") {
+      return Response.json({ error: "Forbidden — admin only" }, { status: 403 });
+    }
 
     // Fetch all admin data in parallel using service role
     const [providers, jobs, reviews, userProfiles, subscriptions, deviceTokens] = await Promise.all([

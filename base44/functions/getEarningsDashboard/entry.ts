@@ -3,9 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    const firebase_uid = user.id;
+    const { firebase_uid } = await req.json();
+    if (!firebase_uid) return Response.json({ error: "firebase_uid required" }, { status: 400 });
 
     // Run all independent queries in parallel for faster response
     const [profiles, earnings, subs, pendingWithdrawals] = await Promise.all([

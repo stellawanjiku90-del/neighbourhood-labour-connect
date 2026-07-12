@@ -31,42 +31,11 @@ Deno.serve(async (req) => {
       lng,
       verify_id,
       referral_code_used,
-      profile_completed,
     } = data;
 
     if (!phone) {
       return Response.json({ error: "Phone is required" }, { status: 400 });
     }
-
-    // Never allow 'admin' role via this endpoint — prevents privilege escalation
-    if (role === 'admin') {
-      return Response.json({ error: "Invalid role" }, { status: 403 });
-    }
-
-    // Look up existing profile early — needed for ownership verification
-    const existing = await base44.asServiceRole.entities.UserProfile.filter({ phone });
-
-    // Require authentication — prevents unauthenticated profile creation,
-    // account takeover, and credential squatting on arbitrary phone numbers.
-    const caller = await base44.auth.me();
-    if (!caller) {
-      return Response.json({ error: "Authentication required" }, { status: 401 });
-    }
-
-    // The caller's authenticated ID is the source of truth for firebase_uid —
-    // never trust the client-supplied value.
-    const verifiedFirebaseUid = caller.id;
-
-    // For existing profiles, verify the caller is the true owner.
-    // Reject all non-owner updates to existing records.
-    if (existing.length > 0 && existing[0].firebase_uid !== verifiedFirebaseUid) {
-      return Response.json({ error: "You can only edit your own profile" }, { status: 403 });
-    }
-
-    // Sensitive fields are always derived from the verified caller.
-    const effectivePinHash = pin_hash;
-    const effectiveRole = role;
-    const effectiveFirebaseUid = verifiedFirebaseUid;
 
     // ─── ID Verification via InvokeLLM ──────────────────────────
     let id_verified = false;
@@ -128,9 +97,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ─── Build profile data — sensitive fields only when defined ──
     const profileData = {
       phone,
+      firebase_uid,
+      pin_hash,
+      role,
       first_name,
       surname,
       age,
@@ -143,18 +114,15 @@ Deno.serve(async (req) => {
       location_name,
       lat,
       lng,
-      profile_completed: profile_completed !== undefined ? profile_completed : true,
+      profile_completed: data.profile_completed !== undefined ? data.profile_completed : true,
     };
-    // Only include sensitive fields when they have a value — prevents
-    // overwriting existing pin_hash/role/firebase_uid with undefined/null
-    if (effectiveFirebaseUid !== undefined) profileData.firebase_uid = effectiveFirebaseUid;
-    if (effectivePinHash !== undefined) profileData.pin_hash = effectivePinHash;
-    if (effectiveRole !== undefined) profileData.role = effectiveRole;
+
+    const existing = await base44.asServiceRole.entities.UserProfile.filter({ phone });
 
     const createReferralRecord = async (profile) => {
-      if (!referred_by || !referrerProfile || !effectiveFirebaseUid) return;
+      if (!referred_by || !referrerProfile || !firebase_uid) return;
       const existingRef = await base44.asServiceRole.entities.Referral.filter(
-        { referrer_id: referred_by, referred_id: effectiveFirebaseUid },
+        { referrer_id: referred_by, referred_id: firebase_uid },
         null,
         1
       );
@@ -164,7 +132,7 @@ Deno.serve(async (req) => {
         referrer_name:
           `${referrerProfile.first_name || ""} ${referrerProfile.surname || ""}`.trim() ||
           referrerProfile.phone,
-        referred_id: effectiveFirebaseUid,
+        referred_id: firebase_uid,
         referred_name: `${first_name || ""} ${surname || ""}`.trim() || phone,
         referred_phone: phone,
         referral_code_used: normalizedCode,
@@ -187,16 +155,13 @@ Deno.serve(async (req) => {
         profileData
       );
       await createReferralRecord(profile);
-      // Strip pin_hash from response — never expose to client
-      const { pin_hash: _removed, ...safeProfile } = profile;
-      return Response.json({ profile: safeProfile, id_verified });
+      return Response.json({ profile, id_verified });
     } else {
       profileData.referral_code = generateReferralCode();
       if (referred_by) profileData.referred_by = referred_by;
       const profile = await base44.asServiceRole.entities.UserProfile.create(profileData);
       await createReferralRecord(profile);
-      const { pin_hash: _removed, ...safeProfile } = profile;
-      return Response.json({ profile: safeProfile, id_verified });
+      return Response.json({ profile, id_verified });
     }
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

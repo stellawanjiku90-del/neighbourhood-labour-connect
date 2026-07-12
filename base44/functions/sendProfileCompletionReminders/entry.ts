@@ -1,33 +1,22 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const SCHEDULER_SECRET = "nlc-sched-7k3m9p2x8f";
-
-async function isAuthorized(base44, req) {
-  try {
-    const user = await base44.auth.me();
-    if (user && user.role === "admin") return true;
-  } catch { /* not authenticated */ }
-  try {
-    const body = await req.json();
-    if (body && body.scheduler_secret === SCHEDULER_SECRET) return true;
-  } catch { /* no body */ }
-  return false;
-}
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    if (!await isAuthorized(base44, req)) {
-      return Response.json({ error: 'Forbidden — admin or scheduler only' }, { status: 403 });
+    
+    // Verify admin access
+    const user = await base44.auth.me();
+    if (!user || user.role !== 'admin') {
+      return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     // Get all users who haven't completed profile
-    const allProfiles = await base44.asServiceRole.entities.UserProfile.filter({ 
+    const allProfiles = await base44.entities.UserProfile.filter({ 
       profile_completed: false 
     });
 
     // Get all users without active subscription
-    const allSubscriptions = await base44.asServiceRole.entities.Subscription.filter({ 
+    const allSubscriptions = await base44.entities.Subscription.filter({ 
       status: 'active' 
     });
     const subscribedUserIds = new Set(allSubscriptions.map(s => s.user_id));
@@ -39,7 +28,7 @@ Deno.serve(async (req) => {
     );
 
     // Get device tokens for notifications
-    const allTokens = await base44.asServiceRole.entities.DeviceToken.list();
+    const allTokens = await base44.entities.DeviceToken.list();
     
     let notificationsSent = 0;
 

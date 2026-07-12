@@ -15,20 +15,12 @@ function resolveBaseUrl(apiKey, publishableKey) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-
-    // Require authentication — prevents invoice replay attacks where an
-    // unauthenticated caller supplies a victim's invoice_id with their own uid.
-    const caller = await base44.auth.me();
-    if (!caller) {
-      return Response.json({ error: "Authentication required" }, { status: 401 });
-    }
-    // The caller's authenticated ID is the source of truth — never trust
-    // the client-supplied firebase_uid.
-    const firebase_uid = caller.id;
-
-    const { invoice_id } = await req.json();
+    const { invoice_id, firebase_uid } = await req.json();
     if (!invoice_id) {
       return Response.json({ error: "invoice_id required" }, { status: 400 });
+    }
+    if (!firebase_uid) {
+      return Response.json({ error: "firebase_uid required" }, { status: 400 });
     }
 
     const apiKey = Deno.env.get("INTASEND_API_KEY");
@@ -67,19 +59,6 @@ Deno.serve(async (req) => {
       });
     }
     const state = data.invoice?.state;
-
-    // ─── Verify invoice ownership before activating ──────────────
-    // The api_ref is set at creation time as "NLC|<firebase_uid>".
-    // Extract it from the IntaSend response and confirm the firebase_uid
-    // embedded in it matches the authenticated caller — prevents replaying
-    // another user's paid invoice to activate your own subscription.
-    if (state === "SUCCESS" || state === "COMPLETED") {
-      const apiRef = data.invoice?.api_ref || "";
-      const invoiceUid = apiRef.includes("|") ? apiRef.split("|").pop() : null;
-      if (!invoiceUid || invoiceUid !== firebase_uid) {
-        return Response.json({ error: "Invoice does not belong to this account" }, { status: 403 });
-      }
-    }
 
     // ─── Payment successful — activate subscription ──────────────
     if (state === "SUCCESS" || state === "COMPLETED") {
