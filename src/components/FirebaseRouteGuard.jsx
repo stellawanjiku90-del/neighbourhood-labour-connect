@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/AuthContext";
  *   - the per-session PIN has not been entered
  */
 export default function FirebaseRouteGuard() {
-  const { user, isLoadingAuth, isAuthenticated, pinVerified } = useAuth();
+  const { user, isLoadingAuth, isAuthenticated } = useAuth();
 
   if (isLoadingAuth) {
     return (
@@ -27,7 +27,7 @@ export default function FirebaseRouteGuard() {
     return <Navigate to="/firebase-auth" replace />;
   }
 
-  if (!pinVerified) {
+  if (sessionStorage.getItem("pin_verified") !== "true") {
     return <Navigate to="/firebase-auth" replace />;
   }
 

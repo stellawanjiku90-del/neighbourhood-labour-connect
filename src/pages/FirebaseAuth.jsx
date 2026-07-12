@@ -6,6 +6,7 @@ import {
   getAuthInstance,
   signOutFirebase,
 } from "@/lib/firebase";
+import { hashPin } from "@/lib/pin";
 import { useAuth } from "@/lib/AuthContext";
 import PhoneStep from "@/components/firebase/PhoneStep";
 import OtpStep from "@/components/firebase/OtpStep";
@@ -21,7 +22,7 @@ const LOGO_URL =
 
 export default function FirebaseAuth() {
   const navigate = useNavigate();
-  const { setPinSession, pinVerified } = useAuth();
+  const { setPinSession } = useAuth();
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
@@ -54,9 +55,7 @@ export default function FirebaseAuth() {
   useEffect(() => {
     let active = true;
     (async () => {
-      // Use the server-validated pinVerified flag from AuthContext instead
-      // of reading sessionStorage directly — prevents session spoofing.
-      if (pinVerified) {
+      if (sessionStorage.getItem("pin_verified") === "true") {
         const stored = sessionStorage.getItem("pin_session_profile");
         if (stored) {
           try {
@@ -90,7 +89,7 @@ export default function FirebaseAuth() {
     return () => {
       active = false;
     };
-  }, [pinVerified]);
+  }, []);
 
   // Resend countdown
   useEffect(() => {
@@ -210,6 +209,7 @@ export default function FirebaseAuth() {
     setError(null);
     setLoading(true);
     try {
+      const pinHash = await hashPin(pin);
       const auth = await getAuthInstance();
       const firebaseUser = auth.currentUser;
 
@@ -217,7 +217,7 @@ export default function FirebaseAuth() {
         // Reset PIN for an existing account (preserves all other profile data).
         const { data } = await base44.functions.invoke("resetPin", {
           phone,
-          pin,
+          pin_hash: pinHash,
           firebase_uid: firebaseUser?.uid,
         });
         const profile = data?.profile;
@@ -228,7 +228,7 @@ export default function FirebaseAuth() {
         const { data } = await base44.functions.invoke("saveUserProfile", {
           phone,
           firebase_uid: firebaseUser?.uid,
-          pin,
+          pin_hash: pinHash,
           role,
           profile_completed: false,
         });
@@ -246,9 +246,10 @@ export default function FirebaseAuth() {
     setError(null);
     setLoading(true);
     try {
+      const pinHash = await hashPin(pin);
       const { data } = await base44.functions.invoke("loginWithPin", {
         phone,
-        pin,
+        pin_hash: pinHash,
       });
       const profile = data?.profile;
       if (profile) {
@@ -297,6 +298,7 @@ export default function FirebaseAuth() {
         ...profileData,
         phone,
         firebase_uid: firebaseUser?.uid,
+        pin_hash: userProfile?.pin_hash,
         role,
       });
 

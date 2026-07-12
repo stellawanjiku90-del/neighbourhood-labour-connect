@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { hashPin } from "@/lib/pin";
 import { useAuth } from "@/lib/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Switch } from "@/components/ui/switch";
@@ -86,9 +87,10 @@ export default function Settings() {
     }
     setSavingPin(true);
     try {
+      const pinHash = await hashPin(newPin);
       await base44.functions.invoke("saveUserProfile", {
         phone: user?.phone,
-        pin: newPin,
+        pin_hash: pinHash,
       });
       toast({ title: "PIN changed", description: "Use your new PIN to log in." });
       setPinOpen(false);

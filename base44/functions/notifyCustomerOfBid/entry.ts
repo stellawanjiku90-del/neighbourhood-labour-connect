@@ -75,12 +75,6 @@ async function sendFcm(accessToken, projectId, token, title, body) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-
-    // Require authentication — prevents anonymous callers from pushing
-    // fabricated bid notifications to customers.
-    const caller = await base44.auth.me();
-    if (!caller) return Response.json({ error: "Authentication required" }, { status: 401 });
-
     const body = await req.json();
     const { request_id, provider_name, charge, request_title } = body;
 
@@ -97,15 +91,6 @@ Deno.serve(async (req) => {
     }
     if (!job || !job.customer_id) {
       return Response.json({ sent: 0, reason: "no customer for this job" });
-    }
-
-    // Verify the caller has a legitimate pending bid on this job before
-    // sending any notification to the customer.
-    const bids = await base44.asServiceRole.entities.JobBid.filter(
-      { request_id, provider_id: caller.id, status: "pending" }, null, 1
-    );
-    if (bids.length === 0) {
-      return Response.json({ sent: 0, reason: "no pending bid from caller" });
     }
 
     // Only notify subscribed customers
@@ -137,11 +122,8 @@ Deno.serve(async (req) => {
     const projectId = serviceAccount.project_id;
     const accessToken = await getAccessToken(serviceAccount);
 
-    // Use verified bid data — not client-supplied values — to prevent
-    // fabrication of provider name or charge amount in the notification.
-    const bid = bids[0];
     const title = "New offer on your job";
-    const bodyText = `${bid.provider_name || "A provider"} offered KES ${bid.charge || 0} for "${request_title || job.title || "your job"}"`;
+    const bodyText = `${provider_name || "A provider"} offered KES ${charge || 0} for "${request_title || job.title || "your job"}"`;
 
     const results = await Promise.all(
       tokens.map((t) => sendFcm(accessToken, projectId, t, title, bodyText))
