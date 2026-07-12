@@ -130,6 +130,16 @@ Deno.serve(async (req) => {
     );
     const sent = results.filter(Boolean).length;
 
+    // Create in-app notification for the customer
+    await base44.asServiceRole.entities.InAppNotification.create({
+      user_id: job.customer_id,
+      title: title,
+      body: bodyText,
+      type: "bid",
+      read: false,
+      link: "/jobs",
+    }).catch(() => {});
+
     return Response.json({ sent, total: tokens.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

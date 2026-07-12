@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import OfflineBanner from "@/components/OfflineBanner";
 import OnboardingPermissions from "@/components/OnboardingPermissions";
+import NotificationsBell from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
@@ -78,12 +79,15 @@ export default function Layout() {
     <div className="h-[100dvh] bg-background flex overflow-hidden">
       {/* Desktop sidebar — fixed width, native desktop feel */}
       <aside className="hidden md:flex flex-col w-72 shrink-0 bg-card border-r border-border h-full pt-safe-area-top z-30">
-        <Link to="/" className="flex items-center gap-3 px-6 h-16 shrink-0 border-b border-border">
-          <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-9 h-9 rounded-xl object-cover shrink-0" />
-          <span className="font-display font-extrabold text-foreground text-sm leading-tight">
-            Neighbourhood<br />Labour Connect
-          </span>
-        </Link>
+        <div className="flex items-center justify-between px-6 h-16 shrink-0 border-b border-border">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-9 h-9 rounded-xl object-cover shrink-0" />
+            <span className="font-display font-extrabold text-foreground text-sm leading-tight">
+              Neighbourhood<br />Labour Connect
+            </span>
+          </Link>
+          <NotificationsBell align="left" />
+        </div>
         <nav className="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
           {nav.map(({ to, label, icon: Icon, plain }, i) =>
             plain ? (
@@ -134,8 +138,8 @@ export default function Layout() {
         <OfflineBanner />
         <OnboardingPermissions />
         {/* Back-arrow bar only on secondary pages */}
-        {showBack && (
-          <div className="md:hidden shrink-0 flex items-center px-2 h-11 border-b border-border bg-background/90 backdrop-blur safe-area-left safe-area-right">
+        <div className="md:hidden shrink-0 flex items-center justify-between px-2 h-11 border-b border-border bg-background/90 backdrop-blur safe-area-left safe-area-right">
+          {showBack ? (
             <button
               onClick={() => navigate(-1)}
               aria-label="Go back"
@@ -143,8 +147,11 @@ export default function Layout() {
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
-          </div>
-        )}
+          ) : (
+            <span className="w-9" />
+          )}
+          <NotificationsBell />
+        </div>
         <div className="flex-1 min-h-0 overflow-hidden w-full">
           <AnimatedOutlet />
         </div>

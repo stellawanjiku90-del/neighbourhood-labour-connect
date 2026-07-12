@@ -205,6 +205,25 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.NotificationLog.bulkCreate(logEntries).catch(() => {});
     }
 
+    // Create in-app notifications for nearby providers (respect opt-out prefs)
+    const inAppNotifs = nearby
+      .filter((p) => p.firebase_uid)
+      .filter((p) => {
+        const profile = profileMap[p.firebase_uid];
+        return !profile || profile[prefKey] !== false;
+      })
+      .map((p) => ({
+        user_id: p.firebase_uid,
+        title: title,
+        body: jobTitle,
+        type: "job_match",
+        read: false,
+        link: "/jobs",
+      }));
+    if (inAppNotifs.length > 0) {
+      await base44.asServiceRole.entities.InAppNotification.bulkCreate(inAppNotifs).catch(() => {});
+    }
+
     return Response.json({ sent, failed, total: sendPromises.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
