@@ -6,7 +6,6 @@ import {
   getAuthInstance,
   signOutFirebase,
 } from "@/lib/firebase";
-import { hashPin } from "@/lib/pin";
 import { useAuth } from "@/lib/AuthContext";
 import PhoneStep from "@/components/firebase/PhoneStep";
 import OtpStep from "@/components/firebase/OtpStep";
@@ -209,7 +208,6 @@ export default function FirebaseAuth() {
     setError(null);
     setLoading(true);
     try {
-      const pinHash = await hashPin(pin);
       const auth = await getAuthInstance();
       const firebaseUser = auth.currentUser;
 
@@ -217,7 +215,7 @@ export default function FirebaseAuth() {
         // Reset PIN for an existing account (preserves all other profile data).
         const { data } = await base44.functions.invoke("resetPin", {
           phone,
-          pin_hash: pinHash,
+          pin,
           firebase_uid: firebaseUser?.uid,
         });
         const profile = data?.profile;
@@ -228,7 +226,7 @@ export default function FirebaseAuth() {
         const { data } = await base44.functions.invoke("saveUserProfile", {
           phone,
           firebase_uid: firebaseUser?.uid,
-          pin_hash: pinHash,
+          pin,
           role,
           profile_completed: false,
         });
@@ -246,10 +244,9 @@ export default function FirebaseAuth() {
     setError(null);
     setLoading(true);
     try {
-      const pinHash = await hashPin(pin);
       const { data } = await base44.functions.invoke("loginWithPin", {
         phone,
-        pin_hash: pinHash,
+        pin,
       });
       const profile = data?.profile;
       if (profile) {
@@ -298,7 +295,6 @@ export default function FirebaseAuth() {
         ...profileData,
         phone,
         firebase_uid: firebaseUser?.uid,
-        pin_hash: userProfile?.pin_hash,
         role,
       });
 

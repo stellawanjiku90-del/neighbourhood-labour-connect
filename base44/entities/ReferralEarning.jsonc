@@ -33,6 +33,7 @@
       "type": "string",
       "enum": [
         "pending",
+        "processing",
         "paid"
       ],
       "default": "pending"
