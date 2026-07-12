@@ -21,7 +21,7 @@ const LOGO_URL =
 
 export default function FirebaseAuth() {
   const navigate = useNavigate();
-  const { setPinSession } = useAuth();
+  const { setPinSession, pinVerified } = useAuth();
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
@@ -54,7 +54,9 @@ export default function FirebaseAuth() {
   useEffect(() => {
     let active = true;
     (async () => {
-      if (sessionStorage.getItem("pin_verified") === "true") {
+      // Use the server-validated pinVerified flag from AuthContext instead
+      // of reading sessionStorage directly — prevents session spoofing.
+      if (pinVerified) {
         const stored = sessionStorage.getItem("pin_session_profile");
         if (stored) {
           try {
@@ -88,7 +90,7 @@ export default function FirebaseAuth() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [pinVerified]);
 
   // Resend countdown
   useEffect(() => {
