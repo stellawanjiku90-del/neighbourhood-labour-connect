@@ -116,9 +116,9 @@ export default function MyJobs() {
         </div>
       </header>
 
-      {/* Horizontal scroll */}
-      <div className="flex-1 min-h-0 overflow-x-auto px-4 py-3" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
-        <div className="flex gap-3 pb-2 h-full">
+      {/* Vertical list */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3" style={{ paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))' }}>
+        <div className="flex flex-col gap-3">
           {jobs.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
               <EmptyState
@@ -130,11 +130,11 @@ export default function MyJobs() {
               />
             </div>
           )}
-          {jobs.slice(0, 8).map((job) => {
+          {jobs.map((job) => {
             const icon = CATEGORIES.find((c) => c.name === job.category)?.icon;
             const count = bidCounts[job.id] || 0;
             return (
-              <div key={job.id} className="min-w-[220px] shrink-0 bg-card rounded-lg border border-border p-3">
+              <div key={job.id} className="w-full bg-card rounded-lg border border-border p-3">
                 <div className="flex items-start gap-2.5">
                   <span className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-secondary-foreground shrink-0">
                     <CategoryIcon name={icon} />
@@ -218,9 +218,6 @@ export default function MyJobs() {
               </div>
             );
           })}
-          {jobs.length > 8 && (
-            <p className="text-sm text-muted-foreground text-center py-2">+{jobs.length - 8} more</p>
-          )}
         </div>
       </div>
 
