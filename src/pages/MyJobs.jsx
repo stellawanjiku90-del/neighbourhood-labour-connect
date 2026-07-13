@@ -4,13 +4,14 @@ import { base44 } from "@/api/base44Client";
 import CategoryIcon from "@/components/CategoryIcon";
 import RateDialog from "@/components/RateDialog";
 import BidsDialog from "@/components/BidsDialog";
+import BidDialog from "@/components/BidDialog";
 import TrackProviderDialog from "@/components/TrackProviderDialog";
 import { getOrCreateConversation } from "@/lib/chat";
 import { useAuth } from "@/lib/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
-import { Siren, MapPin, CheckCircle2, Users, MessageCircle, Navigation, Briefcase } from "lucide-react";
+import { Siren, MapPin, CheckCircle2, Users, MessageCircle, Navigation, Briefcase, Check } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 
@@ -28,25 +29,31 @@ export default function MyJobs() {
   const [rating, setRating] = useState(null);
   const [bidsJob, setBidsJob] = useState(null);
   const [trackJob, setTrackJob] = useState(null);
+  const [bidJob, setBidJob] = useState(null);
+  const [provider, setProvider] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { active, loading: subLoading } = useSubscription();
 
   const load = async () => {
-    const [jobList, allBids] = await Promise.all([
-      base44.entities.ServiceRequest.list("-created_date", 100),
-      base44.entities.JobBid.list("-created_date", 200),
-    ]);
+    const jobList = await base44.entities.ServiceRequest.list("-created_date", 100);
     // Filter by role: customers see jobs they posted, providers see jobs assigned to them + open board
     const filtered = user?.role === "customer"
       ? jobList.filter(j => j.customer_id === user.id)
       : jobList.filter(j => j.assigned_provider_id === user.id || j.status === "open");
     setJobs(filtered);
-    const counts = {};
-    allBids.forEach((b) => {
-      counts[b.request_id] = (counts[b.request_id] || 0) + 1;
-    });
-    setBidCounts(counts);
+    // Only fetch bid counts for customers (on their own jobs).
+    // Providers must not see other providers' bids.
+    if (user?.role === "customer") {
+      const allBids = await base44.entities.JobBid.list("-created_date", 200);
+      const counts = {};
+      allBids.forEach((b) => {
+        counts[b.request_id] = (counts[b.request_id] || 0) + 1;
+      });
+      setBidCounts(counts);
+    } else {
+      setBidCounts({});
+    }
   };
 
   useEffect(() => {
@@ -57,6 +64,15 @@ export default function MyJobs() {
     }
     load();
   }, [user?.role, active, subLoading]);
+
+  // Fetch provider record for bidding (providers only)
+  useEffect(() => {
+    if (user?.role === "provider" && user?.phone) {
+      base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1)
+        .then((r) => setProvider(r[0] || null))
+        .catch(() => setProvider(null));
+    }
+  }, [user?.role, user?.phone]);
 
   const complete = async (job) => {
     await base44.entities.ServiceRequest.update(job.id, { status: "completed" });
@@ -144,13 +160,22 @@ export default function MyJobs() {
                 </div>
 
                 {job.status === "open" && (
-                  <Button
-                    onClick={() => setBidsJob(job)}
-                    variant="outline"
-                    className="w-full mt-3 rounded-lg h-9 gap-1.5 text-sm"
-                  >
-                    <Users className="w-4 h-4" /> Offers{count > 0 ? ` (${count})` : ""}
-                  </Button>
+                  user?.role === "customer" ? (
+                    <Button
+                      onClick={() => setBidsJob(job)}
+                      variant="outline"
+                      className="w-full mt-3 rounded-lg h-9 gap-1.5 text-sm"
+                    >
+                      <Users className="w-4 h-4" /> Offers{count > 0 ? ` (${count})` : ""}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => setBidJob(job)}
+                      className="w-full mt-3 rounded-lg h-9 gap-1.5 text-sm"
+                    >
+                      <Check className="w-4 h-4" /> Apply
+                    </Button>
+                  )
                 )}
 
                 {(job.status === "accepted" || job.status === "in_progress") && (
@@ -202,6 +227,7 @@ export default function MyJobs() {
       {rating && <RateDialog open={!!rating} onOpenChange={(v) => !v && setRating(null)} request={rating} onDone={load} />}
       <BidsDialog open={!!bidsJob} onOpenChange={(v) => !v && setBidsJob(null)} job={bidsJob} onDone={load} />
       <TrackProviderDialog open={!!trackJob} onOpenChange={(v) => !v && setTrackJob(null)} job={trackJob} />
+      <BidDialog open={!!bidJob} onOpenChange={(v) => !v && setBidJob(null)} job={bidJob} provider={provider} onDone={load} />
     </div>
   );
 }
