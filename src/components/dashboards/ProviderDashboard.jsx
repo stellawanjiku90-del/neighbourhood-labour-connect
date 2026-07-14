@@ -1,52 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import BidDialog from "@/components/BidDialog";
-import { getOrCreateConversation } from "@/lib/chat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
-import SubscriptionPaywall from "@/components/SubscriptionPaywall";
-import { Wallet, Star, Briefcase, Siren, MapPin, Check, Wrench, CheckCircle2, MessageCircle } from "lucide-react";
+import { Wallet, Star, Briefcase, Wrench, ArrowRight } from "lucide-react";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
-
-function haversine(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function sortByProximity(jobs, provider) {
-  if (!provider || provider.lat == null || provider.lng == null) return jobs;
-  const radius = provider.service_radius_km || 10;
-  const withDist = jobs.map((j) => {
-    const dist = j.lat != null && j.lng != null ? haversine(provider.lat, provider.lng, j.lat, j.lng) : Infinity;
-    return { ...j, _dist: dist };
-  });
-  withDist.sort((a, b) => {
-    const aNear = a._dist <= radius ? 0 : 1;
-    const bNear = b._dist <= radius ? 0 : 1;
-    if (aNear !== bNear) return aNear - bNear;
-    return a._dist - b._dist;
-  });
-  return withDist;
-}
 
 export default function ProviderDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [provider, setProvider] = useState(null);
-  const [openJobs, setOpenJobs] = useState([]);
   const [assignedJobs, setAssignedJobs] = useState([]);
   const [loadingProvider, setLoadingProvider] = useState(true);
-  const [bidJob, setBidJob] = useState(null);
-  const [completing, setCompleting] = useState(null);
-  const [activeTab, setActiveTab] = useState("open");
 
   const phone = user?.phone;
   const { active: subActive, loading: subLoading } = useSubscription();
@@ -61,15 +29,13 @@ export default function ProviderDashboard() {
   }, []);
 
   const load = async () => {
-    const [providers, jobs, acceptedJobs, inProgressJobs] = await Promise.all([
+    const [providers, acceptedJobs, inProgressJobs] = await Promise.all([
       phone ? base44.entities.ServiceProvider.filter({ phone }, "-created_date", 1) : Promise.resolve([]),
-      base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 50),
       base44.entities.ServiceRequest.filter({ status: "accepted" }, "-created_date", 50),
       base44.entities.ServiceRequest.filter({ status: "in_progress" }, "-created_date", 50),
     ]);
     const me = providers[0] || null;
     setProvider(me);
-    setOpenJobs(sortByProximity(jobs, me));
     const myAssigned = [...acceptedJobs, ...inProgressJobs].filter((j) => me && j.assigned_provider_id === me.id);
     setAssignedJobs(me ? myAssigned : []);
     setLoadingProvider(false);
@@ -80,7 +46,6 @@ export default function ProviderDashboard() {
   }, []);
 
   // Broadcast live location to customers tracking in-progress jobs.
-  // Updates every 30s while the provider has the dashboard open.
   useEffect(() => {
     const inProgress = assignedJobs.filter((j) => j.status === "in_progress");
     if (inProgress.length === 0 || !navigator.geolocation) return;
@@ -113,25 +78,6 @@ export default function ProviderDashboard() {
     setProvider(updated);
   };
 
-  const startJob = async (job) => {
-    setCompleting(job.id);
-    await base44.entities.ServiceRequest.update(job.id, { status: "in_progress" });
-    setAssignedJobs((prev) => prev.filter((j) => j.id !== job.id));
-    setCompleting(null);
-  };
-
-  const messageCustomer = async (job) => {
-    if (!provider || !job.customer_id) return;
-    const convo = await getOrCreateConversation({
-      providerId: provider.id,
-      providerName: provider.name,
-      providerPhoto: provider.photo_url,
-      customerId: job.customer_id,
-      customerName: job.customer_name,
-    });
-    navigate(`/chat/${convo.id}`);
-  };
-
   const firstName = user?.full_name?.split(" ")[0] || "there";
 
   if (loadingProvider || subLoading) {
@@ -154,14 +100,6 @@ export default function ProviderDashboard() {
       </div>
     );
   }
-
-  const handleBid = (job) => {
-    if (!subActive) {
-      navigate("/subscribe");
-    } else {
-      setBidJob(job);
-    }
-  };
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -219,119 +157,21 @@ export default function ProviderDashboard() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="shrink-0 px-4 md:px-8 py-1.5 border-t border-border bg-background">
-        <div className="flex gap-1.5 w-full">
-          <button
-            onClick={() => setActiveTab("assigned")}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-              activeTab === "assigned" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            Assigned ({assignedJobs.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("open")}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-              activeTab === "open" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            Open ({openJobs.length})
-          </button>
+      {/* CTA to Jobs page */}
+      <div className="flex-1 min-h-0 overflow-y-auto flex items-center justify-center px-6">
+        <div className="text-center">
+          <span className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center text-secondary-foreground mx-auto mb-3">
+            <Briefcase className="w-7 h-7" />
+          </span>
+          <h2 className="text-lg font-bold text-foreground mb-1">Browse Available Jobs</h2>
+          <p className="text-sm text-muted-foreground mb-4 max-w-xs">
+            View open jobs near you and manage your assigned tasks — all in one place.
+          </p>
+          <Button onClick={() => navigate("/jobs")} className="rounded-xl h-10 px-6">
+            Go to Jobs <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto page-content py-4">
-        <div className="flex gap-2 pb-2 h-full w-full" style={{ paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))' }}>
-          {activeTab === "assigned" && assignedJobs.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center w-full py-8">No assigned jobs</p>
-          )}
-          {activeTab === "assigned" && assignedJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[180px] shrink-0 bg-[#C9E8D8] rounded-lg border border-[#2D7A3E]/20 p-2 shadow-sm">
-              <div className="flex items-center gap-1 mb-1">
-                <span className="text-[10px] font-medium text-[#2D7A3E] bg-white/60 px-1.5 py-0.5 rounded-md truncate max-w-[100px]">
-                  {job.category}
-                </span>
-                {job.emergency && <Siren className="w-2.5 h-2.5 text-[#B36D25]" />}
-              </div>
-              <h3 className="font-semibold text-xs text-foreground truncate mb-1">{job.title}</h3>
-              {job.location_name && (
-                <p className="text-[10px] text-muted-foreground flex items-center gap-0.5 mb-1">
-                  <MapPin className="w-2.5 h-2.5" /> {job.location_name}
-                </p>
-              )}
-              <div className="flex gap-1">
-                {job.status === "accepted" && (
-                  <Button
-                    onClick={() => startJob(job)}
-                    disabled={completing === job.id}
-                    className="flex-1 h-7 rounded bg-[#2D7A3E] text-[10px] hover:bg-[#2D7A3E]/90"
-                  >
-                    {completing === job.id ? (
-                      <div className="w-2.5 h-2.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Start
-                      </>
-                    )}
-                  </Button>
-                )}
-                <Button
-                  onClick={() => messageCustomer(job)}
-                  variant="outline"
-                  className="flex-1 h-7 rounded bg-white text-[10px]"
-                >
-                  <MessageCircle className="w-2.5 h-2.5 mr-0.5" /> Chat
-                </Button>
-              </div>
-            </div>
-          ))}
-
-          {activeTab === "open" && openJobs.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center w-full py-8">No open jobs</p>
-          )}
-          {activeTab === "open" && openJobs.slice(0, 6).map((job) => (
-            <div key={job.id} className="min-w-[180px] shrink-0 bg-card rounded-lg border border-border p-2 shadow-sm">
-              <div className="flex items-center gap-1 mb-1">
-                <span className="text-[10px] font-medium text-[#2D7A3E] bg-[#C9E8D8] px-1.5 py-0.5 rounded-md truncate max-w-[80px]">
-                  {job.category}
-                </span>
-                {job.emergency && <Siren className="w-2.5 h-2.5 text-[#B36D25]" />}
-              </div>
-              <h3 className="font-semibold text-xs text-foreground truncate mb-1">{job.title}</h3>
-              {job.location_name && (
-                <p className="text-[10px] text-muted-foreground flex items-center gap-0.5 mb-1">
-                  <MapPin className="w-2.5 h-2.5" /> {job.location_name}
-                </p>
-              )}
-              {job._dist != null && job._dist !== Infinity && (
-                <p
-                  className={`text-[10px] font-medium mb-1 ${
-                    job._dist <= (provider?.service_radius_km || 10) ? "text-[#2D7A3E]" : "text-muted-foreground"
-                  }`}
-                >
-                  {job._dist < 1 ? `${Math.round(job._dist * 1000)}m` : `${job._dist.toFixed(1)}km`}
-                </p>
-              )}
-              {job.budget != null && <p className="text-xs font-bold text-foreground mb-1">KES {job.budget}</p>}
-              <Button
-                onClick={() => handleBid(job)}
-                disabled={!subActive}
-                className={`w-full h-7 rounded text-[10px] ${
-                  subActive
-                    ? "bg-[#2D7A3E] hover:bg-[#2D7A3E]/90"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                }`}
-              >
-                <Check className="w-2.5 h-2.5 mr-0.5" /> {subActive ? "Offer" : "Subscribe"}
-              </Button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <BidDialog open={!!bidJob} onOpenChange={(v) => !v && setBidJob(null)} job={bidJob} provider={provider} onDone={load} />
     </div>
   );
 }
