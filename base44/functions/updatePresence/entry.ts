@@ -14,9 +14,10 @@ Deno.serve(async (req) => {
     const existing = await base44.asServiceRole.entities.UserPresence.filter({ user_id: user.id }, null, 1);
 
     if (existing.length > 0) {
+      const isManuallyOffline = existing[0].provider_status === 'offline';
       const update = {
         last_active: now,
-        is_online: true,
+        is_online: isManuallyOffline ? false : true,
         user_name: user.full_name || existing[0].user_name,
         role: role
       };

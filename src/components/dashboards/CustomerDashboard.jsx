@@ -22,8 +22,27 @@ export default function CustomerDashboard() {
   const [openJobs, setOpenJobs] = useState([]);
   const [location, setLocation] = useState(null);
   const [locating, setLocating] = useState(false);
+  const [presenceStatus, setPresenceStatus] = useState("online");
 
   const firstName = user?.full_name?.split(" ")[0] || "there";
+
+  // Fetch customer's current presence status
+  useEffect(() => {
+    if (!user?.id) return;
+    base44.entities.UserPresence.filter({ user_id: user.id }, null, 1)
+      .then((r) => { if (r[0]) setPresenceStatus(r[0].provider_status || "online"); })
+      .catch(() => {});
+  }, [user?.id]);
+
+  const toggleStatus = async () => {
+    const newStatus = presenceStatus === "offline" ? "online" : "offline";
+    setPresenceStatus(newStatus);
+    try {
+      await base44.functions.invoke("updatePresence", { provider_status: newStatus });
+    } catch {
+      setPresenceStatus(presenceStatus);
+    }
+  };
 
   const goToPostJob = () => {
     if (!subLoading && !active) {
@@ -88,9 +107,21 @@ export default function CustomerDashboard() {
               </button>
             </div>
           </div>
-          <Button onClick={goToPostJob} className="rounded-xl h-10 px-4 shrink-0">
-            <Plus className="w-4 h-4" /> Post Job
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={toggleStatus}
+              className={`text-xs font-semibold px-2.5 py-2 rounded-md transition-colors ${
+                presenceStatus === "offline"
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-[#C9E8D8] text-[#2D7A3E]"
+              }`}
+            >
+              {presenceStatus === "offline" ? "Offline" : "Online"}
+            </button>
+            <Button onClick={goToPostJob} className="rounded-xl h-10 px-4">
+              <Plus className="w-4 h-4" /> Post Job
+            </Button>
+          </div>
         </div>
 
         {/* Search */}
