@@ -9,7 +9,7 @@ import TrackProviderDialog from "@/components/TrackProviderDialog";
 import { getOrCreateConversation } from "@/lib/chat";
 import { useAuth } from "@/lib/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, distanceKm } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Siren, MapPin, CheckCircle2, Users, MessageCircle, Navigation, Briefcase, Check } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -37,11 +37,42 @@ export default function MyJobs() {
 
   const load = async () => {
     const jobList = await base44.entities.ServiceRequest.list("-created_date", 100);
-    // Filter by role: customers see jobs they posted, providers see jobs assigned to them + open board
-    const filtered = user?.role === "customer"
-      ? jobList.filter(j => j.customer_id === user.id)
-      : jobList.filter(j => j.assigned_provider_id === user.id || j.status === "open");
+
+    let filtered;
+    if (user?.role === "customer") {
+      filtered = jobList.filter(j => j.customer_id === user.id);
+    } else {
+      // Providers: show assigned jobs + open jobs matching their skills and service area
+      let prov = provider;
+      if (!prov && user?.phone) {
+        const provs = await base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1);
+        prov = provs[0] || null;
+        if (prov) setProvider(prov);
+      }
+
+      const assignedJobs = jobList.filter(j => j.assigned_provider_id === user.id);
+      const matchingOpenJobs = prov
+        ? jobList.filter(j => {
+            if (j.status !== "open") return false;
+            // Match by profession
+            const professionMatch = prov.professions?.some(p =>
+              p.toLowerCase() === j.category?.toLowerCase()
+            );
+            if (!professionMatch) return false;
+            // Match by location (within service radius)
+            if (prov.lat != null && prov.lng != null && j.lat != null && j.lng != null) {
+              const dist = distanceKm(prov.lat, prov.lng, j.lat, j.lng);
+              if (dist == null) return false;
+              return dist <= (prov.service_radius_km || 10);
+            }
+            return true;
+          })
+        : jobList.filter(j => j.status === "open");
+
+      filtered = [...assignedJobs, ...matchingOpenJobs];
+    }
     setJobs(filtered);
+
     // Only fetch bid counts for customers (on their own jobs).
     // Providers must not see other providers' bids.
     if (user?.role === "customer") {
