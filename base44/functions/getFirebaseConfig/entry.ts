@@ -9,7 +9,6 @@ Deno.serve(async (req) => {
       appId: Deno.env.get("FIREBASE_APP_ID"),
       vapidKey: Deno.env.get("FIREBASE_VAPID_KEY"),
     };
-    console.log("[getFirebaseConfig] config:", JSON.stringify(config));
     return Response.json(config);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

@@ -52,14 +52,6 @@ async function initFirebase() {
     }
     firebaseConfig = config;
     await waitForFirebaseSdk();
-    console.log("[Firebase] initializeApp() config:", {
-      apiKey: config.apiKey,
-      authDomain: config.authDomain,
-      projectId: config.projectId,
-      storageBucket: config.storageBucket,
-      messagingSenderId: config.messagingSenderId,
-      appId: config.appId,
-    });
     firebaseApp = window.firebase.initializeApp(config);
     return firebaseApp;
   })();
@@ -158,7 +150,6 @@ export function clearRecaptchaVerifier() {
 export async function sendPhoneCode(phone) {
   const auth = await getAuthInstance();
   const verifier = await getRecaptchaVerifier();
-  console.log("[Firebase] Sending SMS to", phone);
   try {
     return await auth.signInWithPhoneNumber(phone, verifier);
   } catch (err) {

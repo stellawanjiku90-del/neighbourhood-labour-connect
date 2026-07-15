@@ -13,7 +13,6 @@ import OtpStep from "@/components/firebase/OtpStep";
 import PinStep from "@/components/firebase/PinStep";
 import ProfileSetupStep from "@/components/firebase/ProfileSetupStep";
 import RoleStep from "@/components/firebase/RoleStep";
-import AuthDebugPanel from "@/components/AuthDebugPanel";
 import SafeAreaPage from "@/components/SafeAreaPage";
 import { ShieldCheck } from "lucide-react";
 
@@ -34,8 +33,6 @@ export default function FirebaseAuth() {
   const [resendTimer, setResendTimer] = useState(0);
   const [isResettingPin, setIsResettingPin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  // Raw Firebase error for the debug panel (code + full object).
-  const [debugError, setDebugError] = useState(null);
 
   // Parse URL params for referral code and role on mount
   useEffect(() => {
@@ -105,8 +102,6 @@ export default function FirebaseAuth() {
   };
 
   const handleAuthError = (err) => {
-    console.error("[FirebaseAuth] Auth error:", err?.code, err?.message, err);
-    setDebugError(err);
     const map = {
       "auth/invalid-phone-number":
         "Please enter a valid phone number with country code (e.g. +254712345678).",
@@ -336,7 +331,6 @@ export default function FirebaseAuth() {
           </div>
           {step === "phone" && (
             <>
-              <AuthDebugPanel error={debugError} />
               <PhoneStep
               phone={phone}
               setPhone={setPhone}
