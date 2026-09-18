@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: neighbourhood-labour-connect
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev --no-audit --no-fund && npm run build && npx prisma generate
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: neighbourhood-labour-connect-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_NAME
+        value: Neighbourhood Labour Connect
+      - key: ADMIN_PHONES
+        sync: false
+      - key: ADMIN_INITIAL_PIN_HASH
+        sync: false
+      - key: INTASEND_TEST_ENVIRONMENT
+        value: "false"
+      - key: PHONE_VERIFICATION_AMOUNT_KES
+        value: "100"
+      - key: VERIFICATION_RECEIPT_EMAIL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: FIREBASE_WEB_CONFIG
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: INTASEND_API_KEY
+        sync: false
+      - key: INTASEND_PUBLISHABLE_KEY
+        sync: false
+      - key: INTASEND_WEBHOOK_SECRET
+        sync: false
+databases:
+  - name: neighbourhood-labour-connect-db
+    plan: free

@@ -1,77 +1,52 @@
-# Base44 Project
+# Neighbourhood Labour Connect — Standalone
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+Neighbourhood Labour Connect is a React/Vite marketplace for customers and local service providers. This repository contains the frontend **and its own Node/Express + PostgreSQL backend**.
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+## No Base44 dependency
 
-## Prerequisites
+The runtime does not import, call, or require Base44 or Firebase Authentication. The old Base44 entity/function definitions have been removed. `src/api/apiClient.js` is the application API facade used by the UI; all requests go to `/api` on this application.
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
+## Architecture
 
-See the [Base44 CLI docs](https://docs.base44.com/developers/references/cli/get-started/overview) if you want to run Base44 commands directly.
+- React 18 + Vite frontend
+- Node.js + Express API
+- PostgreSQL via Prisma ORM
+- JWT sessions
+- bcryptjs for email/password credentials
+- IntaSend M-Pesa STK Push for phone verification; Firebase is used only for optional web push notifications (FCM)
+- IntaSend integration for M-Pesa phone verification, subscription collection, and webhook confirmation
+- Same-origin file upload endpoint
+- Admin role controlled by `ADMIN_PHONES`
 
-## Run Locally
+## Local setup
 
-Run the full local development environment from the project root:
+1. Copy `.env.example` to `.env`.
+2. Set `DATABASE_URL` to PostgreSQL and a strong `JWT_SECRET`.
+3. `npm install`
+4. `npx prisma generate`
+5. `npm run build`
+6. `npm start`
+7. Open `http://localhost:3000`.
 
-```bash
-base44 dev
-```
+For frontend/backend development separately: `npm run dev` and `npm run dev:server`.
 
-`base44 dev` starts the local Base44 development backend and, when this app is configured for it, also starts the frontend dev server for you. Use the frontend URL printed by the command.
+## Render
 
-For example, when the Base44 project config includes a `serveCommand`, `base44 dev` can launch the frontend too:
+The included `render.yaml` provisions one web service and one PostgreSQL database. Set the secret environment variables in Render before going live. The service exposes `/api/health` for health checks.
 
-```json5
-{
-  "site": {
-    "serveCommand": "npm run dev"
-  }
-}
-```
+## Required production secrets
 
-In a Base44 project this lives in `base44/config.jsonc`.
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `ADMIN_PHONES`
+- `INTASEND_API_KEY`, `INTASEND_PUBLISHABLE_KEY`, `PHONE_VERIFICATION_AMOUNT_KES` for M-Pesa phone verification
+- `FIREBASE_WEB_CONFIG` and `FIREBASE_SERVICE_ACCOUNT` only if FCM web push notifications are enabled
+- `FIREBASE_SERVICE_ACCOUNT` if server-side FCM delivery is enabled
+- `VAPID_PUBLIC_KEY` for browser push
+- `INTASEND_API_KEY`, `INTASEND_PUBLISHABLE_KEY`, `INTASEND_WEBHOOK_SECRET` for live payments
 
-## Run Only The Frontend
+Uploads use the local filesystem by default. On Render, use a persistent disk or replace the upload storage adapter with durable object storage before relying on uploads as permanent records.
 
-If you only want to work on the frontend against the hosted Base44 backend, run:
+### Phone verification
 
-```bash
-npm run dev
-```
-
-Open the local URL printed by Vite.
-
-## Use The Hosted Backend
-
-For frontend-only development, create or update `.env.local` in the project root:
-
-```bash
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
-```
-
-`VITE_BASE44_APP_ID` identifies the Base44 app.
-
-`VITE_BASE44_APP_BASE_URL` tells the Base44 Vite plugin where to send local `/api` requests. Point it at your deployed Base44 app URL when you want the local frontend to use the hosted backend.
-
-When you use `base44 dev`, the command injects the local Base44 values for you, so `.env.local` is mainly needed for frontend-only workflows.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
-
-```bash
-base44 dashboard open
-```
-
-## Docs & Support
-
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
-
-Base44 CLI command reference: [https://docs.base44.com/developers/references/cli/commands/introduction](https://docs.base44.com/developers/references/cli/commands/introduction)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+Phone verification is intentionally payment-based rather than SMS-OTP-based. The backend sends an IntaSend M-Pesa STK Push for `PHONE_VERIFICATION_AMOUNT_KES` (default KSh 100), polls the IntaSend invoice status, and also accepts IntaSend webhook confirmation. A short-lived verification token is issued only after a successful payment. IntaSend documents STK Push and payment status APIs for this flow.
