@@ -14,25 +14,25 @@ const TESTIMONIALS = [
 
 export default function LandingTestimonials() {
   return (
-    <section className="py-6 md:py-8 px-4 md:px-8 shrink-0">
-      <h2 className="font-display font-bold text-foreground text-lg md:text-2xl text-center mb-1">Trusted by Thousands</h2>
-      <p className="text-xs md:text-sm text-muted-foreground text-center mb-5">Real stories from real users across Africa</p>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 max-w-4xl mx-auto snap-x">
+    <section className="py-10 md:py-14 px-5 md:px-10 shrink-0">
+      <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-2">Trusted by Thousands</h2>
+      <p className="text-sm md:text-base text-muted-foreground text-center mb-8">Real stories from real users across Africa</p>
+      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 max-w-5xl mx-auto snap-x">
         {TESTIMONIALS.map((t, i) => (
-          <div key={i} className="bg-card rounded-xl border border-border p-4 shadow-sm flex-shrink-0 w-[280px] snap-start">
+          <div key={i} className="bg-card rounded-2xl border border-border p-5 shadow-sm flex-shrink-0 w-[320px] snap-start">
             <div className="flex items-center gap-1 mb-2">
               {[...Array(5)].map((_, j) => (
                 <Star key={j} className="w-3 h-3 fill-primary text-primary" />
               ))}
             </div>
-            <p className="text-xs text-foreground leading-relaxed mb-3">"{t.text}"</p>
+            <p className="text-sm text-foreground leading-relaxed mb-4">"{t.text}"</p>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <span className="text-xs font-bold text-primary">{t.name.charAt(0)}</span>
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-foreground truncate">{t.name}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{t.role} · {t.location}</p>
+                <p className="text-xs text-muted-foreground truncate">{t.role} · {t.location}</p>
               </div>
             </div>
           </div>

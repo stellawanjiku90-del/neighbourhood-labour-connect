@@ -136,7 +136,7 @@ export default function CustomerDashboard() {
 
       {/* Scrollable content */}
       <div className="flex-1 min-h-0 overflow-y-auto page-content py-4" style={{ paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))' }}>
-        <div className="w-full space-y-5">
+        <div className="w-full max-w-[1320px] mx-auto space-y-7 md:space-y-9">
         {/* Quick actions */}
         <div className="grid grid-cols-2 gap-3">
           <button

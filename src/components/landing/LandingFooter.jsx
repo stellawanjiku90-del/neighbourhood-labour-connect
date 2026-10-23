@@ -30,15 +30,15 @@ const SOCIALS = [
 export default function LandingFooter() {
   return (
     <footer className="shrink-0 border-t border-border bg-background safe-area-bottom">
-      <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+      <div className="max-w-[1320px] mx-auto px-5 md:px-10 py-9 md:py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
           {/* Brand + social */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-2">
-              <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-7 h-7 rounded-lg object-cover" />
+            <div className="flex items-center gap-3 mb-3">
+              <img src={LOGO_URL} alt="Neighbourhood Labour Connect" className="w-9 h-9 rounded-xl object-cover" />
               <span className="font-display font-bold text-sm text-foreground">Neighbourhood Labour Connect</span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               Connecting communities with trusted local professionals across Africa.
             </p>
             <div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export default function LandingFooter() {
                   key={s.name}
                   href="#"
                   aria-label={s.name}
-                  className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-xs font-bold text-secondary-foreground hover:bg-accent transition-colors"
+                  className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-xs font-bold text-secondary-foreground hover:bg-accent transition-colors"
                 >
                   {s.label}
                 </a>
@@ -57,12 +57,12 @@ export default function LandingFooter() {
           {/* Link columns */}
           {LINK_COLUMNS.map((col, ci) => (
             <div key={ci}>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {col.map((link) => (
                   <li key={link.label}>
                     <Link
                       to={link.to}
-                      className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+                      className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -72,7 +72,7 @@ export default function LandingFooter() {
             </div>
           ))}
         </div>
-        <p className="text-center text-[11px] text-muted-foreground mt-6">
+        <p className="text-center text-xs text-muted-foreground mt-8">
           © {new Date().getFullYear()} Neighbourhood Labour Connect. All rights reserved.
         </p>
       </div>

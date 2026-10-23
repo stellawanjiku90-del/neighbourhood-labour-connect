@@ -10,17 +10,17 @@ const REASONS = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-6 md:py-8 px-4 md:px-8 shrink-0">
-      <h2 className="font-display font-bold text-foreground text-lg md:text-2xl text-center mb-1">Why Choose Us?</h2>
-      <p className="text-xs md:text-sm text-muted-foreground text-center mb-5">Built for trust, speed and fairness</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl mx-auto">
+    <section className="py-10 md:py-14 px-5 md:px-10 shrink-0">
+      <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-2">Why Choose Us?</h2>
+      <p className="text-sm md:text-base text-muted-foreground text-center mb-8">Built for trust, speed and fairness</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
         {REASONS.map((reason, i) => (
-          <div key={i} className="bg-card rounded-xl border border-border p-4">
-            <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center mb-3">
+          <div key={i} className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-secondary flex items-center justify-center mb-3">
               <reason.icon className="w-5 h-5 text-primary" />
             </div>
             <p className="text-sm font-bold text-foreground">{reason.title}</p>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{reason.desc}</p>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{reason.desc}</p>
           </div>
         ))}
       </div>
