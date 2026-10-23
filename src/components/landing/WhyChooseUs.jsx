@@ -10,8 +10,8 @@ const REASONS = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-10 md:py-14 px-5 md:px-10 shrink-0">
-      <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-2">Why Choose Us?</h2>
+    <section id="why-neighbourhood" className="scroll-mt-6 py-10 md:py-14 px-5 md:px-10 shrink-0">
+      <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-2">Why Neighbourhood Labour Connect?</h2>
       <p className="text-sm md:text-base text-muted-foreground text-center mb-8">Built for trust, speed and fairness</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
         {REASONS.map((reason, i) => (

@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 export default function LandingCategories() {
   const shown = CATEGORIES.slice(0, 16);
   return (
-    <section className="py-10 md:py-14 px-5 md:px-10 shrink-0">
+    <section id="services" className="scroll-mt-6 py-10 md:py-14 px-5 md:px-10 shrink-0">
       <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-2">Browse Services</h2>
       <p className="text-sm md:text-base text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-        Electricians, plumbers, cleaners, tutors and more — find local services near you
+        Find help with repairs, cleaning, lessons, beauty and more.
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto">
         {shown.map((cat) => (
@@ -25,7 +25,7 @@ export default function LandingCategories() {
       <div className="text-center mt-7">
         <Link to="/auth">
           <Button variant="outline" className="rounded-2xl h-11 px-7 text-sm font-semibold">
-            View All Services
+            Create an account to browse all services
           </Button>
         </Link>
       </div>

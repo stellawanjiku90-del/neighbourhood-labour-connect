@@ -12,7 +12,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-10 md:py-14 px-5 md:px-10 shrink-0">
+    <section id="how-it-works" className="scroll-mt-6 py-10 md:py-14 px-5 md:px-10 shrink-0">
       <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-3">How It Works</h2>
       <p className="text-sm md:text-base text-muted-foreground text-center mb-8">From sign-up to done in six simple steps</p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">

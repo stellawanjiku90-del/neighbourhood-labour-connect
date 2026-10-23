@@ -14,7 +14,7 @@ const TESTIMONIALS = [
 
 export default function LandingTestimonials() {
   return (
-    <section className="py-10 md:py-14 px-5 md:px-10 shrink-0">
+    <section id="stories" className="scroll-mt-6 py-10 md:py-14 px-5 md:px-10 shrink-0">
       <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-2">Trusted by Thousands</h2>
       <p className="text-sm md:text-base text-muted-foreground text-center mb-8">Real stories from real users across Africa</p>
       <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 max-w-5xl mx-auto snap-x">

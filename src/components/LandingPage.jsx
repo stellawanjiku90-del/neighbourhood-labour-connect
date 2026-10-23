@@ -37,14 +37,14 @@ export default function LandingPage() {
         </div>
 
         <ServiceStats />
+        <LandingCategories />
         <HowItWorks />
         <TrustIndicators />
         <WhyChooseUs />
-        <LandingCategories />
         <LandingTestimonials />
 
         {/* SEO text */}
-        <section className="px-4 md:px-8 pb-8 pt-2">
+        <section className="px-5 md:px-10 pb-8 pt-2">
           <p className="text-xs text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
             Neighbourhood Labour Connect is a location-based marketplace that helps you find jobs and hire professionals for local services across Africa. Whether you need electricians, plumbers, cleaners, tutors, carpenters, movers, drivers or beauty specialists, our platform connects you with verified professionals in your area. Post a job, receive competitive offers, chat securely, and pay with confidence — all in one app.
           </p>
