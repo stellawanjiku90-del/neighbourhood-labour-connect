@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,7 +30,7 @@ export default function WithdrawDialog({ open, onOpenChange, availableBalance })
     setLoading(true);
     setError(null);
     try {
-      const { data } = await base44.functions.invoke("requestPayout", {
+      const { data } = await apiClient.functions.invoke("requestPayout", {
         provider,
         phone: "+" + cleaned,
       });

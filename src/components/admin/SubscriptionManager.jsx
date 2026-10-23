@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, CreditCard } from "lucide-react";
@@ -13,7 +13,7 @@ export default function SubscriptionManager() {
 
   const load = async () => {
     try {
-      const { data } = await base44.functions.invoke("getAdminData", {
+      const { data } = await apiClient.functions.invoke("getAdminData", {
         firebase_uid: user?.id,
       });
       setUsers(data.userProfiles || []);
@@ -40,7 +40,7 @@ export default function SubscriptionManager() {
   const activate = async (firebaseUid) => {
     setActivating(firebaseUid);
     try {
-      await base44.functions.invoke("activateSubscription", {
+      await apiClient.functions.invoke("activateSubscription", {
         target_user_id: firebaseUid,
         admin_firebase_uid: user?.id,
       });

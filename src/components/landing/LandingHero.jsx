@@ -1,46 +1,62 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Smartphone } from "lucide-react";
+import { ArrowRight, Briefcase, Search } from "lucide-react";
+
+const PATHS = [
+  {
+    to: "/auth?role=customer",
+    title: "I need a service",
+    description: "Find nearby professionals or post a job.",
+    icon: Search,
+  },
+  {
+    to: "/auth?role=provider",
+    title: "I offer a service",
+    description: "Share your skills and find local work.",
+    icon: Briefcase,
+  },
+];
 
 export default function LandingHero() {
   return (
-    <section className="text-center py-6 md:py-10 px-4 shrink-0">
-      <h1 className="font-display font-extrabold text-foreground text-2xl md:text-4xl leading-tight max-w-3xl mx-auto">
-        Find Work. Hire Trusted Professionals.{" "}
-        <span className="text-primary">Anytime, Anywhere.</span>
-      </h1>
-      <p className="text-sm md:text-base text-muted-foreground mt-3 leading-relaxed max-w-xl mx-auto">
-        Connect with customers or find your next job in minutes. Join thousands of customers and professionals already using Neighbourhood Labour Connect.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-2 justify-center mt-5">
-        <Link to="/firebase-auth" className="w-full sm:w-auto">
-          <Button className="rounded-xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-11 px-6 w-full text-sm font-semibold">
-            Get Started <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </Link>
-        <Link to="/firebase-auth" className="w-full sm:w-auto">
-          <Button variant="outline" className="rounded-xl h-11 px-6 w-full text-sm font-semibold">
-            Sign In
-          </Button>
-        </Link>
-      </div>
-      {/* Download buttons */}
-      <div className="flex items-center justify-center gap-3 mt-4">
-        <button className="flex items-center gap-2 bg-foreground text-background rounded-xl px-4 h-11 hover:opacity-90 transition-opacity">
-          <Play className="w-4 h-4 fill-current" />
-          <div className="text-left">
-            <p className="text-[8px] opacity-70 leading-none">GET IT ON</p>
-            <p className="text-xs font-semibold leading-none mt-0.5">Google Play</p>
-          </div>
-        </button>
-        <button className="flex items-center gap-2 bg-foreground text-background rounded-xl px-4 h-11 hover:opacity-90 transition-opacity">
-          <Smartphone className="w-4 h-4" />
-          <div className="text-left">
-            <p className="text-[8px] opacity-70 leading-none">Download on the</p>
-            <p className="text-xs font-semibold leading-none mt-0.5">App Store</p>
-          </div>
-        </button>
+    <section className="border-b border-border bg-gradient-to-b from-secondary/40 to-background px-5 py-14 sm:py-16 md:px-10 md:py-24">
+      <div className="mx-auto max-w-[1000px]">
+        <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-primary sm:text-sm">
+          Local help. Local work.
+        </p>
+        <h1 className="mx-auto max-w-4xl text-center font-display text-4xl font-bold leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl">
+          Find help nearby.{" "}
+          <span className="text-primary">Find your next job.</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-2xl text-center text-base leading-relaxed text-muted-foreground sm:text-lg">
+          Connect with people in your neighbourhood, whether you need a hand or have a skill to offer.
+        </p>
+
+        <div className="mx-auto mt-9 grid max-w-3xl gap-3 sm:grid-cols-2 sm:gap-4">
+          {PATHS.map(({ to, title, description, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              className="group flex min-h-[104px] items-center gap-4 rounded-2xl border border-border bg-card p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-6"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-bold text-foreground sm:text-lg">{title}</span>
+                <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">{description}</span>
+              </span>
+              <ArrowRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link to="/auth" className="font-semibold text-primary underline-offset-4 hover:underline">
+            Sign in with your phone
+          </Link>
+        </p>
       </div>
     </section>
   );

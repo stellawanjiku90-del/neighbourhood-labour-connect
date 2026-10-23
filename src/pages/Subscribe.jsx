@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Check, Loader2, X, Smartphone, ShieldCheck, Eye, Search, Briefcase, Star, CreditCard, ArrowLeft, MessageCircle } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/lib/AuthContext";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
 
 export default function Subscribe() {
@@ -23,7 +23,7 @@ export default function Subscribe() {
   // ─── Fetch the public IntaSend config ──
   useEffect(() => {
     let cancelled = false;
-    base44.functions
+    apiClient.functions
       .invoke("getIntaSendConfig", {})
       .then((res) => {
         if (!cancelled) setConfig(res.data);
@@ -97,8 +97,8 @@ export default function Subscribe() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("intent") === "provider" && user?.id) {
         try {
-          const providers = await base44.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1);
-          if (providers.length > 0) await base44.entities.ServiceProvider.update(providers[0].id, { available: true });
+          const providers = await apiClient.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1);
+          if (providers.length > 0) await apiClient.entities.ServiceProvider.update(providers[0].id, { available: true });
           sessionStorage.setItem("provider_just_listed", "true");
         } catch { /* best-effort */ }
       }
@@ -110,7 +110,7 @@ export default function Subscribe() {
         // Active verification — queries IntaSend directly and activates the
         // subscription as soon as the payment is confirmed (no webhook needed).
         if (invoiceIdRef.current) {
-          const res = await base44.functions.invoke("checkMpesaPayment", {
+          const res = await apiClient.functions.invoke("checkMpesaPayment", {
             invoice_id: invoiceIdRef.current,
             firebase_uid: user?.id,
           });
@@ -121,7 +121,7 @@ export default function Subscribe() {
           }
         }
         // Fallback — the webhook may have already activated it.
-        const subRes = await base44.functions.invoke("checkSubscription", { firebase_uid: user?.id });
+        const subRes = await apiClient.functions.invoke("checkSubscription", { firebase_uid: user?.id });
         if (subRes.data?.active) {
           await finishActivation();
           return;

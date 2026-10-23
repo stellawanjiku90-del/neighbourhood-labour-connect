@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,10 +26,10 @@ export default function Chat() {
   const { presence: otherPresence } = useUserPresence(otherPresenceUid);
 
   const loadMessages = () =>
-    base44.entities.Message.filter({ conversation_id: id }, "created_date", 200).then(setMessages);
+    apiClient.entities.Message.filter({ conversation_id: id }, "created_date", 200).then(setMessages);
 
   useEffect(() => {
-    base44.entities.Conversation.get(id).then(async (c) => {
+    apiClient.entities.Conversation.get(id).then(async (c) => {
       if (!c) { setConvo(false); return; }
       // Guard: only participants can open a conversation
       // Customers match customer_id (firebase_uid); providers match via their ServiceProvider record
@@ -40,7 +40,7 @@ export default function Chat() {
           if (c.customer_id === me.id) { setConvo(false); return; }
           // Verify this provider owns the ServiceProvider record in the conversation
           const myProv = me.phone
-            ? await base44.entities.ServiceProvider.filter({ phone: me.phone }, null, 1).catch(() => [])
+            ? await apiClient.entities.ServiceProvider.filter({ phone: me.phone }, null, 1).catch(() => [])
             : [];
           if (!myProv[0] || myProv[0].id !== c.provider_id) { setConvo(false); return; }
         }
@@ -48,14 +48,14 @@ export default function Chat() {
       setConvo(c);
       setRevealed({ customer: !!c?.customer_revealed_number, provider: !!c?.provider_revealed_number });
       if (me?.role === "customer" && c?.provider_id) {
-        const prov = await base44.entities.ServiceProvider.get(c.provider_id).catch(() => null);
+        const prov = await apiClient.entities.ServiceProvider.get(c.provider_id).catch(() => null);
         if (prov?.firebase_uid) setOtherPresenceUid(prov.firebase_uid);
       } else if (me?.role === "provider" && c?.customer_id) {
         setOtherPresenceUid(c.customer_id);
       }
     }).catch(() => setConvo(false));
     loadMessages();
-    const unsub = base44.entities.Message.subscribe((event) => {
+    const unsub = apiClient.entities.Message.subscribe((event) => {
       if (event?.data?.conversation_id === id || event?.type === "delete") loadMessages();
     });
     return unsub;
@@ -69,7 +69,7 @@ export default function Chat() {
     if (!convo || !me) return;
     const isCustomer = me.id === convo.customer_id;
     const key = isCustomer ? "customer_revealed_number" : "provider_revealed_number";
-    const updated = await base44.entities.Conversation.update(id, { [key]: true });
+    const updated = await apiClient.entities.Conversation.update(id, { [key]: true });
     setConvo(updated);
     setRevealed({ customer: !!updated.customer_revealed_number, provider: !!updated.provider_revealed_number });
   };
@@ -86,11 +86,11 @@ export default function Chat() {
     if (!otherRevealed || !convo || !me) return;
     (async () => {
       if (isCustomer && convo.provider_id) {
-        const prov = await base44.entities.ServiceProvider.get(convo.provider_id).catch(() => null);
+        const prov = await apiClient.entities.ServiceProvider.get(convo.provider_id).catch(() => null);
         setOtherPhone(prov?.phone ? prov.phone : "unavailable");
       } else if (!isCustomer) {
         // customer's phone lives on the UserProfile via firebase_uid
-        const phys = await base44.entities.UserProfile.filter({ firebase_uid: convo.customer_id }, null, 1).catch(() => []);
+        const phys = await apiClient.entities.UserProfile.filter({ firebase_uid: convo.customer_id }, null, 1).catch(() => []);
         setOtherPhone(phys[0]?.phone ? phys[0].phone : "unavailable");
       }
     })();
@@ -111,14 +111,14 @@ export default function Chat() {
     }]);
     setSending(true);
     try {
-      const created = await base44.entities.Message.create({
+      const created = await apiClient.entities.Message.create({
         conversation_id: id,
         sender_id: me.id,
         sender_name: me.full_name,
         text: body,
       });
       setMessages((prev) => prev.map((m) => (m.id === tempId ? created : m)));
-      await base44.entities.Conversation.update(id, {
+      await apiClient.entities.Conversation.update(id, {
         last_message: body,
         last_sender_id: me.id,
       });

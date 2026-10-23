@@ -5,7 +5,7 @@
 // - Consistent vertical rhythm and spacing
 // - No layout jumping between pages
 //
-// Usage: Replace ad-hoc wrappers with this for FirebaseAuth, LegalPage, Subscribe, etc.
+// Usage: Replace ad-hoc wrappers with this for PhoneAuth, LegalPage, Subscribe, etc.
 
 export default function UnifiedPage({ children, className = "", maxWidth = "max-w-2xl" }) {
   return (

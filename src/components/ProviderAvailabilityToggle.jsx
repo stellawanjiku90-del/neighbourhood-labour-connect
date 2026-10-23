@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Loader2, Check } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 
 const STATUSES = [
   { value: "online", label: "Online", desc: "Visible as online", color: "bg-green-500" },
@@ -22,7 +22,7 @@ export default function ProviderAvailabilityToggle({ currentStatus, onUpdated })
     try {
       const storedProfile = sessionStorage.getItem("pin_session_profile");
       const profile = storedProfile ? JSON.parse(storedProfile) : {};
-      await base44.functions.invoke("setProviderAvailability", { status: newStatus, firebase_uid: profile.firebase_uid });
+      await apiClient.functions.invoke("setProviderAvailability", { status: newStatus, firebase_uid: profile.firebase_uid });
       setSavedStatus(newStatus);
       if (onUpdated) onUpdated(newStatus);
       setTimeout(() => setSavedStatus(null), 2000);

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import SafeAreaPage from "@/components/SafeAreaPage";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
+const LOGO_URL = "/icon.svg";
 
 // Standardized layout for Terms / Privacy / Refund.
 // Consistent header, safe areas, readable content width, scrollable body,

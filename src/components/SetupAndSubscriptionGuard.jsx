@@ -23,7 +23,7 @@ export default function SetupAndSubscriptionGuard({ requireSubscription = true }
 
   // Check profile completion and verification
   if (!user?.profile_completed) {
-    return <Navigate to="/firebase-auth" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   // Check ID verification (if id_type is set but not verified, they need admin approval)

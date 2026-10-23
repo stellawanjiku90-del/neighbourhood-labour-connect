@@ -8,7 +8,7 @@
 
 export default function ContentContainer({ children, className = "" }) {
   return (
-    <div className={`w-full max-w-[1200px] mx-auto px-4 md:px-8 ${className}`}>
+    <div className={`w-full max-w-[1320px] mx-auto px-5 md:px-10 ${className}`}>
       {children}
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 
 // Lightweight geolocation hook. Returns coords + reverse-geocoded label.
 export function useGeoLocation() {
@@ -36,7 +36,7 @@ export function useGeoLocation() {
           async (err) => {
             // Fallback to IP-based location
             try {
-              const ipLocation = await base44.functions.invoke("getIpLocation", {});
+              const ipLocation = await apiClient.functions.invoke("getIpLocation", {});
               setLoading(false);
               resolve(ipLocation.data);
             } catch (e) {
@@ -49,7 +49,7 @@ export function useGeoLocation() {
         );
       } else {
         // No geolocation support - use IP-based fallback
-        base44.functions.invoke("getIpLocation", {})
+        apiClient.functions.invoke("getIpLocation", {})
           .then((res) => {
             setLoading(false);
             resolve(res.data);

@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { Navigation, MapPin, Clock } from "lucide-react";
 
 function haversine(lat1, lng1, lat2, lng2) {
@@ -33,7 +33,7 @@ export default function TrackProviderDialog({ open, onOpenChange, job }) {
     let active = true;
     const poll = async () => {
       try {
-        const j = await base44.entities.ServiceRequest.get(job.id);
+        const j = await apiClient.entities.ServiceRequest.get(job.id);
         if (active) setLive(j);
       } catch {
         /* ignore — keep last known */

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { distanceKm } from "@/lib/categories";
 import CategorySearch from "@/components/CategorySearch";
@@ -23,7 +23,7 @@ export default function Providers() {
   const { active, loading: subLoading } = useSubscription();
 
   useEffect(() => {
-    base44.entities.ServiceProvider.filter({ available: true }, "-rating", 50).then(setProviders);
+    apiClient.entities.ServiceProvider.filter({ available: true }, "-rating", 50).then(setProviders);
   }, []);
 
   const list = useMemo(() => {

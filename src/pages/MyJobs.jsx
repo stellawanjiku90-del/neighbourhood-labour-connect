@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import CategoryIcon from "@/components/CategoryIcon";
 import RateDialog from "@/components/RateDialog";
 import BidsDialog from "@/components/BidsDialog";
@@ -36,7 +36,7 @@ export default function MyJobs() {
   const { active, loading: subLoading } = useSubscription();
 
   const load = async () => {
-    const jobList = await base44.entities.ServiceRequest.list("-created_date", 100);
+    const jobList = await apiClient.entities.ServiceRequest.list("-created_date", 100);
 
     let filtered;
     if (user?.role === "customer") {
@@ -45,7 +45,7 @@ export default function MyJobs() {
       // Providers: show assigned jobs + open jobs matching their skills and service area
       let prov = provider;
       if (!prov && user?.phone) {
-        const provs = await base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1);
+        const provs = await apiClient.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1);
         prov = provs[0] || null;
         if (prov) setProvider(prov);
       }
@@ -76,7 +76,7 @@ export default function MyJobs() {
     // Only fetch bid counts for customers (on their own jobs).
     // Providers must not see other providers' bids.
     if (user?.role === "customer") {
-      const allBids = await base44.entities.JobBid.list("-created_date", 200);
+      const allBids = await apiClient.entities.JobBid.list("-created_date", 200);
       const counts = {};
       allBids.forEach((b) => {
         counts[b.request_id] = (counts[b.request_id] || 0) + 1;
@@ -99,14 +99,14 @@ export default function MyJobs() {
   // Fetch provider record for bidding (providers only)
   useEffect(() => {
     if (user?.role === "provider" && user?.phone) {
-      base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1)
+      apiClient.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1)
         .then((r) => setProvider(r[0] || null))
         .catch(() => setProvider(null));
     }
   }, [user?.role, user?.phone]);
 
   const complete = async (job) => {
-    await base44.entities.ServiceRequest.update(job.id, { status: "completed" });
+    await apiClient.entities.ServiceRequest.update(job.id, { status: "completed" });
     load();
   };
 

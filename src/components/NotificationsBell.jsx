@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Bell, CheckCheck } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -38,7 +38,7 @@ export default function NotificationsBell({ align = "right" }) {
 
     const fetchNotifications = async () => {
       try {
-        const notifs = await base44.entities.InAppNotification.filter(
+        const notifs = await apiClient.entities.InAppNotification.filter(
           { user_id: user.id },
           "-created_date",
           30
@@ -54,7 +54,7 @@ export default function NotificationsBell({ align = "right" }) {
 
     fetchNotifications();
 
-    const unsub = base44.entities.InAppNotification.subscribe(() => {
+    const unsub = apiClient.entities.InAppNotification.subscribe(() => {
       fetchNotifications();
     });
 
@@ -75,7 +75,7 @@ export default function NotificationsBell({ align = "right" }) {
   const markAllRead = async () => {
     const unread = notifications.filter((n) => !n.read);
     if (unread.length === 0) return;
-    await base44.entities.InAppNotification.bulkUpdate(
+    await apiClient.entities.InAppNotification.bulkUpdate(
       unread.map((n) => ({ id: n.id, read: true }))
     );
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
@@ -84,7 +84,7 @@ export default function NotificationsBell({ align = "right" }) {
 
   const handleClickNotif = async (notif) => {
     if (!notif.read) {
-      await base44.entities.InAppNotification.update(notif.id, { read: true });
+      await apiClient.entities.InAppNotification.update(notif.id, { read: true });
       setUnreadCount((prev) => Math.max(0, prev - 1));
       setNotifications((prev) =>
         prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n))

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -46,11 +46,11 @@ export default function Settings() {
 
   useEffect(() => {
     if (!user?.id) return;
-    base44.functions.invoke("getUserProfile", { firebase_uid: user.id })
+    apiClient.functions.invoke("getUserProfile", { firebase_uid: user.id })
       .then((res) => { if (res.data?.profile) setNotifPrefs(res.data.profile); else setNotifPrefs({}); })
       .catch(() => setNotifPrefs({}));
     if (user.role === "provider") {
-      base44.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1)
+      apiClient.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1)
         .then((providers) => { if (providers[0]) setProviderStatus(providers[0].availability_status || "offline"); })
         .catch(() => {});
     }
@@ -58,7 +58,7 @@ export default function Settings() {
 
   const toggleNotif = (key, value) => {
     setNotifPrefs((prev) => ({ ...(prev || {}), [key]: value }));
-    base44.functions.invoke("saveUserProfile", { phone: user?.phone, [key]: value }).catch(() => {});
+    apiClient.functions.invoke("saveUserProfile", { phone: user?.phone, [key]: value }).catch(() => {});
   };
 
   const userNotifCats = NOTIF_CATEGORIES.filter((c) => c.roles.includes(user?.role || "customer"));
@@ -69,7 +69,7 @@ export default function Settings() {
   const deleteAccount = async () => {
     setDeleting(true);
     try {
-      await base44.functions.invoke("deleteAccount", {});
+      await apiClient.functions.invoke("deleteAccount", {});
       await logout();
     } catch (e) {
       setDeleting(false);
@@ -88,7 +88,7 @@ export default function Settings() {
     setSavingPin(true);
     try {
       const pinHash = await hashPin(newPin);
-      await base44.functions.invoke("saveUserProfile", {
+      await apiClient.functions.invoke("saveUserProfile", {
         phone: user?.phone,
         pin_hash: pinHash,
       });
@@ -119,7 +119,7 @@ export default function Settings() {
                   Finish setting up your profile to start posting or finding jobs. You need to verify your identity first.
                 </p>
                 <Button
-                  onClick={() => navigate("/firebase-auth")}
+                  onClick={() => navigate("/auth")}
                   className="mt-2 h-8 text-xs rounded-lg bg-warning text-warning-foreground hover:bg-warning/90"
                 >
                   Complete Setup

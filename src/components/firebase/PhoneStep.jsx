@@ -38,22 +38,27 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
   }, [country, setLocalNumber]);
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-sm md:p-8">
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
         <Phone className="w-7 h-7 text-secondary-foreground" />
       </div>
-      <h1 className="text-2xl font-extrabold text-foreground mb-6">Phone Verification</h1>
-      <label className="text-sm font-medium text-foreground mb-2 block">Phone Number</label>
+      <h1 className="mb-2 font-display text-2xl font-bold text-foreground">Sign in or join</h1>
+      <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
+        Enter your phone number. Existing members can sign in with their PIN. New members verify their number through M-Pesa; the next screen shows the amount and guides you through it.
+      </p>
+      <label htmlFor="phone-number" className="mb-2 block text-sm font-medium text-foreground">Phone number</label>
       <div className="flex gap-2 mb-2">
         <div className="h-12 rounded-xl border border-input bg-muted px-3 flex items-center gap-1.5 text-base font-medium shrink-0">
           <span className="text-lg leading-none">{country.flag}</span>
           <span>+{country.dial}</span>
         </div>
         <Input
+          id="phone-number"
           type="tel"
+          autoComplete="tel-national"
           inputMode="numeric"
           value={localNumber}
           onChange={(e) => setLocalNumber(formatLocalNumber(e.target.value, country.length))}
