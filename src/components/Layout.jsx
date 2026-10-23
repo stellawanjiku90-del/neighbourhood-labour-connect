@@ -59,6 +59,7 @@ export default function Layout() {
   const { pathname } = useLocation();
 
   const nav = user?.role === "provider" ? PROVIDER_NAV : CUSTOMER_NAV;
+  const mobileNav = nav.filter(({ to }) => to !== "/settings");
 
   const showBack = !PRIMARY_PATHS.includes(pathname);
 
@@ -137,7 +138,17 @@ export default function Layout() {
           ) : (
             <span className="w-9" />
           )}
-          <NotificationsBell />
+          <div className="flex items-center gap-1">
+            <NavLink
+              to="/settings"
+              aria-label="Profile and settings"
+              title="Profile and settings"
+              className={({ isActive }) => `flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${isActive ? "bg-accent text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+            >
+              <SettingsIcon className="h-4 w-4" />
+            </NavLink>
+            <NotificationsBell />
+          </div>
         </div>
         <div className="flex-1 min-h-0 overflow-hidden w-full">
           <AnimatedOutlet />
@@ -150,7 +161,7 @@ export default function Layout() {
         className="lg:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border flex z-40 px-1 safe-area-left safe-area-right"
         style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}
       >
-        {nav.map(({ to, label, icon: Icon }) => (
+        {mobileNav.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -162,7 +173,7 @@ export default function Layout() {
             }
           >
             <Icon className="w-5 h-5" />
-            <span className="text-[11px] sm:text-xs font-medium leading-none">{label}</span>
+            <span className="whitespace-nowrap text-[10px] sm:text-xs font-medium leading-none">{label}</span>
           </NavLink>
         ))}
       </nav>

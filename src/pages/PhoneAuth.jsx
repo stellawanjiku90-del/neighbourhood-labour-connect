@@ -36,7 +36,7 @@ export default function PhoneAuth() {
     const ref = params.get("ref");
     const roleParam = params.get("role");
     if (ref) setReferralCodeFromUrl(ref.toUpperCase());
-    if (roleParam && ["customer", "provider", "admin"].includes(roleParam)) {
+    if (roleParam && ["customer", "provider"].includes(roleParam)) {
       setRole(roleParam);
     }
   }, []);
@@ -126,7 +126,11 @@ export default function PhoneAuth() {
 
   const verificationComplete = (token) => {
     setVerificationToken(token);
-    if (isResettingPin) setStep("pin-setup"); else setStep("role");
+    if (isResettingPin || role === "customer" || role === "provider") {
+      setStep("pin-setup");
+    } else {
+      setStep("role");
+    }
   };
 
   const retryVerification = () => startVerification(phone, isResettingPin ? "reset_pin" : "registration");

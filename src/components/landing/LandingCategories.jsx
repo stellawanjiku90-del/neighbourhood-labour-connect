@@ -5,29 +5,38 @@ import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 
 export default function LandingCategories() {
-  const shown = CATEGORIES.slice(0, 16);
+  const shown = CATEGORIES.slice(0, 12);
+
   return (
-    <section id="services" className="scroll-mt-6 py-10 md:py-14 px-5 md:px-10 shrink-0">
-      <h2 className="font-display font-bold text-foreground text-2xl md:text-3xl text-center mb-2">Browse Services</h2>
-      <p className="text-sm md:text-base text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-        Find help with repairs, cleaning, lessons, beauty and more.
-      </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto">
-        {shown.map((cat) => (
-          <div key={cat.name} className="flex items-center gap-2.5 bg-card rounded-2xl border border-border p-3 md:p-4">
-            <span className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground shrink-0">
-              <CategoryIcon name={cat.icon} />
-            </span>
-            <span className="text-sm font-medium text-foreground truncate">{cat.name}</span>
-          </div>
-        ))}
-      </div>
-      <div className="text-center mt-7">
-        <Link to="/auth">
-          <Button variant="outline" className="rounded-2xl h-11 px-7 text-sm font-semibold">
-            Create an account to browse all services
+    <section id="services" className="scroll-mt-6 px-5 py-14 md:px-10 md:py-20">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8 max-w-2xl">
+          <p className="mb-2 text-sm font-semibold text-primary">Services</p>
+          <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
+            What can we help with?
+          </h2>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            Browse common services, from home repairs and cleaning to beauty and lessons.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4">
+          {shown.map((cat) => (
+            <div key={cat.name} className="flex min-h-[68px] items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:min-h-[76px] sm:p-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+                <CategoryIcon name={cat.icon} />
+              </span>
+              <span className="min-w-0 text-sm font-medium leading-snug text-foreground">{cat.name}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-7 flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+          <Button asChild variant="outline" className="h-11 rounded-xl px-5 text-sm font-semibold">
+            <Link to="/auth?role=customer">Explore all services</Link>
           </Button>
-        </Link>
+          <span className="text-sm text-muted-foreground">Sign in to browse providers near you.</span>
+        </div>
       </div>
     </section>
   );
