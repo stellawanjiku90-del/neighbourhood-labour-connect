@@ -47,7 +47,7 @@ export default function PhoneStep({ phone, setPhone, onSendCode, loading, error 
       </div>
       <h1 className="mb-2 font-display text-2xl font-bold text-foreground">Sign in or join</h1>
       <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
-        Enter your phone number. If you already have an account, you can sign in with your PIN. If you’re new, we’ll help you set one up.
+        Enter your phone number. Existing members can sign in with their PIN. New members verify their number through M-Pesa; the next screen shows the amount and guides you through it.
       </p>
       <label htmlFor="phone-number" className="mb-2 block text-sm font-medium text-foreground">Phone number</label>
       <div className="flex gap-2 mb-2">

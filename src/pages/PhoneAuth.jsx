@@ -224,7 +224,7 @@ export default function PhoneAuth() {
         <div className="w-full max-w-md">
           <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground mb-4">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            <span>Secure M-Pesa verification · Your data is protected</span>
+            <span>Phone sign-in · M-Pesa check for new accounts</span>
           </div>
           {step === "phone" && (
             <>
