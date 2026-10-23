@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,8 +12,8 @@ export default function RateDialog({ open, onOpenChange, request, onDone }) {
 
   const submit = async () => {
     setSaving(true);
-    const me = await base44.auth.me().catch(() => null);
-    await base44.entities.Review.create({
+    const me = await apiClient.auth.me().catch(() => null);
+    await apiClient.entities.Review.create({
       provider_id: request.assigned_provider_id,
       request_id: request.id,
       reviewer_name: me?.full_name || "Customer",
@@ -22,17 +22,17 @@ export default function RateDialog({ open, onOpenChange, request, onDone }) {
     });
     // recompute provider rating
     if (request.assigned_provider_id) {
-      const prov = await base44.entities.ServiceProvider.get(request.assigned_provider_id).catch(() => null);
+      const prov = await apiClient.entities.ServiceProvider.get(request.assigned_provider_id).catch(() => null);
       if (prov) {
-        const all = await base44.entities.Review.filter({ provider_id: prov.id });
+        const all = await apiClient.entities.Review.filter({ provider_id: prov.id });
         const avg = all.reduce((s, r) => s + r.stars, 0) / all.length;
-        await base44.entities.ServiceProvider.update(prov.id, {
+        await apiClient.entities.ServiceProvider.update(prov.id, {
           rating: Math.round(avg * 10) / 10,
           reviews_count: all.length,
         });
       }
     }
-    await base44.entities.ServiceRequest.update(request.id, { rated: true });
+    await apiClient.entities.ServiceRequest.update(request.id, { rated: true });
     setSaving(false);
     onDone?.();
     onOpenChange(false);

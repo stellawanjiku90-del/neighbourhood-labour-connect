@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 
 // Find or create a conversation between a customer and a provider.
 export async function getOrCreateConversation({
@@ -8,13 +8,13 @@ export async function getOrCreateConversation({
   customerId,
   customerName,
 }) {
-  const existing = await base44.entities.Conversation.filter({
+  const existing = await apiClient.entities.Conversation.filter({
     provider_id: providerId,
     customer_id: customerId,
   });
   if (existing.length > 0) return existing[0];
 
-  return base44.entities.Conversation.create({
+  return apiClient.entities.Conversation.create({
     provider_id: providerId,
     provider_name: providerName,
     provider_photo: providerPhoto,

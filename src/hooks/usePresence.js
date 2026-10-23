@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds
@@ -15,7 +15,7 @@ export function usePresence() {
   const heartbeat = useCallback(async () => {
     if (!user?.id) return;
     try {
-      await base44.functions.invoke("updatePresence", {});
+      await apiClient.functions.invoke("updatePresence", {});
     } catch { /* silent — heartbeat failures are non-critical */ }
   }, [user?.id]);
 
@@ -53,7 +53,7 @@ export function usePresenceBatch(userIds = []) {
     if (!userIds.length) { setPresenceMap({}); setLoading(false); return; }
     try {
       // Fetch presence records for the given user IDs
-      const results = await base44.entities.UserPresence.list('-last_active', 500);
+      const results = await apiClient.entities.UserPresence.list('-last_active', 500);
       const map = {};
       for (const p of results) {
         if (userIds.includes(p.user_id)) {

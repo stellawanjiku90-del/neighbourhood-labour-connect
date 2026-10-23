@@ -23,7 +23,7 @@ export default function LandingCategories() {
         ))}
       </div>
       <div className="text-center mt-4">
-        <Link to="/firebase-auth">
+        <Link to="/auth">
           <Button variant="outline" className="rounded-xl h-10 px-6 text-sm font-semibold">
             View All Services
           </Button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
@@ -86,12 +86,12 @@ export default function BecomeProvider() {
 
       // Upsert so re-listing doesn't create duplicate provider records.
       const existing = user?.id
-        ? await base44.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1)
+        ? await apiClient.entities.ServiceProvider.filter({ firebase_uid: user.id }, null, 1)
         : [];
       if (existing.length > 0) {
-        await base44.entities.ServiceProvider.update(existing[0].id, payload);
+        await apiClient.entities.ServiceProvider.update(existing[0].id, payload);
       } else {
-        await base44.entities.ServiceProvider.create(payload);
+        await apiClient.entities.ServiceProvider.create(payload);
       }
 
       if (subActive) {

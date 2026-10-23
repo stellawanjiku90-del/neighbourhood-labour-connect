@@ -10,8 +10,8 @@ import ScrollToTop from './components/ScrollToTop';
 import Layout from '@/components/Layout';
 import Home from '@/pages/Home';
 import PageTransition from '@/components/PageTransition';
-import FirebaseAuth from '@/pages/FirebaseAuth';
-import FirebaseRouteGuard from '@/components/FirebaseRouteGuard';
+import PhoneAuth from '@/pages/PhoneAuth';
+import AuthRouteGuard from '@/components/AuthRouteGuard';
 import RoleGuard from '@/components/RoleGuard';
 import SetupAndSubscriptionGuard from '@/components/SetupAndSubscriptionGuard';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
@@ -63,14 +63,14 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/firebase-auth" element={<FirebaseAuth />} />
+      <Route path="/auth" element={<PhoneAuth />} />
       {/* Public legal pages — accessible without auth */}
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/refund" element={<Refund />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
-        <Route element={<FirebaseRouteGuard />}>
+        <Route element={<AuthRouteGuard />}>
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin" element={<AdminPanel />} />
@@ -86,7 +86,7 @@ const AuthenticatedApp = () => {
           <Route path="/jobs" element={<MyJobs />} />
         </Route>
       </Route>
-      <Route element={<FirebaseRouteGuard />}>
+      <Route element={<AuthRouteGuard />}>
         <Route path="/chat/:id" element={<PageTransition><Chat /></PageTransition>} />
         <Route element={<RoleGuard allow={["customer"]} />}>
           <Route path="/provider/:id" element={<PageTransition><ProviderDetail /></PageTransition>} />

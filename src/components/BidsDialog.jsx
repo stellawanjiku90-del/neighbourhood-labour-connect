@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Dialog,
@@ -25,7 +25,7 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
     if (!job) return;
     setLoading(true);
     try {
-      const list = await base44.entities.JobBid.filter(
+      const list = await apiClient.entities.JobBid.filter(
         { request_id: job.id },
         "-created_date",
         50
@@ -33,7 +33,7 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
       setBids(list);
       const provs = await Promise.all(
         list.map((b) =>
-          base44.entities.ServiceProvider.get(b.provider_id).catch(() => null)
+          apiClient.entities.ServiceProvider.get(b.provider_id).catch(() => null)
         )
       );
       const map = {};
@@ -55,12 +55,12 @@ export default function BidsDialog({ open, onOpenChange, job, onDone }) {
     setAssigning(bid.id);
     try {
       const p = providers[bid.provider_id];
-      await base44.entities.ServiceRequest.update(job.id, {
+      await apiClient.entities.ServiceRequest.update(job.id, {
         status: "accepted",
         assigned_provider_id: bid.provider_id,
         assigned_provider_name: bid.provider_name,
       });
-      await base44.entities.JobBid.update(bid.id, { status: "accepted" });
+      await apiClient.entities.JobBid.update(bid.id, { status: "accepted" });
       await getOrCreateConversation({
         providerId: bid.provider_id,
         providerName: bid.provider_name,

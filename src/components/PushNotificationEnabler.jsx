@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { getFirebaseConfig, getMessagingToken } from "@/lib/firebase";
 import { useAuth } from "@/lib/AuthContext";
 import { Bell, Check, BellOff } from "lucide-react";
@@ -50,12 +50,12 @@ export default function PushNotificationEnabler() {
 
       const token = await getMessagingToken(config.vapidKey, swReg);
 
-      const existing = await base44.entities.DeviceToken.filter({
+      const existing = await apiClient.entities.DeviceToken.filter({
         user_id: user.id,
         token,
       });
       if (existing.length === 0) {
-        await base44.entities.DeviceToken.create({
+        await apiClient.entities.DeviceToken.create({
           user_id: user.id,
           token,
           platform: "web",

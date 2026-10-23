@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { getFirebaseConfig, getMessagingToken } from "@/lib/firebase";
 import { useAuth } from "@/lib/AuthContext";
 import { Bell, MapPin, Loader2, Check, AlertCircle } from "lucide-react";
@@ -74,12 +74,12 @@ export default function OnboardingPermissions() {
             );
             const token = await getMessagingToken(config.vapidKey, swReg);
             if (token) {
-              const existing = await base44.entities.DeviceToken.filter({
+              const existing = await apiClient.entities.DeviceToken.filter({
                 user_id: user.id,
                 token,
               });
               if (existing.length === 0) {
-                await base44.entities.DeviceToken.create({
+                await apiClient.entities.DeviceToken.create({
                   user_id: user.id,
                   token,
                   platform: "web",

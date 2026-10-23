@@ -14,12 +14,12 @@ export default function LandingHero() {
         Connect with customers or find your next job in minutes. Join thousands of customers and professionals already using Neighbourhood Labour Connect.
       </p>
       <div className="flex flex-col sm:flex-row gap-2 justify-center mt-5">
-        <Link to="/firebase-auth" className="w-full sm:w-auto">
+        <Link to="/auth" className="w-full sm:w-auto">
           <Button className="rounded-xl bg-[#1A1F2E] hover:bg-[#2A2F45] h-11 px-6 w-full text-sm font-semibold">
             Get Started <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </Link>
-        <Link to="/firebase-auth" className="w-full sm:w-auto">
+        <Link to="/auth" className="w-full sm:w-auto">
           <Button variant="outline" className="rounded-xl h-11 px-6 w-full text-sm font-semibold">
             Sign In
           </Button>

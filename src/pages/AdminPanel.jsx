@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { Shield, Users, Wifi, DollarSign, Briefcase, Star, Loader2, MapPin, CheckCircle2, Bell } from "lucide-react";
 import SubscriptionManager from "@/components/admin/SubscriptionManager";
@@ -24,14 +24,14 @@ export default function AdminPanel() {
 
     (async () => {
       try {
-        const { data } = await base44.functions.invoke("getAdminData", {
+        const { data } = await apiClient.functions.invoke("getAdminData", {
           firebase_uid: user.id,
         });
         setProviders(data.providers || []);
         setUsers(data.userProfiles || []);
         setStats(data.stats || {});
         try {
-          const { data: monitoring } = await base44.functions.invoke("getAdminStats", {});
+          const { data: monitoring } = await apiClient.functions.invoke("getAdminStats", {});
           setAdminStats(monitoring);
         } catch {}
       } catch (e) {

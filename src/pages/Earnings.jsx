@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export default function Earnings() {
     if (!user?.id) return;
     let active = true;
     setLoading(true);
-    base44.functions
+    apiClient.functions
       .invoke("getEarningsDashboard", { firebase_uid: user.id })
       .then((res) => { if (active) setData(res.data); })
       .catch(() => {})
@@ -79,9 +79,9 @@ export default function Earnings() {
   };
 
   const domain = "neighbourhoodlabourconnect.com";
-  const referralLink = `https://${domain}/firebase-auth?ref=${referralCode || ""}&role=${user?.role || "customer"}`;
+  const referralLink = `https://${domain}/auth?ref=${referralCode || ""}&role=${user?.role || "customer"}`;
   const shareLink = `https://wa.me/?text=${encodeURIComponent(
-    `Join Neighbourhood Labour Connect! Use my referral code ${referralCode || ""} to register as ${user?.role || "a member"}: https://${domain}/firebase-auth?ref=${referralCode || ""}`
+    `Join Neighbourhood Labour Connect! Use my referral code ${referralCode || ""} to register as ${user?.role || "a member"}: https://${domain}/auth?ref=${referralCode || ""}`
   )}`;
 
   const withdrawLink = null;

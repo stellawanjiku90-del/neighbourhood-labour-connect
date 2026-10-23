@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import Stars from "@/components/Stars";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,8 +22,8 @@ export default function ProviderDetail() {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    base44.entities.ServiceProvider.get(id).then(setP).catch(() => setP(false));
-    base44.entities.Review.filter({ provider_id: id }, "-created_date", 20).then(setReviews);
+    apiClient.entities.ServiceProvider.get(id).then(setP).catch(() => setP(false));
+    apiClient.entities.Review.filter({ provider_id: id }, "-created_date", 20).then(setReviews);
   }, [id]);
 
   if (p === null) {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import CategorySearch from "@/components/CategorySearch";
 import LocationPicker from "@/components/LocationPicker";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,7 @@ export default function PostJob() {
       return;
     }
     setSaving(true);
-    const created = await base44.entities.ServiceRequest.create({
+    const created = await apiClient.entities.ServiceRequest.create({
       category,
       title,
       customer_id: user?.id,
@@ -82,7 +82,7 @@ export default function PostJob() {
       lng: loc?.lng,
       status: "open",
     });
-    base44.functions.invoke("sendJobNearbyNotifications", { data: created }).catch(() => {});
+    apiClient.functions.invoke("sendJobNearbyNotifications", { data: created }).catch(() => {});
     setSaving(false);
     toast({ title: "Request posted!", description: "Nearby providers notified" });
     navigate("/jobs");

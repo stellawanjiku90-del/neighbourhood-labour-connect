@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import CategorySearch from "@/components/CategorySearch";
 import CategoryIcon from "@/components/CategoryIcon";
 import ProviderCard from "@/components/ProviderCard";
@@ -11,7 +11,7 @@ import { CATEGORIES, EMERGENCY_CATEGORIES, distanceKm } from "@/lib/categories";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { Plus, Siren, MapPin, Search, ChevronRight, Star, Loader2, Navigation } from "lucide-react";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
+const LOGO_URL = "https://media.apiClient.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
 export default function CustomerDashboard() {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ export default function CustomerDashboard() {
   // Fetch customer's current presence status
   useEffect(() => {
     if (!user?.id) return;
-    base44.entities.UserPresence.filter({ user_id: user.id }, null, 1)
+    apiClient.entities.UserPresence.filter({ user_id: user.id }, null, 1)
       .then((r) => { if (r[0]) setPresenceStatus(r[0].provider_status || "online"); })
       .catch(() => {});
   }, [user?.id]);
@@ -38,7 +38,7 @@ export default function CustomerDashboard() {
     const newStatus = presenceStatus === "offline" ? "online" : "offline";
     setPresenceStatus(newStatus);
     try {
-      await base44.functions.invoke("updatePresence", { provider_status: newStatus });
+      await apiClient.functions.invoke("updatePresence", { provider_status: newStatus });
     } catch {
       setPresenceStatus(presenceStatus);
     }
@@ -54,8 +54,8 @@ export default function CustomerDashboard() {
 
   const refresh = useCallback(async () => {
     const [topData, jobsData] = await Promise.all([
-      base44.entities.ServiceProvider.filter({ available: true }, "-rating", 12),
-      base44.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 30),
+      apiClient.entities.ServiceProvider.filter({ available: true }, "-rating", 12),
+      apiClient.entities.ServiceRequest.filter({ status: "open" }, "-created_date", 30),
     ]);
     setTop(topData);
     setOpenJobs(jobsData);

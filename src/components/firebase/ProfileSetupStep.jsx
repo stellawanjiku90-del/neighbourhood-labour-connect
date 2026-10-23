@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 
 export default function ProfileSetupStep({ onSave, loading, error, referralCodeFromUrl }) {
   const [firstName, setFirstName] = useState("");
@@ -111,7 +111,7 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
 
     setUploading(true);
     try {
-      const profileUpload = await base44.integrations.Core.UploadFile({ file: profilePhoto });
+      const profileUpload = await apiClient.integrations.Core.UploadFile({ file: profilePhoto });
       setUploading(false);
       onSave({
         first_name: firstName,
@@ -132,7 +132,7 @@ export default function ProfileSetupStep({ onSave, loading, error, referralCodeF
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
-      <Link to="/firebase-auth" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+      <Link to="/auth" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">

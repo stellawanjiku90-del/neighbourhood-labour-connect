@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
-import {
-  sendPhoneCode,
-  getAuthInstance,
-  signOutFirebase,
-} from "@/lib/firebase";
+import { apiClient } from "@/api/apiClient";
 import { hashPin } from "@/lib/pin";
 import { useAuth } from "@/lib/AuthContext";
 import PhoneStep from "@/components/firebase/PhoneStep";
-import OtpStep from "@/components/firebase/OtpStep";
+import IntaSendVerificationStep from "@/components/IntaSendVerificationStep";
 import PinStep from "@/components/firebase/PinStep";
 import ProfileSetupStep from "@/components/firebase/ProfileSetupStep";
 import RoleStep from "@/components/firebase/RoleStep";
@@ -17,20 +12,21 @@ import SafeAreaPage from "@/components/SafeAreaPage";
 import { ShieldCheck } from "lucide-react";
 
 const LOGO_URL =
-  "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
+  "/icon.svg";
 
-export default function FirebaseAuth() {
+export default function PhoneAuth() {
   const navigate = useNavigate();
   const { setPinSession } = useAuth();
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [verificationToken, setVerificationToken] = useState(null);
+  const [verificationId, setVerificationId] = useState(null);
+  const [verificationAmount, setVerificationAmount] = useState(100);
   const [userProfile, setUserProfile] = useState(null);
   const [role, setRole] = useState("");
   const [referralCodeFromUrl, setReferralCodeFromUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [resendTimer, setResendTimer] = useState(0);
   const [isResettingPin, setIsResettingPin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -75,11 +71,6 @@ export default function FirebaseAuth() {
         window.location.href = "/";
         return;
       }
-      try {
-        await signOutFirebase();
-      } catch (e) {
-        // ignore
-      }
       if (!active) return;
       setCheckingAuth(false);
     })();
@@ -88,13 +79,6 @@ export default function FirebaseAuth() {
     };
   }, []);
 
-  // Resend countdown
-  useEffect(() => {
-    if (resendTimer <= 0) return;
-    const t = setTimeout(() => setResendTimer((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [resendTimer]);
-
   const normalizePhone = (raw) => {
     let cleaned = raw.replace(/[^\d+]/g, "");
     if (!cleaned.startsWith("+")) cleaned = "+" + cleaned;
@@ -102,24 +86,8 @@ export default function FirebaseAuth() {
   };
 
   const handleAuthError = (err) => {
-    const map = {
-      "auth/invalid-phone-number":
-        "Please enter a valid phone number with country code (e.g. +254712345678).",
-      "auth/missing-phone-number": "Please enter a phone number.",
-      "auth/code-expired": "The verification code has expired. Please request a new one.",
-      "auth/invalid-verification-code": "Incorrect code. Please check and try again.",
-      "auth/too-many-requests": "Too many attempts. Please try again later.",
-      "auth/quota-exceeded": "SMS quota exceeded. Use a test number or try again later.",
-      "auth/captcha-check-failed":
-        "reCAPTCHA verification failed. Please refresh and try again.",
-      "auth/operation-not-allowed":
-        "Phone sign-in is not enabled. Enable it in the Firebase Console.",
-      "auth/configuration-not-found":
-        "Firebase Phone Auth is not configured. Enable Phone Authentication and add your domain to the authorized domains list in the Firebase Console.",
-    };
-    setError(
-      map[err.code] || err.message || "Something went wrong. Please try again."
-    );
+    const message = err?.data?.error || err?.message || "Something went wrong. Please try again.";
+    setError(message);
   };
 
   // ─── Phone submit ──────────────────────────────────────────────
@@ -129,71 +97,39 @@ export default function FirebaseAuth() {
   const handlePhoneSubmit = async () => {
     setError(null);
     const normalized = normalizePhone(phone);
-    if (normalized.length < 10) {
-      setError("Please enter a valid phone number with country code.");
-      return;
-    }
-    setPhone(normalized);
-    setLoading(true);
+    if (normalized.length < 10) { setError("Please enter a valid phone number with country code."); return; }
+    setPhone(normalized); setLoading(true);
     try {
-      const { data } = await base44.functions.invoke("getUserProfile", {
-        phone: normalized,
-      });
+      const { data } = await apiClient.functions.invoke("getUserProfile", { phone: normalized });
       const profile = data?.profile;
-
       if (profile && profile.pin_hash) {
-        // Returning user — log in with PIN, no OTP.
-        setUserProfile(profile);
-        setStep("pin-login");
+        setUserProfile(profile); setStep("pin-login");
       } else {
-        // New number — verify via OTP, then choose role + set PIN.
-        const confirmation = await sendPhoneCode(normalized);
-        setConfirmationResult(confirmation);
-        setStep("otp");
-        setResendTimer(60);
+        await startVerification(normalized, "registration");
       }
-    } catch (err) {
-      handleAuthError(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { handleAuthError(err); }
+    finally { setLoading(false); }
   };
 
-  const verifyCode = async (code) => {
-    setError(null);
-    setLoading(true);
+  const startVerification = async (targetPhone = phone, purpose = "registration") => {
+    setError(null); setLoading(true);
     try {
-      const result = await confirmationResult.confirm(code);
-      const firebaseUser = result.user;
-      setPhone(firebaseUser.phoneNumber);
-
-      if (isResettingPin) {
-        // PIN reset: set a new PIN.
-        setStep("pin-setup");
-      } else {
-        // New registration: choose account type, then set PIN.
-        setStep("role");
-      }
-    } catch (err) {
-      handleAuthError(err);
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch("/api/auth/verification/start", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({phone:targetPhone,purpose}) });
+      const payload = await res.json(); if (!res.ok) throw new Error(payload.error || "Unable to start phone verification.");
+      setPhone(payload.phone || targetPhone);
+      setVerificationId(payload.verification_id);
+      setVerificationAmount(payload.amount_kes || 100);
+      setStep("payment");
+    } catch (err) { handleAuthError(err); }
+    finally { setLoading(false); }
   };
 
-  const resendCode = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const confirmation = await sendPhoneCode(phone);
-      setConfirmationResult(confirmation);
-      setResendTimer(60);
-    } catch (err) {
-      handleAuthError(err);
-    } finally {
-      setLoading(false);
-    }
+  const verificationComplete = (token) => {
+    setVerificationToken(token);
+    if (isResettingPin) setStep("pin-setup"); else setStep("role");
   };
+
+  const retryVerification = () => startVerification(phone, isResettingPin ? "reset_pin" : "registration");
 
   const selectRole = (r) => {
     setRole(r);
@@ -201,40 +137,19 @@ export default function FirebaseAuth() {
   };
 
   const setupPin = async (pin) => {
-    setError(null);
-    setLoading(true);
+    setError(null); setLoading(true);
     try {
       const pinHash = await hashPin(pin);
-      const auth = await getAuthInstance();
-      const firebaseUser = auth.currentUser;
-
       if (isResettingPin) {
-        // Reset PIN for an existing account (preserves all other profile data).
-        const { data } = await base44.functions.invoke("resetPin", {
-          phone,
-          pin_hash: pinHash,
-          firebase_uid: firebaseUser?.uid,
-        });
-        const profile = data?.profile;
-        setPinSession(profile);
-        window.location.href = "/";
+        const { data } = await apiClient.functions.invoke("resetPin", { phone, pin_hash: pinHash, verification_token: verificationToken });
+        await setPinSession(data?.profile); window.location.href = "/";
       } else {
-        // New registration: save initial profile with PIN + role.
-        const { data } = await base44.functions.invoke("saveUserProfile", {
-          phone,
-          firebase_uid: firebaseUser?.uid,
-          pin_hash: pinHash,
-          role,
-          profile_completed: false,
-        });
-        setUserProfile(data?.profile);
-        setStep("profile");
+        const { data } = await apiClient.functions.invoke("saveUserProfile", { phone, pin_hash: pinHash, role, profile_completed:false, verification_token: verificationToken });
+        if (data?.access_token) apiClient.auth.setToken(data.access_token);
+        setUserProfile(data?.profile); setStep("profile");
       }
-    } catch (err) {
-      setError(err.message || "Failed to save PIN. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { setError(err.message || "Failed to save PIN. Please try again."); }
+    finally { setLoading(false); }
   };
 
   const loginWithPin = async (pin) => {
@@ -262,43 +177,21 @@ export default function FirebaseAuth() {
   };
 
   const forgotPin = async () => {
-    setError(null);
-    setIsResettingPin(true);
-    setLoading(true);
+    setError(null); setIsResettingPin(true); setLoading(true);
     try {
-      const confirmation = await sendPhoneCode(phone);
-      setConfirmationResult(confirmation);
-      setStep("otp");
-      setResendTimer(60);
-    } catch (err) {
-      handleAuthError(err);
-    } finally {
-      setLoading(false);
-    }
+      await startVerification(phone, "reset_pin");
+    } catch (err) { handleAuthError(err); }
+    finally { setLoading(false); }
   };
 
   const saveProfile = async (profileData) => {
-    setError(null);
-    setLoading(true);
+    setError(null); setLoading(true);
     try {
-      const auth = await getAuthInstance();
-      const firebaseUser = auth.currentUser;
-
-      const { data } = await base44.functions.invoke("saveUserProfile", {
-        ...profileData,
-        phone,
-        firebase_uid: firebaseUser?.uid,
-        pin_hash: userProfile?.pin_hash,
-        role,
-      });
-
-      setPinSession(data?.profile);
-      window.location.href = role === "provider" ? "/become-provider" : "/";
-    } catch (err) {
-      setError(err.message || "Failed to save profile. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+      const { data } = await apiClient.functions.invoke("saveUserProfile", { ...profileData, phone, pin_hash:userProfile?.pin_hash, role });
+      if (data?.access_token) apiClient.auth.setToken(data.access_token);
+      await setPinSession(data?.profile); window.location.href = role === "provider" ? "/become-provider" : "/";
+    } catch (err) { setError(err.message || "Failed to save profile. Please try again."); }
+    finally { setLoading(false); }
   };
 
   if (checkingAuth) {
@@ -327,7 +220,7 @@ export default function FirebaseAuth() {
         <div className="w-full max-w-md">
           <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground mb-4">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            <span>Secure phone verification · Your data is protected</span>
+            <span>Secure M-Pesa verification · Your data is protected</span>
           </div>
           {step === "phone" && (
             <>
@@ -340,19 +233,14 @@ export default function FirebaseAuth() {
             />
             </>
           )}
-          {step === "otp" && (
-            <OtpStep
+          {step === "payment" && (
+            <IntaSendVerificationStep
               phone={phone}
-              onVerify={verifyCode}
-              onResend={resendCode}
-              onBack={() => {
-                setStep("phone");
-                setError(null);
-                setIsResettingPin(false);
-              }}
+              verificationId={verificationId}
+              amountKes={verificationAmount}
+              onVerified={verificationComplete}
+              onRetry={retryVerification}
               loading={loading}
-              error={error}
-              resendTimer={resendTimer}
             />
           )}
           {step === "role" && (

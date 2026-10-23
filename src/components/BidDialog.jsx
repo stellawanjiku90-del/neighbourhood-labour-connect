@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ export default function BidDialog({ open, onOpenChange, job, provider, onDone })
     setCharge("");
     setMessage("");
     setExisting(null);
-    base44.entities.JobBid
+    apiClient.entities.JobBid
       .filter({ request_id: job.id, provider_id: provider.id }, "-created_date", 1)
       .then((r) => setExisting(r[0] || null))
       .catch(() => setExisting(null));
@@ -33,7 +33,7 @@ export default function BidDialog({ open, onOpenChange, job, provider, onDone })
     if (!charge) return;
     setSaving(true);
     try {
-      await base44.entities.JobBid.create({
+      await apiClient.entities.JobBid.create({
         request_id: job.id,
         request_title: job.title,
         provider_id: provider.id,
@@ -45,7 +45,7 @@ export default function BidDialog({ open, onOpenChange, job, provider, onDone })
       });
       // Notify the customer about the new offer (best-effort)
       try {
-        await base44.functions.invoke("notifyCustomerOfBid", {
+        await apiClient.functions.invoke("notifyCustomerOfBid", {
           request_id: job.id,
           provider_name: provider.name,
           charge: Number(charge),

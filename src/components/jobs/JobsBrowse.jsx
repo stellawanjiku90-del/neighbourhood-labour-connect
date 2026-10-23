@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import CategoryIcon from "@/components/CategoryIcon";
 import BidDialog from "@/components/BidDialog";
 import { CATEGORIES } from "@/lib/categories";
@@ -12,7 +12,7 @@ export default function JobsBrowse({ max = 12 }) {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const jobs = await base44.entities.ServiceRequest.filter(
+    const jobs = await apiClient.entities.ServiceRequest.filter(
       { status: "open" }, "-created_date", max
     );
     setOpenJobs(jobs);

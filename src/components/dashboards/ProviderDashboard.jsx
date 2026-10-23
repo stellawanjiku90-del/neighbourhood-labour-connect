@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Wallet, Star, Briefcase, Wrench, ArrowRight } from "lucide-react";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
+const LOGO_URL = "https://media.apiClient.com/images/public/6a3e0b9748b78301118f6853/d609d57e5_converted_image1.png";
 
 export default function ProviderDashboard() {
   const navigate = useNavigate();
@@ -30,9 +30,9 @@ export default function ProviderDashboard() {
 
   const load = async () => {
     const [providers, acceptedJobs, inProgressJobs] = await Promise.all([
-      phone ? base44.entities.ServiceProvider.filter({ phone }, "-created_date", 1) : Promise.resolve([]),
-      base44.entities.ServiceRequest.filter({ status: "accepted" }, "-created_date", 50),
-      base44.entities.ServiceRequest.filter({ status: "in_progress" }, "-created_date", 50),
+      phone ? apiClient.entities.ServiceProvider.filter({ phone }, "-created_date", 1) : Promise.resolve([]),
+      apiClient.entities.ServiceRequest.filter({ status: "accepted" }, "-created_date", 50),
+      apiClient.entities.ServiceRequest.filter({ status: "in_progress" }, "-created_date", 50),
     ]);
     const me = providers[0] || null;
     setProvider(me);
@@ -55,7 +55,7 @@ export default function ProviderDashboard() {
           const { latitude, longitude } = pos.coords;
           await Promise.all(
             inProgress.map((j) =>
-              base44.entities.ServiceRequest.update(j.id, {
+              apiClient.entities.ServiceRequest.update(j.id, {
                 provider_lat: latitude,
                 provider_lng: longitude,
                 provider_loc_updated_at: new Date().toISOString(),
@@ -74,7 +74,7 @@ export default function ProviderDashboard() {
 
   const toggleAvailable = async () => {
     if (!provider) return;
-    const updated = await base44.entities.ServiceProvider.update(provider.id, { available: !provider.available });
+    const updated = await apiClient.entities.ServiceProvider.update(provider.id, { available: !provider.available });
     setProvider(updated);
   };
 

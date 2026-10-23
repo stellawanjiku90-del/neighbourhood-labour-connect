@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 
 export function useSubscription() {
@@ -14,7 +14,7 @@ export function useSubscription() {
     }
     let active = true;
     setLoading(true);
-    base44.functions
+    apiClient.functions
       .invoke("checkSubscription", { firebase_uid: user.id })
       .then((res) => {
         if (active) {

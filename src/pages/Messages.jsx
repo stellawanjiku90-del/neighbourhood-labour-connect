@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/api/apiClient";
 import { useAuth } from "@/lib/AuthContext";
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -24,14 +24,14 @@ export default function Messages() {
 
     if (user.role === "provider") {
       const providers = user.phone
-        ? await base44.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1).catch(() => [])
+        ? await apiClient.entities.ServiceProvider.filter({ phone: user.phone }, "-created_date", 1).catch(() => [])
         : [];
       const myProviderId = providers[0]?.id || null;
       if (myProviderId) {
-        list = await base44.entities.Conversation.filter({ provider_id: myProviderId }, "-updated_date", 50);
+        list = await apiClient.entities.Conversation.filter({ provider_id: myProviderId }, "-updated_date", 50);
       }
     } else {
-      list = await base44.entities.Conversation.filter({ customer_id: user.id }, "-updated_date", 50);
+      list = await apiClient.entities.Conversation.filter({ customer_id: user.id }, "-updated_date", 50);
     }
 
     list.sort((a, b) => new Date(b.updated_date) - new Date(a.updated_date));
@@ -42,7 +42,7 @@ export default function Messages() {
       // Customers need provider firebase_uids — fetch from ServiceProvider
       const providerIds = list.map((c) => c.provider_id).filter(Boolean);
       const providers = await Promise.all(
-        providerIds.map((id) => base44.entities.ServiceProvider.get(id).catch(() => null))
+        providerIds.map((id) => apiClient.entities.ServiceProvider.get(id).catch(() => null))
       );
       const providerUidMap = {};
       for (const p of providers) {
@@ -63,7 +63,7 @@ export default function Messages() {
 
   useEffect(() => {
     load();
-    const unsub = base44.entities.Conversation.subscribe(() => load());
+    const unsub = apiClient.entities.Conversation.subscribe(() => load());
     return unsub;
   }, [user?.id]);
 
